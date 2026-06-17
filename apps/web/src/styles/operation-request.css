@@ -1,0 +1,157 @@
+.operation-route {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 720;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.operation-summary {
+  margin-top: 0.65rem;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.operation-description,
+.fact-text {
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.operation-facts {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.fact-list,
+.response-chips,
+.field-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.response-chips {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.fact-chip {
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-subtle);
+  padding: 0.42rem 0.6rem;
+  color: var(--text);
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.required-label {
+  margin-left: 0.45rem;
+  color: var(--subtle);
+  font-size: 0.74rem;
+}
+
+.empty-state,
+.empty-inline,
+.empty-field {
+  color: var(--subtle);
+}
+
+.empty-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.empty-inline {
+  font-size: 0.82rem;
+}
+
+.empty-field,
+.notice,
+.details-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-subtle);
+}
+
+.empty-field {
+  padding: 0.68rem 0.85rem;
+  font-size: 0.9rem;
+}
+
+.request-topline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: end;
+}
+
+.segmented-control {
+  display: inline-flex;
+  gap: 0.2rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--field);
+  padding: 0.22rem;
+}
+
+.segmented-control button {
+  border-radius: 6px;
+  padding: 0.52rem 0.82rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.segmented-control button:hover {
+  color: var(--text);
+}
+
+.segmented-control button.is-active {
+  background: var(--selected);
+  color: var(--selected-text);
+}
+
+.notice {
+  padding: 0.75rem 0.85rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.code-block {
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+  padding: 0.85rem;
+  color: var(--text);
+  font-size: 0.84rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.code-block-compact {
+  max-height: 10rem;
+}
+
+.request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}

@@ -1,0 +1,150 @@
+export const sampleSpec = `openapi: 3.0.3
+info:
+  title: SpecDock Demo API
+  version: 0.1.0
+  description: A small CORS-friendly contract for import, explorer, request, response, and SDK generation smoke tests.
+servers:
+  - url: https://jsonplaceholder.typicode.com
+    description: Public JSONPlaceholder API
+tags:
+  - name: Users
+  - name: Posts
+paths:
+  /users:
+    get:
+      tags:
+        - Users
+      operationId: listUsers
+      summary: List users
+      description: Returns demo users from JSONPlaceholder.
+      parameters:
+        - name: _limit
+          in: query
+          required: false
+          example: 5
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      operationId: getUser
+      summary: Get user
+      description: Returns one demo user by id.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          example: 1
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+  /posts:
+    get:
+      tags:
+        - Posts
+      operationId: listPosts
+      summary: List posts
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          example: 1
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+    post:
+      tags:
+        - Posts
+      operationId: createPost
+      summary: Create post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostRequest"
+            example:
+              title: SpecDock smoke test
+              body: Generated from the request builder.
+              userId: 1
+      responses:
+        "201":
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - email
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+    Post:
+      type: object
+      required:
+        - id
+        - title
+        - body
+        - userId
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        body:
+          type: string
+        userId:
+          type: integer
+    CreatePostRequest:
+      type: object
+      required:
+        - title
+        - body
+        - userId
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        userId:
+          type: integer
+`;

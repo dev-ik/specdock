@@ -1,0 +1,75 @@
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  padding: 1rem;
+}
+
+.settings-dialog {
+  width: min(100%, 28rem);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding: 0.9rem 1rem;
+}
+
+.settings-header h2 {
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.settings-body {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.settings-row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.settings-row .segmented-control {
+  width: 100%;
+}
+
+.settings-row .segmented-control button {
+  flex: 1;
+}
+
+.settings-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.settings-metric {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-subtle);
+  padding: 0.75rem 0.85rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.settings-metric strong {
+  color: var(--text);
+  font-size: 1rem;
+}

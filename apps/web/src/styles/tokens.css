@@ -1,0 +1,115 @@
+:root {
+  color-scheme: dark;
+  --bg: #0f1117;
+  --header-bg: rgba(15, 17, 23, 0.92);
+  --panel: #181b22;
+  --panel-subtle: #11141a;
+  --field: #0b0d12;
+  --border: #2b303b;
+  --border-strong: #3b4352;
+  --text: #f7f8fb;
+  --muted: #a1a8b5;
+  --subtle: #747d8d;
+  --selected: #253043;
+  --selected-text: #f8fbff;
+  --selected-border: #4f8cff;
+  --accent: #2f6fed;
+  --accent-hover: #245ed1;
+  --accent-text: #ffffff;
+  --shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+  --code-bg: #080a0f;
+  --focus: 0 0 0 3px rgba(79, 140, 255, 0.28);
+  --method-get-bg: #052e1a;
+  --method-get-text: #9af2bd;
+  --method-get-border: #167a3d;
+  --method-post-bg: #062b3b;
+  --method-post-text: #7ddcff;
+  --method-post-border: #0e7490;
+  --method-put-bg: #3b2307;
+  --method-put-text: #ffd08a;
+  --method-put-border: #d97706;
+  --method-patch-bg: #332d05;
+  --method-patch-text: #fef08a;
+  --method-patch-border: #ca8a04;
+  --method-delete-bg: #3a0b12;
+  --method-delete-text: #ffb4b8;
+  --method-delete-border: #dc2626;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f6fb;
+  --header-bg: rgba(255, 255, 255, 0.92);
+  --panel: #ffffff;
+  --panel-subtle: #f7f9fc;
+  --field: #ffffff;
+  --border: #d9e0ea;
+  --border-strong: #b9c4d3;
+  --text: #17202e;
+  --muted: #586474;
+  --subtle: #7b8797;
+  --selected: #e8f1ff;
+  --selected-text: #102033;
+  --selected-border: #2563eb;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-text: #ffffff;
+  --shadow: 0 18px 40px rgba(31, 45, 70, 0.1);
+  --code-bg: #f8fafc;
+  --focus: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  --method-get-bg: #dcfce7;
+  --method-get-text: #14532d;
+  --method-get-border: #86efac;
+  --method-post-bg: #e0f2fe;
+  --method-post-text: #075985;
+  --method-post-border: #7dd3fc;
+  --method-put-bg: #ffedd5;
+  --method-put-text: #7c2d12;
+  --method-put-border: #fdba74;
+  --method-patch-bg: #fef9c3;
+  --method-patch-text: #713f12;
+  --method-patch-border: #fde047;
+  --method-delete-bg: #fee2e2;
+  --method-delete-text: #7f1d1d;
+  --method-delete-border: #fca5a5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent) 10%, transparent), transparent 30rem),
+    var(--bg);
+  color: var(--text);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+input,
+textarea {
+  min-width: 0;
+}
+
+::placeholder {
+  color: var(--subtle);
+}

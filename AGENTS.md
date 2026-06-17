@@ -1,0 +1,108 @@
+# AGENTS.md — Instructions for Coding Agents
+
+## Project
+
+SpecDock
+
+## Goal
+
+Build an open-source local-first API Contract Workspace.
+
+Core flow:
+
+```txt
+Import -> Explore -> Test -> Generate
+```
+
+## Package Manager
+
+Use npm only.
+
+Do not use:
+
+- pnpm
+- yarn
+
+## Stack
+
+Frontend:
+
+- React
+- TypeScript
+- Vite
+- TailwindCSS v4
+- shadcn/ui
+- TanStack Query
+- React Hook Form
+- Zod
+
+Backend:
+
+- Node.js
+- Fastify
+
+Packages:
+
+- packages/core
+- packages/generator
+- packages/ui
+
+## Source of Truth
+
+Read in order:
+
+1. docs/SPECDOCK_MASTER_PLAN.md
+2. docs/IMPLEMENTATION_PLAN.md
+3. docs/API_CONTRACTS.md
+4. docs/DATA_MODELS.md
+5. docs/SECURITY.md
+6. docs/NON_FUNCTIONAL_REQUIREMENTS.md
+7. docs/ROADMAP.md
+8. README.md
+
+## Security Rules
+
+Do not implement unrestricted public proxy.
+
+Proxy mode must be:
+
+- disabled by default
+- enabled only with `PROXY_ENABLED=true`
+- protected by SSRF checks
+- protected by allowed hosts
+- protected by timeout and size limits
+
+Public demo must use direct browser requests only.
+
+## Architecture Rules
+
+- Do not put OpenAPI parsing directly into React components.
+- Do not put SDK generation directly into React components.
+- Do not store user data in cloud.
+- Do not require login.
+- Do not log Authorization or Cookie headers.
+- Keep business logic outside UI.
+- Prefer pure functions.
+
+## Maintainability Rules
+
+- Keep manually maintained source and docs files at or below 250 lines.
+- Start splitting a file when it grows past roughly 200 lines.
+- Prefer domain modules over generic `utils` buckets.
+- Accept generated or external artifacts over 250 lines only when they are not maintained by hand, such as `package-lock.json`, `dist`, `node_modules`, and vendored/generated outputs.
+- Keep `docs/IMPLEMENTATION_PLAN.md` as the stable index; put detailed phase task lists under `docs/implementation-plan/`.
+
+## Release Rules
+
+- Use Docker Hub as the public container registry: `docker.io/d8vik/specdock`.
+- Publish immutable version tags such as `docker.io/d8vik/specdock:v0.1.0`.
+- Do not rely on `latest` for the v0.1.0 release.
+- Run before release:
+
+```bash
+npm audit
+npm run typecheck
+npm run lint
+npm run test
+npm run build
+```

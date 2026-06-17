@@ -1,0 +1,131 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.55rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.2;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+}
+
+.button:focus-visible,
+.field:focus,
+.search-field:focus-within,
+.segmented-control button:focus-visible,
+.endpoint-item:focus-visible,
+.project-item:focus-visible,
+.file-item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+  transform: none;
+}
+
+.button-primary {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.button-primary:hover {
+  background: var(--accent-hover);
+}
+
+.button-secondary,
+.button-ghost {
+  border-color: var(--border-strong);
+  background: var(--panel-subtle);
+  color: var(--text);
+}
+
+.button-secondary:hover,
+.button-ghost:hover {
+  border-color: var(--selected-border);
+}
+
+.button-small {
+  min-height: 2rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.input-row,
+.button-row,
+.section-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.section-label-row {
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.field,
+.search-field {
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--text);
+}
+
+.field {
+  padding: 0.72rem 0.85rem;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.field:hover,
+.search-field:hover {
+  border-color: var(--selected-border);
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.72rem 0.85rem;
+  color: var(--muted);
+}
+
+.search-field input {
+  color: var(--text);
+}
+
+.code-field,
+.code-block,
+.field-name,
+.field-name-readonly,
+.endpoint-path,
+.operation-route,
+.method-badge {
+  font-family: "SFMono-Regular", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+}
+
+.code-field {
+  display: block;
+  width: 100%;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.spec-editor {
+  min-height: 22rem;
+}

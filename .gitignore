@@ -1,0 +1,17 @@
+node_modules
+dist
+build
+coverage
+.history
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+*.tsbuildinfo
+.playwright-mcp
+.agents
+.codex
+docs_deprecated
+docs/BOOTSTRAP_REPOSITORY.md
+docs/TASKS.md

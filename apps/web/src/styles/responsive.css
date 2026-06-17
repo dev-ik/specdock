@@ -1,0 +1,129 @@
+@media (max-width: 1320px) {
+  .jump-nav {
+    display: block;
+  }
+
+  .workspace-grid {
+    grid-template-columns: minmax(300px, 0.9fr) minmax(420px, 1.1fr);
+  }
+
+  .workspace-grid > section:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .app-header-inner,
+  .request-actions,
+  .button-row {
+    align-items: stretch;
+  }
+
+  .app-header-inner {
+    flex-direction: column;
+  }
+
+  .app-header-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    width: 100%;
+  }
+
+  .status-pill {
+    max-width: none;
+  }
+
+  .workspace-grid {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0.85rem;
+  }
+
+  .scroll-target {
+    scroll-margin-top: 14rem;
+  }
+
+  .workspace-grid > section:last-child {
+    grid-column: auto;
+  }
+
+  .endpoint-scroll,
+  .project-list,
+  .generated-list {
+    max-height: none;
+  }
+
+  .request-topline,
+  .generated-grid,
+  .generate-options-grid,
+  .generate-toggle-list,
+  .request-field-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .generated-list {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .button-row {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .button-row .button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .panel-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .app-header-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .status-pill {
+    grid-column: 1 / -1;
+    white-space: normal;
+  }
+
+  .theme-toggle {
+    width: 100%;
+  }
+
+  .scroll-target {
+    scroll-margin-top: 16rem;
+  }
+
+  .input-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .button-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .segmented-control {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .spec-editor {
+    min-height: 16rem;
+  }
+
+  .endpoint-main,
+  .operation-route {
+    gap: 0.55rem;
+  }
+
+  .method-badge {
+    min-width: 3.2rem;
+  }
+}

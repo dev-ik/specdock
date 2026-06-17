@@ -1,0 +1,156 @@
+.project-list,
+.endpoint-scroll,
+.generated-list {
+  overflow: auto;
+}
+
+.project-list {
+  max-height: 13.5rem;
+  padding: 0.65rem;
+}
+
+.project-item,
+.endpoint-item,
+.file-item {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+}
+
+.project-item,
+.file-item {
+  padding: 0.75rem 0.85rem;
+}
+
+.project-item:hover,
+.file-item:hover,
+.endpoint-item:hover {
+  background: var(--panel-subtle);
+  color: var(--text);
+}
+
+.project-item.is-active,
+.file-item.is-active,
+.endpoint-item.is-active {
+  border-color: var(--selected-border);
+  background: var(--selected);
+  color: var(--selected-text);
+}
+
+.project-name {
+  display: block;
+  overflow: hidden;
+  color: inherit;
+  font-size: 0.95rem;
+  font-weight: 720;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-meta,
+.endpoint-summary {
+  display: block;
+  margin-top: 0.32rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.endpoint-scroll {
+  max-height: min(62vh, 720px);
+  padding: 0.65rem;
+}
+
+.endpoint-group + .endpoint-group {
+  margin-top: 1rem;
+}
+
+.endpoint-group-title {
+  padding: 0.35rem 0.35rem 0.5rem;
+  color: var(--subtle);
+  font-size: 0.76rem;
+  font-weight: 780;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.endpoint-items {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.endpoint-item {
+  position: relative;
+  padding: 0.72rem 0.75rem 0.72rem 0.85rem;
+  border-left-width: 4px;
+}
+
+.endpoint-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.endpoint-path {
+  min-width: 0;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.38;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.endpoint-item.is-active .endpoint-path,
+.endpoint-item.is-active .endpoint-summary {
+  color: var(--selected-text);
+}
+
+.method-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  min-width: 3.45rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  padding: 0.22rem 0.45rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.method-get {
+  border-color: var(--method-get-border);
+  background: var(--method-get-bg);
+  color: var(--method-get-text);
+}
+
+.method-post {
+  border-color: var(--method-post-border);
+  background: var(--method-post-bg);
+  color: var(--method-post-text);
+}
+
+.method-put {
+  border-color: var(--method-put-border);
+  background: var(--method-put-bg);
+  color: var(--method-put-text);
+}
+
+.method-patch {
+  border-color: var(--method-patch-border);
+  background: var(--method-patch-bg);
+  color: var(--method-patch-text);
+}
+
+.method-delete {
+  border-color: var(--method-delete-border);
+  background: var(--method-delete-bg);
+  color: var(--method-delete-text);
+}
