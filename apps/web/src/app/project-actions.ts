@@ -7,12 +7,6 @@ export const createProjectActions = (
   state: State,
   activateProject: (project: OpenApiProject, message: string) => void
 ) => {
-  const closeProject = (project: OpenApiProject) => {
-    if (state.activeProjectId !== project.id) return;
-
-    clearActiveProject(state, `Closed ${project.name}`);
-  };
-
   const deleteProject = (project: OpenApiProject) => {
     if (!window.confirm(`Delete "${project.name}" from local projects?`)) {
       return;
@@ -55,7 +49,7 @@ export const createProjectActions = (
     clearActiveProject(state, `Deleted ${project.name}`);
   };
 
-  return { closeProject, deleteProject };
+  return { deleteProject };
 };
 
 const clearActiveProject = (state: State, message: string) => {

@@ -67,7 +67,6 @@ export const App = () => {
           curlInput={app.curlInput}
           isImportingUrl={app.isImportingUrl}
           onOpenProject={app.openProject}
-          onCloseProject={app.closeProject}
           onDeleteProject={app.deleteProject}
           onSpecTextChange={app.setSpecTextAsRaw}
           onUrlInputChange={app.setUrlInput}

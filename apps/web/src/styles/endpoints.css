@@ -60,7 +60,6 @@
   color: var(--selected-text);
 }
 
-.project-close-button,
 .project-delete-button {
   display: inline-flex;
   align-items: center;
@@ -75,20 +74,23 @@
   opacity: 0.72;
 }
 
-.project-close-button:hover,
-.project-close-button:focus-visible {
-  border-color: var(--selected-border);
-  background: var(--panel-subtle);
-  color: var(--text);
-  opacity: 1;
-}
-
 .project-delete-button:hover,
 .project-delete-button:focus-visible {
   border-color: var(--method-delete-border);
   background: var(--method-delete-bg);
   color: var(--method-delete-text);
   opacity: 1;
+}
+
+.project-active-badge {
+  margin-right: 0.3rem;
+  border: 1px solid var(--selected-border);
+  border-radius: 999px;
+  padding: 0.28rem 0.5rem;
+  color: var(--selected-text);
+  font-size: 0.72rem;
+  font-weight: 720;
+  line-height: 1;
 }
 
 .project-name {

@@ -1,4 +1,4 @@
-import { Link, Terminal, Trash2, Upload, Wand2, X } from "lucide-react";
+import { Link, Terminal, Trash2, Upload, Wand2 } from "lucide-react";
 import type React from "react";
 import type { OpenApiProject } from "@specdock/core";
 import { orderPanelIds, type PanelId } from "../app/usePanelLayout.js";
@@ -12,7 +12,6 @@ export const ProjectsImportPanel = ({
   curlInput,
   isImportingUrl,
   onOpenProject,
-  onCloseProject,
   onDeleteProject,
   onSpecTextChange,
   onUrlInputChange,
@@ -31,7 +30,6 @@ export const ProjectsImportPanel = ({
   curlInput: string;
   isImportingUrl: boolean;
   onOpenProject(project: OpenApiProject): void;
-  onCloseProject(project: OpenApiProject): void;
   onDeleteProject(project: OpenApiProject): void;
   onSpecTextChange(value: string): void;
   onUrlInputChange(value: string): void;
@@ -73,15 +71,7 @@ export const ProjectsImportPanel = ({
                     </span>
                   </button>
                   {activeProjectId === project.id ? (
-                    <button
-                      className="project-close-button"
-                      type="button"
-                      aria-label={`Close ${project.name}`}
-                      title={`Close ${project.name}`}
-                      onClick={() => onCloseProject(project)}
-                    >
-                      <X size={15} aria-hidden="true" />
-                    </button>
+                    <span className="project-active-badge">Active</span>
                   ) : null}
                   <button
                     className="project-delete-button"
