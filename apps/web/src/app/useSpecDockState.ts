@@ -4,13 +4,18 @@ import {
   type GeneratedFile,
   type GenerateOptions,
   type OpenApiProject,
-  type OpenApiSource
+  type OpenApiSource,
+  type RequestState
 } from "@specdock/core";
-import { buildApiRequest, createRequestState, generateCurl } from "../request.js";
+import { createRequestState } from "../request.js";
 import { createWorkspaceStorage } from "../workspace.js";
-import { groupOperations } from "./controller-helpers.js";
-import { readLocalJson, readLocalString, writeLocalJson, writeLocalString } from "./local-storage.js";
-import { createOperationKey } from "./request-utils.js";
+import {
+  readLocalJson,
+  readLocalString,
+  removeLocalValue,
+  writeLocalJson,
+  writeLocalString
+} from "./local-storage.js";
 import { sampleSpec } from "./sample-spec.js";
 import {
   baseUrlsStorageKey,
@@ -20,6 +25,11 @@ import {
   requestStatesStorageKey,
   responseScopeStorageKey
 } from "./storage-keys.js";
+import {
+  hydrateStoredRequestStates,
+  sanitizeRequestStatesForStorage
+} from "./request-state-storage.js";
+import { useSpecDockDerivedState } from "./useSpecDockDerivedState.js";
 import type {
   ExchangeMap,
   GenerateMeta,
@@ -31,84 +41,145 @@ import type {
 
 export const useSpecDockState = () => {
   const storageAdapter = useMemo(() => createWorkspaceStorage(), []);
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => storageAdapter.getSettings().theme === "light" ? "light" : "dark");
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() =>
+    storageAdapter.getSettings().theme === "light" ? "light" : "dark"
+  );
   const [specText, setSpecText] = useState(sampleSpec);
-  const [projects, setProjects] = useState<OpenApiProject[]>(() => storageAdapter.getProjects());
-  const [historyCount, setHistoryCount] = useState(() => storageAdapter.getHistory().length);
-  const [activeProjectId, setActiveProjectId] = useState<string | undefined>(() => storageAdapter.getActiveProjectId());
-  const [currentSource, setCurrentSource] = useState<OpenApiSource>({ type: "raw" });
+  const [projects, setProjects] = useState<OpenApiProject[]>(() =>
+    storageAdapter.getProjects()
+  );
+  const [historyCount, setHistoryCount] = useState(
+    () => storageAdapter.getHistory().length
+  );
+  const [activeProjectId, setActiveProjectId] = useState<string | undefined>(
+    () => storageAdapter.getActiveProjectId()
+  );
+  const [currentSource, setCurrentSource] = useState<OpenApiSource>({
+    type: "raw"
+  });
   const [urlInput, setUrlInput] = useState("");
+  const [curlInput, setCurlInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedOperationId, setSelectedOperationId] = useState<string | undefined>();
-  const [requestStates, setRequestStates] = useState<RequestStateMap>(() => readLocalJson(requestStatesStorageKey, {}));
-  const [baseUrlsByProject, setBaseUrlsByProject] = useState<ProjectBaseUrlMap>(() => readLocalJson(baseUrlsStorageKey, {}));
+  const [selectedOperationId, setSelectedOperationId] = useState<
+    string | undefined
+  >();
+  const [requestStates, setRequestStates] = useState<RequestStateMap>(() =>
+    hydrateStoredRequestStates(readLocalJson(requestStatesStorageKey, {}))
+  );
+  const [defaultRequestMode, setDefaultRequestMode] = useState<
+    RequestState["requestMode"]
+  >(() => storageAdapter.getSettings().defaultRequestMode);
+  const [baseUrlsByProject, setBaseUrlsByProject] = useState<ProjectBaseUrlMap>(
+    () => readLocalJson(baseUrlsStorageKey, {})
+  );
   const [files, setFiles] = useState<GeneratedFile[]>([]);
   const [selectedPath, setSelectedPath] = useState<string | undefined>();
   const [generateMeta, setGenerateMeta] = useState<GenerateMeta | undefined>();
-  const [exchangesByOperation, setExchangesByOperation] = useState<ExchangeMap>(() => readLocalJson(exchangesStorageKey, {}));
-  const [latestExchangeKey, setLatestExchangeKey] = useState<string | undefined>(() => readLocalString(latestExchangeKeyStorageKey));
-  const [responseScope, setResponseScope] = useState<ResponseScope>(() => readLocalString(responseScopeStorageKey) === "latest" ? "latest" : "operation");
+  const [exchangesByOperation, setExchangesByOperation] = useState<ExchangeMap>(
+    {}
+  );
+  const [latestExchangeKey, setLatestExchangeKey] = useState<
+    string | undefined
+  >();
+  const [responseScope, setResponseScope] = useState<ResponseScope>(() =>
+    readLocalString(responseScopeStorageKey) === "latest"
+      ? "latest"
+      : "operation"
+  );
   const [status, setStatus] = useState("Ready");
   const [isImportingUrl, setIsImportingUrl] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
-  const [generateOptions, setGenerateOptions] = useState<GenerateOptions>(() => ({
-    ...defaultGenerateOptions,
-    client: storageAdapter.getSettings().defaultClient,
-    ...readLocalJson<Partial<GenerateOptions>>(generateOptionsStorageKey, {})
-  }));
+  const [generateOptions, setGenerateOptions] = useState<GenerateOptions>(
+    () => ({
+      ...defaultGenerateOptions,
+      client: storageAdapter.getSettings().defaultClient,
+      ...readLocalJson<Partial<GenerateOptions>>(generateOptionsStorageKey, {})
+    })
+  );
 
-  const activeProject = useMemo(() => projects.find((project) => project.id === activeProjectId), [activeProjectId, projects]);
-  const selectedOperation = useMemo(() => activeProject?.operations.find((operation) => operation.id === selectedOperationId), [activeProject, selectedOperationId]);
-  const operationKey = activeProject && selectedOperation ? createOperationKey(activeProject.id, selectedOperation.id) : undefined;
-  const requestState = operationKey ? requestStates[operationKey] : undefined;
-  const selectedBaseUrl = activeProject ? (baseUrlsByProject[activeProject.id] ?? activeProject.servers[0]?.url ?? "") : "";
-  const selectedFile = useMemo(() => files.find((file) => file.path === selectedPath) ?? files[0], [files, selectedPath]);
-  const operationGroups = useMemo(() => groupOperations(activeProject?.operations ?? [], searchQuery), [activeProject, searchQuery]);
-  const builtRequest = useMemo(() => {
-    if (!selectedOperation || !requestState || !selectedBaseUrl.trim()) return undefined;
-    try {
-      return buildApiRequest(selectedOperation, requestState, selectedBaseUrl);
-    } catch {
-      return undefined;
-    }
-  }, [requestState, selectedBaseUrl, selectedOperation]);
-  const displayedExchange = responseScope === "latest"
-    ? exchangesByOperation[latestExchangeKey ?? ""]
-    : exchangesByOperation[operationKey ?? ""];
-  const displayedContext = useMemo(() => {
-    if (!displayedExchange) return undefined;
-    const project = projects.find((candidate) => candidate.id === displayedExchange.projectId);
-    const operation = project?.operations.find((candidate) => candidate.id === displayedExchange.operationId);
-    return {
-      projectName: project?.name ?? "Unknown project",
-      operationLabel: operation ? `${operation.method} ${operation.path}` : displayedExchange.operationId
-    };
-  }, [displayedExchange, projects]);
+  const derived = useSpecDockDerivedState({
+    projects,
+    activeProjectId,
+    selectedOperationId,
+    requestStates,
+    defaultRequestMode,
+    baseUrlsByProject,
+    files,
+    selectedPath,
+    searchQuery,
+    exchangesByOperation,
+    latestExchangeKey,
+    responseScope
+  });
 
   useEffect(() => {
     document.documentElement.dataset.theme = themeMode;
     document.documentElement.style.colorScheme = themeMode;
-    storageAdapter.saveSettings({ ...storageAdapter.getSettings(), theme: themeMode });
+    storageAdapter.saveSettings({
+      ...storageAdapter.getSettings(),
+      theme: themeMode
+    });
   }, [storageAdapter, themeMode]);
   useEffect(() => {
+    const activeProject = derived.activeProject;
+
     if (!activeProject) return;
-    setBaseUrlsByProject((current) => ({ ...current, [activeProject.id]: current[activeProject.id] ?? activeProject.servers[0]?.url ?? "https://api.example.com" }));
-    setSelectedOperationId((current) => current && activeProject.operations.some((operation) => operation.id === current) ? current : activeProject.operations[0]?.id);
-  }, [activeProject]);
+
+    setBaseUrlsByProject((current) => ({
+      ...current,
+      [activeProject.id]:
+        current[activeProject.id] ??
+        activeProject.servers[0]?.url ??
+        "https://api.example.com"
+    }));
+    setSelectedOperationId((current) =>
+      current &&
+      activeProject.operations.some((operation) => operation.id === current)
+        ? current
+        : activeProject.operations[0]?.id
+    );
+  }, [derived.activeProject]);
   useEffect(() => {
+    const selectedOperation = derived.selectedOperation;
+    const operationKey = derived.operationKey;
+
     if (!selectedOperation || !operationKey) return;
-    setRequestStates((current) => ({ ...current, [operationKey]: current[operationKey] ?? createRequestState(selectedOperation) }));
-  }, [selectedOperation, operationKey]);
-  useEffect(() => writeLocalJson(requestStatesStorageKey, requestStates), [requestStates]);
-  useEffect(() => writeLocalJson(baseUrlsStorageKey, baseUrlsByProject), [baseUrlsByProject]);
-  useEffect(() => writeLocalJson(exchangesStorageKey, exchangesByOperation), [exchangesByOperation]);
-  useEffect(() => writeLocalString(latestExchangeKeyStorageKey, latestExchangeKey), [latestExchangeKey]);
-  useEffect(() => writeLocalString(responseScopeStorageKey, responseScope), [responseScope]);
+
+    setRequestStates((current) => ({
+      ...current,
+      [operationKey]:
+        current[operationKey] ??
+        createRequestState(selectedOperation, defaultRequestMode)
+    }));
+  }, [derived.selectedOperation, derived.operationKey, defaultRequestMode]);
+  useEffect(
+    () =>
+      writeLocalJson(
+        requestStatesStorageKey,
+        sanitizeRequestStatesForStorage(requestStates)
+      ),
+    [requestStates]
+  );
+  useEffect(
+    () => writeLocalJson(baseUrlsStorageKey, baseUrlsByProject),
+    [baseUrlsByProject]
+  );
+  useEffect(() => {
+    removeLocalValue(exchangesStorageKey);
+    removeLocalValue(latestExchangeKeyStorageKey);
+  }, []);
+  useEffect(
+    () => writeLocalString(responseScopeStorageKey, responseScope),
+    [responseScope]
+  );
   useEffect(() => {
     writeLocalJson(generateOptionsStorageKey, generateOptions);
-    storageAdapter.saveSettings({ ...storageAdapter.getSettings(), defaultClient: generateOptions.client });
+    storageAdapter.saveSettings({
+      ...storageAdapter.getSettings(),
+      defaultClient: generateOptions.client
+    });
   }, [generateOptions, storageAdapter]);
 
   return {
@@ -127,11 +198,15 @@ export const useSpecDockState = () => {
     setCurrentSource,
     urlInput,
     setUrlInput,
+    curlInput,
+    setCurlInput,
     searchQuery,
     setSearchQuery,
     setSelectedOperationId,
     requestStates,
     setRequestStates,
+    defaultRequestMode,
+    setDefaultRequestMode,
     setBaseUrlsByProject,
     files,
     setFiles,
@@ -140,6 +215,7 @@ export const useSpecDockState = () => {
     setGenerateMeta,
     setExchangesByOperation,
     setLatestExchangeKey,
+    latestExchangeKey,
     responseScope,
     setResponseScope,
     status,
@@ -154,16 +230,6 @@ export const useSpecDockState = () => {
     setIsExecuting,
     generateOptions,
     setGenerateOptions,
-    activeProject,
-    selectedOperation,
-    operationKey,
-    requestState,
-    selectedBaseUrl,
-    selectedFile,
-    operationGroups,
-    builtRequest,
-    displayedExchange,
-    displayedContext,
-    curlPreview: builtRequest ? generateCurl(builtRequest) : ""
+    ...derived
   };
 };

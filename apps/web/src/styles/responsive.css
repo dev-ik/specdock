@@ -60,6 +60,15 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .request-field-row.has-remove {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .request-field-row.has-remove .field-name,
+  .request-field-row.has-remove .field-name-readonly {
+    grid-column: 1 / -1;
+  }
+
   .generated-list {
     border-right: 0;
     border-bottom: 1px solid var(--border);
@@ -78,8 +87,12 @@
 
 @media (max-width: 560px) {
   .panel-header {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .panel-header-actions {
+    flex: 1;
   }
 
   .app-header-actions {

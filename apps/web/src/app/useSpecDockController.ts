@@ -4,9 +4,12 @@ import {
   type OpenApiProject
 } from "@specdock/core";
 import { importOpenApiFromUrl } from "../import-url.js";
+import { importCurlCommand } from "../curl-import.js";
 import { persistProjectFromSpecText } from "../workspace.js";
 import { downloadSdkZip, generateSdkFiles } from "./controller-helpers.js";
+import { createProjectActions } from "./project-actions.js";
 import { createRequestActions } from "./request-actions.js";
+import { createOperationKey } from "./request-utils.js";
 import { useSpecDockState } from "./useSpecDockState.js";
 
 export const useSpecDockController = () => {
@@ -80,6 +83,32 @@ export const useSpecDockController = () => {
       state.setStatus(error instanceof Error ? error.message : "Unable to import raw OpenAPI.");
     }
   };
+  const importCurl = () => {
+    try {
+      const imported = importCurlCommand(state.curlInput, state.defaultRequestMode);
+      const project = persistProjectFromSpecText(state.storageAdapter, imported.specText, { type: "curl" });
+      const operation = project.operations.find((candidate) => candidate.id === imported.operationId);
+      if (!operation) {
+        throw new Error("Imported cURL did not produce an operation.");
+      }
+
+      refreshStoredProjects(project.id);
+      activateProject(project, `Imported cURL as ${operation.method} ${operation.path}`);
+      state.setSpecText(imported.specText);
+      state.setCurrentSource({ type: "curl" });
+      state.setBaseUrlsByProject((current) => ({ ...current, [project.id]: imported.baseUrl }));
+      state.setSelectedOperationId(operation.id);
+      state.setRequestStates((current) => ({
+        ...current,
+        [createOperationKey(project.id, operation.id)]: {
+          ...imported.requestState,
+          operationId: operation.id
+        }
+      }));
+    } catch (error) {
+      state.setStatus(error instanceof Error ? error.message : "Unable to import cURL.");
+    }
+  };
   const uploadSpec = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];
     if (!file) return;
@@ -133,6 +162,7 @@ export const useSpecDockController = () => {
     }
   };
   const requestActions = createRequestActions(state);
+  const projectActions = createProjectActions(state, activateProject);
 
   return {
     ...state,
@@ -160,7 +190,9 @@ export const useSpecDockController = () => {
       }
     },
     openProject,
+    ...projectActions,
     importFromUrl,
+    importCurl,
     importRawSpec,
     uploadSpec,
     ...requestActions,

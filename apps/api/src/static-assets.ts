@@ -13,7 +13,9 @@ export function resolveWebDistDir(): string | undefined {
     join(moduleDir, "..", "..", "..", "apps", "web", "dist")
   ].filter((candidate): candidate is string => Boolean(candidate));
 
-  return candidates.map((candidate) => resolve(candidate)).find((candidate) => isDirectory(candidate));
+  return candidates
+    .map((candidate) => resolve(candidate))
+    .find((candidate) => isDirectory(candidate));
 }
 
 export function requestPathname(rawUrl: string): string {
@@ -24,12 +26,19 @@ export function requestPathname(rawUrl: string): string {
   }
 }
 
-export function resolveStaticAsset(root: string, pathname: string): string | undefined {
-  const relativePath = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+export function resolveStaticAsset(
+  root: string,
+  pathname: string
+): string | undefined {
+  const relativePath =
+    pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
   const candidate = resolve(root, relativePath);
   const candidateRelativeToRoot = relative(root, candidate);
 
-  if (candidateRelativeToRoot.startsWith("..") || candidateRelativeToRoot.includes(`..${sep}`)) {
+  if (
+    candidateRelativeToRoot.startsWith("..") ||
+    candidateRelativeToRoot.includes(`..${sep}`)
+  ) {
     return undefined;
   }
 
@@ -44,6 +53,29 @@ export function setStaticHeaders(reply: FastifyReply, assetPath: string): void {
       ? "public, max-age=31536000, immutable"
       : "no-store"
   );
+  reply.header("content-security-policy", securityPolicy());
+  reply.header(
+    "permissions-policy",
+    "camera=(), microphone=(), geolocation=()"
+  );
+  reply.header("referrer-policy", "strict-origin-when-cross-origin");
+  reply.header("x-content-type-options", "nosniff");
+  reply.header("x-frame-options", "DENY");
+}
+
+function securityPolicy(): string {
+  return [
+    "default-src 'self'",
+    "base-uri 'none'",
+    "connect-src 'self' http: https:",
+    "font-src 'self' data:",
+    "form-action 'none'",
+    "frame-ancestors 'none'",
+    "img-src 'self' data:",
+    "object-src 'none'",
+    "script-src 'self'",
+    "style-src 'self'"
+  ].join("; ");
 }
 
 function contentTypeFor(assetPath: string): string {

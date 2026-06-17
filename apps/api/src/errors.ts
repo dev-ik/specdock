@@ -28,6 +28,18 @@ export const generationErrorCode = (error: unknown): string => {
     return "UNSUPPORTED_OPENAPI_VERSION";
   }
 
+  if (error.name === "GenerationTimeoutError") {
+    return "GENERATION_TIMEOUT";
+  }
+
+  if (error.name === "GeneratedOutputTooLargeError") {
+    return "GENERATED_OUTPUT_TOO_LARGE";
+  }
+
+  if (error.message.includes("too large to generate")) {
+    return "GENERATION_TOO_COMPLEX";
+  }
+
   if (error.message.includes("Specification")) {
     return "INVALID_SPEC";
   }

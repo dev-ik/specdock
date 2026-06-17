@@ -1,6 +1,6 @@
 import { Copy, Play } from "lucide-react";
 import type { ApiOperation, RequestState } from "@specdock/core";
-import { EmptyState, Panel } from "./common.js";
+import { EmptyState, Panel, type PanelReorderProps } from "./common.js";
 import { RequestFields } from "./RequestFields.js";
 
 export const RequestPanel = ({
@@ -16,8 +16,10 @@ export const RequestPanel = ({
   onRequestStateChange,
   onRecordFieldChange,
   onRecordFieldRename,
+  onRecordFieldRemove,
   onAddHeader,
-  onExecute
+  onExecute,
+  reorder
 }: {
   historyCount: number;
   activeProjectId?: string;
@@ -31,10 +33,17 @@ export const RequestPanel = ({
   onRequestStateChange(operationKey: string, operation: ApiOperation, patch: Partial<RequestState>): void;
   onRecordFieldChange(section: "pathParams" | "queryParams" | "headers", name: string, value: string): void;
   onRecordFieldRename(section: "pathParams" | "queryParams" | "headers", oldName: string, newName: string): void;
+  onRecordFieldRemove(section: "pathParams" | "queryParams" | "headers", name: string): void;
   onAddHeader(): void;
   onExecute(): void;
+  reorder?: PanelReorderProps;
 }) => (
-  <Panel title="Request" action={<span className="meta-text">{historyCount} history items</span>}>
+  <Panel
+    title="Request"
+    panelId="request"
+    reorder={reorder}
+    action={<span className="meta-text">{historyCount} history items</span>}
+  >
     {activeProjectId && operation && operationKey && requestState ? (
       <div className="panel-body">
         <div className="request-topline">
@@ -78,6 +87,7 @@ export const RequestPanel = ({
           values={requestState.headers}
           onChange={(name, value) => onRecordFieldChange("headers", name, value)}
           onRename={(oldName, newName) => onRecordFieldRename("headers", oldName, newName)}
+          onRemove={(name) => onRecordFieldRemove("headers", name)}
           onAdd={onAddHeader}
         />
 

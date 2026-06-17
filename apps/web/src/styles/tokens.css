@@ -103,11 +103,18 @@ textarea {
 
 button {
   color: inherit;
+  user-select: none;
 }
 
 input,
 textarea {
   min-width: 0;
+  user-select: text;
+}
+
+pre,
+code {
+  user-select: text;
 }
 
 ::placeholder {

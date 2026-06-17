@@ -26,6 +26,7 @@ Default compose settings keep backend proxy mode disabled:
 PUBLIC_DEMO=true
 PROXY_ENABLED=false
 WEB_DIST_DIR=/app/apps/web/dist
+TRUST_PROXY=false
 ```
 
 Published image tags:
@@ -54,6 +55,7 @@ PROXY_ALLOW_PRIVATE_TARGETS=false
 PROXY_TIMEOUT_MS=15000
 PROXY_MAX_REQUEST_BYTES=5242880
 PROXY_MAX_RESPONSE_BYTES=10485760
+TRUST_PROXY=false
 ```
 
 For internal-network testing only, private targets can be allowed explicitly:
@@ -65,6 +67,7 @@ PROXY_ALLOW_PRIVATE_TARGETS=true
 Do not enable unrestricted public proxying.
 
 Configured proxy timeout and body limits are capped by SpecDock's built-in safe defaults.
+Proxy response bodies are read with a streaming size cap.
 
 ## Nginx Reverse Proxy
 
@@ -89,6 +92,10 @@ server {
 ```
 
 For HTTPS, terminate TLS in Nginx and keep the container bound to `127.0.0.1:3000`.
+If Nginx is the only trusted proxy and it strips user-controlled forwarding
+headers, set `TRUST_PROXY=loopback` so app-level rate limits can use client IPs.
+For public deployments, prefer Nginx or edge rate limiting as the primary abuse
+control.
 
 ## Manual Smoke Checklist
 

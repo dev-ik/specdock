@@ -1,22 +1,26 @@
 # SpecDock
 
-Open-source local-first workspace for OpenAPI contracts.
+Local-first API contract workspace for OpenAPI teams.
 
-SpecDock keeps the core API contract workflow in one place:
+SpecDock keeps the everyday API contract loop in one browser workspace:
 
 ```txt
 Import -> Explore -> Test -> Generate
 ```
 
-## What Works In v0.1.0
+Try the hosted demo: [https://specdock.ru](https://specdock.ru)
 
-- Import OpenAPI 3.0/3.1 from raw text, file upload, or URL.
+## What It Does
+
+- Import OpenAPI 3.0/3.1 specs from raw text, file upload, or URL.
 - Explore endpoints grouped by tags with search and operation details.
 - Build requests with path/query/header params, JSON body, cURL preview, and saved Base URL/Mode.
-- Execute requests in Direct Browser Mode and inspect responses.
-- Use Proxy Mode only in trusted self-hosted deployments.
+- Execute requests in Direct Browser Mode or restricted self-hosted Proxy Mode.
+- Inspect saved request/response exchanges per endpoint or latest request.
 - Generate TypeScript SDK files and ZIP downloads.
-- Persist projects, settings, request state, response view state, and request history locally.
+- Store projects, settings, safe request preferences, and history metadata in local browser storage.
+
+The hosted demo is for evaluation. It does not provide unrestricted proxying for arbitrary third-party APIs. For controlled proxy execution, run SpecDock yourself and configure an explicit host allowlist.
 
 ## Quick Start
 
@@ -27,16 +31,11 @@ Node.js >=20.19.0 <21 or >=22.13.0
 npm
 ```
 
-Install dependencies:
+Install and run:
 
 ```bash
 nvm use
 npm install
-```
-
-Run the API and web app:
-
-```bash
 npm run dev
 ```
 
@@ -79,18 +78,24 @@ Open:
 http://127.0.0.1:3000
 ```
 
-The container serves both the web app and `/api` from the same Fastify service.
+Check health:
 
-## Proxy Mode
+```bash
+curl -fsS http://127.0.0.1:3000/api/health
+```
 
-Public/demo deployments must keep proxy mode disabled:
+Use immutable version tags such as `docker.io/d8vik/specdock:v0.1.0`. The project does not rely on `latest` for the first release.
+
+## Configuration
+
+Public/demo deployments should keep backend proxy mode disabled:
 
 ```env
 PUBLIC_DEMO=true
 PROXY_ENABLED=false
 ```
 
-For trusted self-hosted deployments, enable proxy mode with an explicit allowlist:
+Trusted self-hosted deployments can enable restricted proxy mode:
 
 ```env
 PUBLIC_DEMO=false
@@ -99,9 +104,12 @@ PROXY_ALLOWED_HOSTS=api.example.com,staging-api.example.com
 PROXY_ALLOW_PRIVATE_TARGETS=false
 ```
 
-Use `PROXY_ALLOW_PRIVATE_TARGETS=true` only for local or internal-network testing.
+Do not enable unrestricted public proxying. Proxy requests are protected by explicit host allowlists, SSRF checks, header filtering, timeout limits, and request/response size limits. Self-hosted deployments should also use outbound firewall rules for internal networks.
 
-## Checks
+When running behind a trusted loopback reverse proxy, set `TRUST_PROXY=loopback`.
+Leave it disabled for direct public exposure.
+
+## Development Checks
 
 ```bash
 nvm use
@@ -111,9 +119,18 @@ npm run test
 npm run build
 ```
 
-## Documentation
+## Repository Layout
 
-Start here:
+```txt
+apps/api        Fastify API, proxy endpoint, generation endpoint, static web serving
+apps/web        React/Vite web workspace
+packages/core   OpenAPI normalization, storage contracts, shared types
+packages/generator TypeScript SDK generation
+packages/ui     Shared UI package placeholder
+docs            Architecture, security, deployment, smoke tests, and roadmap
+```
+
+## Documentation
 
 - [Master plan](docs/SPECDOCK_MASTER_PLAN.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
@@ -140,8 +157,8 @@ docs/BOOTSTRAP_REPOSITORY.md
 docs/TASKS.md
 ```
 
-Do not commit local credentials, private proxy targets, or generated build output.
+Do not commit local credentials, private proxy targets, provider-specific hosting entrypoints, or generated build output.
 
 ## License
 
-See [LICENSE](LICENSE).
+SpecDock is released under the [MIT License](LICENSE).

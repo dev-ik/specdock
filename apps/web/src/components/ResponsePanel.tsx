@@ -1,23 +1,27 @@
 import { Copy } from "lucide-react";
 import type { ExchangeContext, ResponseScope, StoredExchange } from "../app/types.js";
 import { formatDateTime } from "../app/request-utils.js";
-import { EmptyState, MethodBadge, Panel } from "./common.js";
+import { EmptyState, MethodBadge, Panel, type PanelReorderProps } from "./common.js";
 
 export const ResponsePanel = ({
   exchange,
   context,
   responseScope,
   onResponseScopeChange,
-  onCopyText
+  onCopyText,
+  reorder
 }: {
   exchange?: StoredExchange;
   context?: ExchangeContext;
   responseScope: ResponseScope;
   onResponseScopeChange(scope: ResponseScope): void;
   onCopyText(label: string, value: string): void;
+  reorder?: PanelReorderProps;
 }) => (
   <Panel
     title="Response"
+    panelId="response"
+    reorder={reorder}
     action={
       <div className="segmented-control response-scope-toggle" aria-label="Response scope">
         {(["operation", "latest"] as const).map((scope) => (

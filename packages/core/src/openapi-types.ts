@@ -10,6 +10,7 @@ export type HttpMethod =
 export type OpenApiSource =
   | { type: "url"; url: string }
   | { type: "file"; fileName: string }
+  | { type: "curl" }
   | { type: "raw" };
 
 export type OpenApiProject = {

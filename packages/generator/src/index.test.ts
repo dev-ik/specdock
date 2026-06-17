@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { LIMITS } from "@specdock/core";
 import { generateSdk, generateSdkZip } from "./index.js";
 
 const spec = {
@@ -31,7 +32,9 @@ const spec = {
     "/users/{id}": {
       get: {
         operationId: "getUser",
-        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
+        parameters: [
+          { name: "id", in: "path", required: true, schema: { type: "string" } }
+        ],
         responses: {
           "200": {
             description: "OK"
@@ -91,8 +94,12 @@ describe("generateSdk", () => {
       generateReactQuery: true,
       generateZod: true
     });
-    const hooks = files.find((file) => file.path === "generated/hooks.ts")?.content;
-    const schemas = files.find((file) => file.path === "generated/schemas.ts")?.content;
+    const hooks = files.find(
+      (file) => file.path === "generated/hooks.ts"
+    )?.content;
+    const schemas = files.find(
+      (file) => file.path === "generated/schemas.ts"
+    )?.content;
 
     expect(hooks).toContain("useGetUserQuery");
     expect(hooks).toContain("useCreateUserMutation");
@@ -116,7 +123,14 @@ describe("generateSdk", () => {
       paths: {
         "/accounts/{accountId}/orders": {
           get: {
-            parameters: [{ name: "accountId", in: "path", required: true, schema: { type: "string" } }],
+            parameters: [
+              {
+                name: "accountId",
+                in: "path",
+                required: true,
+                schema: { type: "string" }
+              }
+            ],
             responses: {
               "200": {
                 description: "OK"
@@ -127,14 +141,110 @@ describe("generateSdk", () => {
       }
     });
 
-    expect(files.find((file) => file.path === "generated/client.ts")?.content).toContain(
-      "export const getAccountsAccountIdOrders"
+    expect(
+      files.find((file) => file.path === "generated/client.ts")?.content
+    ).toContain("export const getAccountsAccountIdOrders");
+  });
+
+  it("generates query param support for clients and hooks", () => {
+    const querySpec = {
+      ...spec,
+      paths: {
+        "/posts": {
+          get: {
+            operationId: "listPosts",
+            parameters: [
+              {
+                name: "userId",
+                in: "query",
+                required: false,
+                schema: { type: "string" }
+              }
+            ],
+            responses: {
+              "200": {
+                description: "OK"
+              }
+            }
+          }
+        }
+      }
+    };
+    const files = generateSdk(querySpec, { generateReactQuery: true });
+    const client = files.find(
+      (file) => file.path === "generated/client.ts"
+    )?.content;
+    const hooks = files.find(
+      (file) => file.path === "generated/hooks.ts"
+    )?.content;
+
+    expect(client).toContain("type QueryValue");
+    expect(client).toContain('appendQuery("/posts", query)');
+    expect(client).toContain("query?: Record<string, QueryValue>");
+    expect(hooks).toContain(
+      "query?: Record<string, string | number | boolean | undefined>"
     );
+    expect(hooks).toContain('queryKey: ["listPosts", query]');
   });
 
   it("generates ZIP archives", async () => {
     const archive = await generateSdkZip(spec);
 
     expect(archive.byteLength).toBeGreaterThan(0);
+  });
+
+  it("escapes untrusted path literals in generated clients", () => {
+    const files = generateSdk({
+      ...spec,
+      paths: {
+        "/users/`${globalThis.alert(1)}`/{id}": {
+          get: {
+            operationId: "unsafePath",
+            parameters: [
+              {
+                name: "id",
+                in: "path",
+                required: true,
+                schema: { type: "string" }
+              }
+            ],
+            responses: {
+              "200": {
+                description: "OK"
+              }
+            }
+          }
+        }
+      }
+    });
+    const client = files.find(
+      (file) => file.path === "generated/client.ts"
+    )?.content;
+
+    expect(client).toContain(
+      '"/users/`${globalThis.alert(1)}`/" + encodeURIComponent(id)'
+    );
+    expect(client).not.toContain("`/users/`${globalThis.alert(1)}`/");
+  });
+
+  it("rejects specs above generation complexity limits", () => {
+    const paths = Object.fromEntries(
+      Array.from({ length: LIMITS.maxGenerateOperations + 1 }, (_, index) => [
+        `/items-${index}`,
+        {
+          get: {
+            responses: {
+              "200": {
+                description: "OK"
+              }
+            }
+          }
+        }
+      ])
+    );
+
+    expect(() => generateSdk({ ...spec, paths })).toThrow(
+      "Specification is too large to generate"
+    );
   });
 });

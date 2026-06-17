@@ -61,11 +61,18 @@ export type HttpMethod =
 
 ```txt
 Max spec size: 10 MB
+Max generated JSON files response: 10 MB
 Max proxy request body: 5 MB
 Max proxy response body: 10 MB
 Generate timeout: 10 sec
 Proxy timeout: 15 sec
+Max generate paths: 2000
+Max generate operations: 2000
+Max generate schemas: 2000
 ```
+
+Generated file paths are always relative and ZIP-safe. Output paths with `.`,
+`..`, backslashes, or drive-letter style segments are rejected.
 
 Self-hosted proxy deployments can lower proxy limits with:
 
@@ -74,6 +81,9 @@ PROXY_TIMEOUT_MS
 PROXY_MAX_REQUEST_BYTES
 PROXY_MAX_RESPONSE_BYTES
 ```
+
+Set `TRUST_PROXY=loopback` only when a trusted loopback reverse proxy strips
+user-controlled forwarding headers before requests reach SpecDock.
 
 ## Logging Rules
 

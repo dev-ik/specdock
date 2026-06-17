@@ -22,9 +22,14 @@
 }
 
 .button:focus-visible,
+.panel-collapse-toggle:focus-visible,
+.panel-drag-handle:focus-visible,
 .field:focus,
 .search-field:focus-within,
 .segmented-control button:focus-visible,
+.project-close-button:focus-visible,
+.project-delete-button:focus-visible,
+.field-remove-button:focus-visible,
 .endpoint-item:focus-visible,
 .project-item:focus-visible,
 .file-item:focus-visible {
@@ -63,6 +68,31 @@
   min-height: 2rem;
   padding: 0.35rem 0.6rem;
   font-size: 0.78rem;
+}
+
+.button,
+.app-header,
+.jump-link,
+.panel-header,
+.panel-title-row,
+.panel-header h2,
+.meta-text,
+.field-label,
+.fact-label,
+.field-name-readonly,
+.endpoint-path,
+.endpoint-summary,
+.operation-route,
+.method-badge,
+.project-name,
+.project-meta,
+.segmented-control,
+.search-field,
+.empty-state,
+.empty-field,
+.notice,
+.code-block-compact {
+  user-select: none;
 }
 
 .input-row,
@@ -119,6 +149,11 @@
   font-family: "SFMono-Regular", "Cascadia Code", "Roboto Mono", Consolas, monospace;
 }
 
+.code-field,
+.code-block {
+  user-select: text;
+}
+
 .code-field {
   display: block;
   width: 100%;
@@ -128,4 +163,8 @@
 
 .spec-editor {
   min-height: 22rem;
+}
+
+.curl-editor {
+  min-height: 7rem;
 }

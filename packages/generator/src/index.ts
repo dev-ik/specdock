@@ -3,6 +3,7 @@ import {
   defaultGenerateOptions,
   extractOperations,
   extractSchemas,
+  LIMITS,
   parseSpec,
   type GeneratedFile,
   type GenerateOptions,
@@ -17,7 +18,10 @@ import { generateZodFile } from "./zod-file.js";
 
 export const GENERATOR_VERSION = "0.1.0";
 
-export const generateSdk = (spec: unknown, options: Partial<GenerateOptions> = {}): GeneratedFile[] => {
+export const generateSdk = (
+  spec: unknown,
+  options: Partial<GenerateOptions> = {}
+): GeneratedFile[] => {
   const resolvedOptions: GenerateOptions = {
     ...defaultGenerateOptions,
     ...options
@@ -26,6 +30,7 @@ export const generateSdk = (spec: unknown, options: Partial<GenerateOptions> = {
   const outputPath = normalizeOutputPath(resolvedOptions.outputPath);
   const operations = extractOperations(document);
   const schemas = extractSchemas(document);
+  assertGenerateComplexity(document, operations.length, schemas.length);
   const files: GeneratedFile[] = [];
 
   if (resolvedOptions.generateTypes) {
@@ -60,6 +65,27 @@ export const generateSdk = (spec: unknown, options: Partial<GenerateOptions> = {
   });
 
   return files;
+};
+
+const assertGenerateComplexity = (
+  document: Record<string, unknown>,
+  operationCount: number,
+  schemaCount: number
+) => {
+  const pathCount =
+    typeof document.paths === "object" && document.paths !== null
+      ? Object.keys(document.paths).length
+      : 0;
+
+  if (
+    pathCount > LIMITS.maxGeneratePaths ||
+    operationCount > LIMITS.maxGenerateOperations ||
+    schemaCount > LIMITS.maxGenerateSchemas
+  ) {
+    throw new Error(
+      `Specification is too large to generate. Limits: ${LIMITS.maxGeneratePaths} paths, ${LIMITS.maxGenerateOperations} operations, ${LIMITS.maxGenerateSchemas} schemas.`
+    );
+  }
 };
 
 export const generateSdkZip = async (

@@ -1,7 +1,7 @@
 import { Download, Wand2 } from "lucide-react";
 import type { GenerateOptions } from "@specdock/core";
 import type { GenerateMeta } from "../app/types.js";
-import { GenerateToggle, Panel } from "./common.js";
+import { GenerateToggle, Panel, type PanelReorderProps } from "./common.js";
 
 export const GeneratePanel = ({
   options,
@@ -11,7 +11,8 @@ export const GeneratePanel = ({
   isDownloadingZip,
   onOptionsChange,
   onGenerate,
-  onDownloadZip
+  onDownloadZip,
+  reorder
 }: {
   options: GenerateOptions;
   meta?: GenerateMeta;
@@ -21,9 +22,12 @@ export const GeneratePanel = ({
   onOptionsChange(patch: Partial<GenerateOptions>): void;
   onGenerate(): void;
   onDownloadZip(): void;
+  reorder?: PanelReorderProps;
 }) => (
   <Panel
     title="Generate"
+    panelId="generate"
+    reorder={reorder}
     action={
       meta ? (
         <span className="meta-text">

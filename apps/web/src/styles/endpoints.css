@@ -5,11 +5,12 @@
 }
 
 .project-list {
+  display: grid;
+  gap: 0.45rem;
   max-height: 13.5rem;
   padding: 0.65rem;
 }
 
-.project-item,
 .endpoint-item,
 .file-item {
   width: 100%;
@@ -20,24 +21,74 @@
   text-align: left;
 }
 
+.project-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--muted);
+  user-select: none;
+}
+
+.project-item {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
 .project-item,
 .file-item {
   padding: 0.75rem 0.85rem;
 }
 
-.project-item:hover,
+.project-row:hover,
 .file-item:hover,
 .endpoint-item:hover {
   background: var(--panel-subtle);
   color: var(--text);
 }
 
-.project-item.is-active,
+.project-row.is-active,
 .file-item.is-active,
 .endpoint-item.is-active {
   border-color: var(--selected-border);
   background: var(--selected);
   color: var(--selected-text);
+}
+
+.project-close-button,
+.project-delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-right: 0.45rem;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--subtle);
+  opacity: 0.72;
+}
+
+.project-close-button:hover,
+.project-close-button:focus-visible {
+  border-color: var(--selected-border);
+  background: var(--panel-subtle);
+  color: var(--text);
+  opacity: 1;
+}
+
+.project-delete-button:hover,
+.project-delete-button:focus-visible {
+  border-color: var(--method-delete-border);
+  background: var(--method-delete-bg);
+  color: var(--method-delete-text);
+  opacity: 1;
 }
 
 .project-name {

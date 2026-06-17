@@ -13,3 +13,4 @@ services:
       PROXY_ENABLED: "false"
       PROXY_ALLOWED_HOSTS: ""
       PROXY_ALLOW_PRIVATE_TARGETS: "false"
+      TRUST_PROXY: "false"

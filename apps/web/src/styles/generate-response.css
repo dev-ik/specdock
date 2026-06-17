@@ -158,6 +158,29 @@
   gap: 0.6rem;
 }
 
+.request-field-row.has-remove {
+  grid-template-columns: minmax(8.5rem, 11.5rem) minmax(0, 1fr) auto;
+}
+
+.field-remove-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.55rem;
+  min-height: 2.55rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--panel-subtle);
+  color: var(--subtle);
+}
+
+.field-remove-button:hover,
+.field-remove-button:focus-visible {
+  border-color: var(--method-delete-border);
+  background: var(--method-delete-bg);
+  color: var(--method-delete-text);
+}
+
 .field-name,
 .field-name-readonly {
   font-size: 0.86rem;

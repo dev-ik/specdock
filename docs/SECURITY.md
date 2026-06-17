@@ -1,6 +1,6 @@
 # Security
 
-SpecDock is local-first. Imported contracts, request state, generated previews, and saved endpoint exchanges stay in the user's browser storage unless the user exports or sends them.
+SpecDock is local-first. Imported contracts, safe request preferences, and generated previews stay in the user's browser storage unless the user exports or sends them. Manual request headers and bodies are session-only by default. Endpoint request/response exchanges are kept in memory for the current session and are cleared on reload.
 
 ## Public Demo
 
@@ -33,13 +33,17 @@ The backend proxy enforces:
 - private-address blocking unless explicitly enabled
 - request timeout
 - request body size limit
-- response body size limit
+- streaming response body size limit
+- hop-by-hop and proxy header filtering
 
 Use `PROXY_ALLOW_PRIVATE_TARGETS=true` only for local/internal-network testing.
+Self-hosted proxy deployments should also enforce outbound firewall rules to
+internal networks. SpecDock pins proxy requests to the validated DNS address,
+and network egress policy remains useful defense in depth.
 
 ## Sensitive Data
 
-Do not put production credentials into shared browsers. Manual headers and saved endpoint exchanges are local browser data and can include values entered by the user.
+Do not put production credentials into shared browsers. Manual headers and request bodies stay in memory for the current browser session and are not persisted to localStorage.
 
 Backend logs must not include request bodies or sensitive headers such as:
 
@@ -51,4 +55,4 @@ X-API-Key
 Proxy-Authorization
 ```
 
-Request history stores execution metadata for browsing recent calls. It must not be used as a response-body archive.
+Request history stores execution metadata for browsing recent calls. It must not be used as a response-body archive. Sensitive query parameters are redacted before history is saved.

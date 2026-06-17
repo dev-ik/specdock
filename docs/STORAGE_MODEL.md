@@ -55,9 +55,11 @@ export type StorageAdapter = {
 
 ## Secrets
 
-Auth profiles may contain secrets.
+Auth profiles are deferred from the MVP because they may contain secrets.
 
-They are stored locally only.
+Manual request headers and bodies are not persisted to localStorage. Stored
+request preferences must omit headers and bodies and redact sensitive query
+values.
 
 UI warning:
 

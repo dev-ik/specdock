@@ -1,14 +1,18 @@
+import { Trash2 } from "lucide-react";
+
 export const RequestFields = ({
   title,
   values,
   onChange,
   onRename,
+  onRemove,
   onAdd
 }: {
   title: string;
   values: Record<string, string>;
   onChange(name: string, value: string): void;
   onRename?: (oldName: string, newName: string) => void;
+  onRemove?: (name: string) => void;
   onAdd?: () => void;
 }) => (
   <div>
@@ -25,7 +29,7 @@ export const RequestFields = ({
     ) : (
       <div className="field-list">
         {Object.entries(values).map(([name, value]) => (
-          <label key={name} className="request-field-row">
+          <div key={name} className={`request-field-row ${onRemove ? "has-remove" : ""}`}>
             {onRename ? (
               <input
                 className="field field-name"
@@ -40,7 +44,18 @@ export const RequestFields = ({
               value={value}
               onChange={(event) => onChange(name, event.target.value)}
             />
-          </label>
+            {onRemove ? (
+              <button
+                className="field-remove-button"
+                type="button"
+                aria-label={`Remove ${name}`}
+                title={`Remove ${name}`}
+                onClick={() => onRemove(name)}
+              >
+                <Trash2 size={15} aria-hidden="true" />
+              </button>
+            ) : null}
+          </div>
         ))}
       </div>
     )}

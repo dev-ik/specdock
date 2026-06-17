@@ -1,16 +1,23 @@
 import type { GeneratedFile } from "@specdock/core";
-import { EmptyState, FileIcon, Panel } from "./common.js";
+import { EmptyState, FileIcon, Panel, type PanelReorderProps } from "./common.js";
 
 export const GeneratedFilesPanel = ({
   files,
   selectedFile,
-  onSelectPath
+  onSelectPath,
+  reorder
 }: {
   files: GeneratedFile[];
   selectedFile?: GeneratedFile;
   onSelectPath(path: string): void;
+  reorder?: PanelReorderProps;
 }) => (
-  <Panel title="Generated files" action={<span className="meta-text">{files.length} files</span>}>
+  <Panel
+    title="Generated files"
+    panelId="generated-files"
+    reorder={reorder}
+    action={<span className="meta-text">{files.length} files</span>}
+  >
     <div className="generated-grid">
       <div className="generated-list">
         {files.length === 0 ? (

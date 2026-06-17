@@ -1,6 +1,9 @@
 import type { ApiOperation, GenerateOptions } from "@specdock/core";
 
-export const operationName = (operation: ApiOperation, options: GenerateOptions): string => {
+export const operationName = (
+  operation: ApiOperation,
+  options: GenerateOptions
+): string => {
   if (options.namingStyle === "operationId" && operation.operationId) {
     return safeIdentifier(operation.operationId);
   }
@@ -25,16 +28,29 @@ export const operationName = (operation: ApiOperation, options: GenerateOptions)
 };
 
 export const normalizeOutputPath = (outputPath: string): string => {
-  return outputPath.replace(/^\/+|\/+$/g, "") || "generated";
+  const normalized = outputPath.replace(/^\/+|\/+$/g, "") || "generated";
+  const segments = normalized.split("/");
+
+  if (
+    segments.some(
+      (segment) =>
+        segment === "" ||
+        segment === "." ||
+        segment === ".." ||
+        !/^[a-zA-Z0-9._-]+$/.test(segment)
+    )
+  ) {
+    throw new Error(
+      "Invalid output path. Use simple relative path segments without traversal."
+    );
+  }
+
+  return segments.join("/");
 };
 
 export const sanitizeTypeName = (value: string): string => {
   const name = value.replace(/[^a-zA-Z0-9_$]/g, " ");
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map(capitalize)
-    .join("");
+  return name.split(" ").filter(Boolean).map(capitalize).join("");
 };
 
 export const safeIdentifier = (value: string): string => {

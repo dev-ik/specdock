@@ -23,8 +23,17 @@ Extensions: .yaml, .yml, .json
 ```txt
 Generate timeout: 10 sec
 Max generated files: 100
+Max generated JSON files response: 10 MB
 Max ZIP size: 20 MB
+Max generate paths: 2000
+Max generate operations: 2000
+Max generate schemas: 2000
 ```
+
+Backend generation runs in an isolated child process and is terminated when the
+timeout is reached.
+Generated output paths are relative ZIP-safe paths. `.` and `..` path segments,
+backslashes, and drive-letter style paths are rejected.
 
 ## Proxy
 
@@ -64,6 +73,10 @@ localhost
 fc00::/7
 fe80::/10
 ```
+
+Self-hosted deployments should also enforce outbound firewall rules. The app
+pins proxy requests to the validated DNS address, and platform egress policy is
+still recommended as defense in depth.
 
 ## Browser Support
 

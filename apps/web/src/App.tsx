@@ -8,11 +8,20 @@ import { RequestPanel } from "./components/RequestPanel.js";
 import { ResponsePanel } from "./components/ResponsePanel.js";
 import { SettingsDialog } from "./components/SettingsDialog.js";
 import { WorkspaceJumpNav } from "./components/WorkspaceJumpNav.js";
+import { type PanelId, usePanelLayout } from "./app/usePanelLayout.js";
 import { useSpecDockController } from "./app/useSpecDockController.js";
 
 export const App = () => {
   const app = useSpecDockController();
+  const panelLayout = usePanelLayout();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const getPanelReorderProps = (panelId: PanelId) => ({
+    isDragging: panelLayout.draggingPanelId === panelId,
+    onDragStart: () => panelLayout.startDragging(panelId),
+    onDragEnd: panelLayout.stopDragging,
+    onDrop: (position: "before" | "after") => panelLayout.dropPanel(panelId, position),
+    onMove: (direction: -1 | 1) => panelLayout.movePanel(panelId, direction)
+  });
 
   return (
     <main className="app-shell">
@@ -55,13 +64,20 @@ export const App = () => {
           activeProjectId={app.activeProjectId}
           specText={app.specText}
           urlInput={app.urlInput}
+          curlInput={app.curlInput}
           isImportingUrl={app.isImportingUrl}
           onOpenProject={app.openProject}
+          onCloseProject={app.closeProject}
+          onDeleteProject={app.deleteProject}
           onSpecTextChange={app.setSpecTextAsRaw}
           onUrlInputChange={app.setUrlInput}
+          onCurlInputChange={app.setCurlInput}
           onUrlImport={() => void app.importFromUrl()}
+          onCurlImport={app.importCurl}
           onRawImport={app.importRawSpec}
           onUpload={app.uploadSpec}
+          panelOrder={panelLayout.layout.import}
+          getPanelReorderProps={getPanelReorderProps}
         />
         <ExplorerPanel
           operationCount={app.activeProject?.operations.length ?? 0}
@@ -71,52 +87,79 @@ export const App = () => {
           hasProject={Boolean(app.activeProject)}
           onSearchChange={app.setSearchQuery}
           onSelectOperation={app.setSelectedOperationId}
+          panelOrder={panelLayout.layout.explorer}
+          getPanelReorderProps={getPanelReorderProps}
         />
         <section className="panel-stack">
-          <div id="request" className="scroll-target">
-            <RequestPanel
-              historyCount={app.historyCount}
-              activeProjectId={app.activeProject?.id}
-              operation={app.selectedOperation}
-              operationKey={app.operationKey}
-              requestState={app.requestState}
-              baseUrl={app.selectedBaseUrl}
-              curlPreview={app.curlPreview}
-              isExecuting={app.isExecuting}
-              onBaseUrlChange={app.updateProjectBaseUrl}
-              onRequestStateChange={app.updateRequestState}
-              onRecordFieldChange={app.updateRecordField}
-              onRecordFieldRename={app.renameRecordField}
-              onAddHeader={app.addHeader}
-              onExecute={() => void app.executeRequest()}
-            />
-          </div>
-          <ResponsePanel
-            exchange={app.displayedExchange}
-            context={app.displayedContext}
-            responseScope={app.responseScope}
-            onResponseScopeChange={app.setResponseScope}
-            onCopyText={(label, value) => void app.copyText(label, value)}
-          />
-          <div id="generate" className="scroll-target">
-            <GeneratePanel
-              options={app.generateOptions}
-              meta={app.generateMeta}
-              fileCount={app.files.length}
-              isGenerating={app.isGenerating}
-              isDownloadingZip={app.isDownloadingZip}
-              onOptionsChange={app.updateGenerateOptions}
-              onGenerate={() => void app.generate()}
-              onDownloadZip={() => void app.downloadZip()}
-            />
-          </div>
-          <div id="generated-files" className="scroll-target">
-            <GeneratedFilesPanel
-              files={app.files}
-              selectedFile={app.selectedFile}
-              onSelectPath={app.setSelectedPath}
-            />
-          </div>
+          {panelLayout.layout.workspace.map((panelId) => {
+            if (panelId === "request") {
+              return (
+                <div key={panelId} id="request" className="scroll-target">
+                  <RequestPanel
+                    historyCount={app.historyCount}
+                    activeProjectId={app.activeProject?.id}
+                    operation={app.selectedOperation}
+                    operationKey={app.operationKey}
+                    requestState={app.requestState}
+                    baseUrl={app.selectedBaseUrl}
+                    curlPreview={app.curlPreview}
+                    isExecuting={app.isExecuting}
+                    onBaseUrlChange={app.updateProjectBaseUrl}
+                    onRequestStateChange={app.updateRequestState}
+                    onRecordFieldChange={app.updateRecordField}
+                    onRecordFieldRename={app.renameRecordField}
+                    onRecordFieldRemove={app.removeRecordField}
+                    onAddHeader={app.addHeader}
+                    onExecute={() => void app.executeRequest()}
+                    reorder={getPanelReorderProps(panelId)}
+                  />
+                </div>
+              );
+            }
+
+            if (panelId === "response") {
+              return (
+                <ResponsePanel
+                  key={panelId}
+                  exchange={app.displayedExchange}
+                  context={app.displayedContext}
+                  responseScope={app.responseScope}
+                  onResponseScopeChange={app.setResponseScope}
+                  onCopyText={(label, value) => void app.copyText(label, value)}
+                  reorder={getPanelReorderProps(panelId)}
+                />
+              );
+            }
+
+            if (panelId === "generate") {
+              return (
+                <div key={panelId} id="generate" className="scroll-target">
+                  <GeneratePanel
+                    options={app.generateOptions}
+                    meta={app.generateMeta}
+                    fileCount={app.files.length}
+                    isGenerating={app.isGenerating}
+                    isDownloadingZip={app.isDownloadingZip}
+                    onOptionsChange={app.updateGenerateOptions}
+                    onGenerate={() => void app.generate()}
+                    onDownloadZip={() => void app.downloadZip()}
+                    reorder={getPanelReorderProps(panelId)}
+                  />
+                </div>
+              );
+            }
+
+            return (
+              <div key={panelId} id="generated-files" className="scroll-target">
+                <GeneratedFilesPanel
+                  files={app.files}
+                  selectedFile={app.selectedFile}
+                  onSelectPath={app.setSelectedPath}
+                  reorder={getPanelReorderProps(panelId)}
+                />
+              </div>
+            );
+          })}
         </section>
       </section>
       <SettingsDialog

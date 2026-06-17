@@ -146,6 +146,11 @@
   max-height: 10rem;
 }
 
+.code-block-compact,
+.code-block-compact code {
+  user-select: none;
+}
+
 .request-actions {
   display: flex;
   flex-wrap: wrap;

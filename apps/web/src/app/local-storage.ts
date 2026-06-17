@@ -1,4 +1,4 @@
-export const readLocalJson = <T,>(key: string, fallback: T): T => {
+export const readLocalJson = <T>(key: string, fallback: T): T => {
   const storage = getLocalStorage();
 
   if (!storage) {
@@ -55,6 +55,20 @@ export const writeLocalString = (key: string, value: string | undefined) => {
     }
 
     storage.setItem(key, value);
+  } catch {
+    // Ignore storage failures; in-memory state remains usable.
+  }
+};
+
+export const removeLocalValue = (key: string) => {
+  const storage = getLocalStorage();
+
+  if (!storage) {
+    return;
+  }
+
+  try {
+    storage.removeItem(key);
   } catch {
     // Ignore storage failures; in-memory state remains usable.
   }
