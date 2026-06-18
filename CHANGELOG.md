@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.2
+
+### Fixed
+
+- Increased generated SDK smoke test timeout for CI environments with PHP Composer enabled.
+- Set Composer root version during smoke validation to avoid root package version warnings.
+
 ## v0.2.1
 
 ### Fixed

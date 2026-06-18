@@ -138,7 +138,7 @@ describe("generated SDK smoke checks", () => {
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
-  });
+  }, 60_000);
 });
 
 const writeGeneratedFiles = (
@@ -211,6 +211,7 @@ const run = (command: string, args: string[], cwd: string) => {
       ...process.env,
       GOCACHE: join(cwd, ".gocache"),
       GOPATH: join(cwd, ".gopath"),
+      COMPOSER_ROOT_VERSION: "0.1.0",
       PYTHONPYCACHEPREFIX: join(cwd, ".pycache")
     },
     stdio: "inherit"

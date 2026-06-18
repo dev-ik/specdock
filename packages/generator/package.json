@@ -1,6 +1,6 @@
 {
   "name": "@specdock/generator",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@specdock/core": "0.2.1",
+    "@specdock/core": "0.2.2",
     "jszip": "3.10.1"
   },
   "devDependencies": {

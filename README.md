@@ -68,7 +68,7 @@ docker run -d --name specdock \
   -p 127.0.0.1:3000:3000 \
   -e PUBLIC_DEMO=true \
   -e PROXY_ENABLED=false \
-  docker.io/d8vik/specdock:v0.2.1
+  docker.io/d8vik/specdock:v0.2.2
 ```
 
 Or keep configuration in a local env file:
@@ -84,7 +84,7 @@ PROXY_ALLOW_PRIVATE_TARGETS=false
 docker run -d --name specdock \
   -p 127.0.0.1:3000:3000 \
   --env-file ./specdock.env \
-  docker.io/d8vik/specdock:v0.2.1
+  docker.io/d8vik/specdock:v0.2.2
 ```
 
 If you prefer Compose with the published image, create your own
@@ -93,7 +93,7 @@ If you prefer Compose with the published image, create your own
 ```yaml
 services:
   specdock:
-    image: docker.io/d8vik/specdock:v0.2.1
+    image: docker.io/d8vik/specdock:v0.2.2
     ports:
       - "127.0.0.1:3000:3000"
     environment:
@@ -113,7 +113,7 @@ Check health:
 curl -fsS http://127.0.0.1:3000/api/health
 ```
 
-Use immutable version tags such as `docker.io/d8vik/specdock:v0.2.1`.
+Use immutable version tags such as `docker.io/d8vik/specdock:v0.2.2`.
 The project does not rely on `latest` for releases.
 
 ## Configuration
