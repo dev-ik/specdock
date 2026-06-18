@@ -16,6 +16,7 @@ import {
   executeProxyRequest,
   uniqueHeaderName
 } from "./request-utils.js";
+import { directRequestBlockReason } from "./deployment-policy.js";
 import type { useSpecDockState } from "./useSpecDockState.js";
 
 type State = ReturnType<typeof useSpecDockState>;
@@ -122,6 +123,17 @@ export const createRequestActions = (state: State) => {
       state.setStatus("Select an operation and enter a valid base URL.");
       return;
     }
+    const blockReason = directRequestBlockReason(
+      state.appConfig,
+      state.requestState.requestMode,
+      state.builtRequest.url
+    );
+
+    if (blockReason) {
+      state.setStatus(blockReason);
+      return;
+    }
+
     state.setIsExecuting(true);
     state.setStatus(
       state.requestState.requestMode === "proxy"

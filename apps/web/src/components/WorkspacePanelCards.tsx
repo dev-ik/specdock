@@ -33,6 +33,7 @@ export const renderWorkspacePanelCard = (
           requestBodyExample={app.requestBodyExample}
           requestBodyFields={app.requestBodyFields}
           isExecuting={app.isExecuting}
+          executionBlockReason={app.requestExecutionBlockReason}
           onBaseUrlChange={app.updateProjectBaseUrl}
           onRequestStateChange={app.updateRequestState}
           onRecordFieldChange={app.updateRecordField}

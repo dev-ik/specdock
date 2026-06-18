@@ -18,6 +18,32 @@ Example:
 }
 ```
 
+## GET /api/config
+
+Deployment policy consumed by the web app.
+
+```ts
+export type AppConfigResponse = {
+  publicDemo: boolean;
+  directRequest: {
+    restricted: boolean;
+    allowedHosts: string[];
+  };
+};
+```
+
+Public demo example:
+
+```json
+{
+  "publicDemo": true,
+  "directRequest": {
+    "restricted": true,
+    "allowedHosts": ["dummyjson.com", "petstore3.swagger.io", "httpbin.org"]
+  }
+}
+```
+
 ## POST /api/generate
 
 Generate SDK files from an OpenAPI document.

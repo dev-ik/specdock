@@ -13,6 +13,14 @@ export type HealthResponse = {
   version: string;
 };
 
+export type AppConfigResponse = {
+  publicDemo: boolean;
+  directRequest: {
+    restricted: boolean;
+    allowedHosts: string[];
+  };
+};
+
 export type GenerateRequest = {
   spec: unknown;
   options?: Partial<GenerateOptions>;

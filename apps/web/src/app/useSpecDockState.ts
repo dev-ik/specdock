@@ -31,6 +31,7 @@ import {
 } from "./request-state-storage.js";
 import type { GeneratedFilesDiff, GeneratedFilesTarget } from "./sdk-diff.js";
 import { hydrateGenerateOptions } from "./generate-options.js";
+import { useAppConfig } from "./useAppConfig.js";
 import { useSpecDockDerivedState } from "./useSpecDockDerivedState.js";
 import type {
   ExchangeMap,
@@ -57,15 +58,11 @@ export const useSpecDockState = () => {
   const [activeProjectId, setActiveProjectId] = useState<string | undefined>(
     () => storageAdapter.getActiveProjectId()
   );
-  const [currentSource, setCurrentSource] = useState<OpenApiSource>({
-    type: "raw"
-  });
+  const [currentSource, setCurrentSource] = useState<OpenApiSource>({ type: "raw" });
   const [urlInput, setUrlInput] = useState("");
   const [curlInput, setCurlInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedOperationId, setSelectedOperationId] = useState<
-    string | undefined
-  >();
+  const [selectedOperationId, setSelectedOperationId] = useState<string>();
   const [requestStates, setRequestStates] = useState<RequestStateMap>(() =>
     hydrateStoredRequestStates(readLocalJson(requestStatesStorageKey, {}))
   );
@@ -90,6 +87,7 @@ export const useSpecDockState = () => {
       ? "latest"
       : "operation"
   );
+  const appConfig = useAppConfig();
   const [status, setStatus] = useState("Ready");
   const [isImportingUrl, setIsImportingUrl] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -232,6 +230,7 @@ export const useSpecDockState = () => {
     latestExchangeKey,
     responseScope,
     setResponseScope,
+    appConfig,
     status,
     setStatus,
     isImportingUrl,

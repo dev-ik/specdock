@@ -8,10 +8,13 @@ Public demo deployments must run with proxy mode disabled:
 
 ```env
 PUBLIC_DEMO=true
+DEMO_DIRECT_ALLOWED_HOSTS=dummyjson.com,petstore3.swagger.io,httpbin.org
 PROXY_ENABLED=false
 ```
 
-In this mode, request execution uses Direct Browser Mode. Browser CORS rules decide which upstream APIs can be called.
+In this mode, backend proxy execution is disabled and Direct Browser Mode is
+limited to `DEMO_DIRECT_ALLOWED_HOSTS`. Browser CORS rules still decide which
+allowed upstream APIs can be called.
 
 ## Self-Hosted Proxy Mode
 

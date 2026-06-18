@@ -1,6 +1,12 @@
 import { createReadStream } from "node:fs";
 import Fastify from "fastify";
-import { APP_VERSION, LIMITS, type HealthResponse } from "@specdock/core";
+import {
+  APP_VERSION,
+  LIMITS,
+  type AppConfigResponse,
+  type HealthResponse
+} from "@specdock/core";
+import { resolveAppConfigResponse } from "./app-config-response.js";
 import { resolveTrustProxy } from "./app-config.js";
 import { sendError } from "./errors.js";
 import { registerGenerateRoutes } from "./generate-routes.js";
@@ -61,6 +67,10 @@ export const buildApp = (options: AppOptions = {}) => {
       status: "ok",
       version: APP_VERSION
     };
+  });
+
+  app.get("/api/config", async (): Promise<AppConfigResponse> => {
+    return resolveAppConfigResponse();
   });
 
   registerGenerateRoutes(app, options.generationRunner);

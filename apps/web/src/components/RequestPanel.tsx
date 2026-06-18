@@ -22,6 +22,7 @@ export const RequestPanel = ({
   requestBodyExample,
   requestBodyFields,
   isExecuting,
+  executionBlockReason,
   onBaseUrlChange,
   onRequestStateChange,
   onRecordFieldChange,
@@ -43,6 +44,7 @@ export const RequestPanel = ({
   requestBodyExample?: string;
   requestBodyFields: SchemaField[];
   isExecuting: boolean;
+  executionBlockReason?: string;
   onBaseUrlChange(projectId: string, value: string): void;
   onRequestStateChange(operationKey: string, operation: ApiOperation, patch: Partial<RequestState>): void;
   onRecordFieldChange(section: "pathParams" | "queryParams" | "headers", name: string, value: string): void;
@@ -207,7 +209,16 @@ export const RequestPanel = ({
         </div>
 
         <div className="request-actions">
-          <button className="button button-primary" type="button" disabled={isExecuting} onClick={onExecute}>
+          {executionBlockReason ? (
+            <div className="empty-field">{executionBlockReason}</div>
+          ) : null}
+          <button
+            className="button button-primary"
+            type="button"
+            disabled={isExecuting || Boolean(executionBlockReason)}
+            title={executionBlockReason}
+            onClick={onExecute}
+          >
             <Play size={16} aria-hidden="true" />
             Send
           </button>

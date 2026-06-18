@@ -5,6 +5,7 @@ import { importCurlCommand } from "../curl-import.js";
 import { persistProjectFromSpecText } from "../workspace.js";
 import { createAuthActions } from "./auth-actions.js";
 import { downloadSdkZip, downloadTextFile, generateSdkFiles } from "./controller-helpers.js";
+import { directRequestBlockReason } from "./deployment-policy.js";
 import { createHttpCollection } from "./http-collection.js";
 import { createProjectActions } from "./project-actions.js";
 import { createRequestActions } from "./request-actions.js";
@@ -194,9 +195,15 @@ export const useSpecDockController = () => {
   const requestActions = createRequestActions(state);
   const projectActions = createProjectActions(state, activateProject);
   const authActions = createAuthActions(state);
+  const requestExecutionBlockReason = directRequestBlockReason(
+    state.appConfig,
+    state.requestState?.requestMode,
+    state.builtRequest?.url ?? state.selectedBaseUrl
+  );
 
   return {
     ...state,
+    requestExecutionBlockReason,
     setSpecTextAsRaw: (value: string) => {
       state.setSpecText(value);
       state.setCurrentSource({ type: "raw" });

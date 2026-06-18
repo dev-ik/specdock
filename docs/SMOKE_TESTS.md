@@ -62,6 +62,9 @@ Expected result: the URL import succeeds without CORS or size errors.
 
 Expected result: Response shows `200`, JSON body, response headers, duration, and a saved request line.
 
+In public demo mode, change Base URL to `https://api.example.com` and confirm
+the `Send` button is disabled with the public demo limit message.
+
 ### Persistence
 
 1. Change Mode to `proxy`, then back to `direct`.

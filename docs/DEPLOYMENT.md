@@ -24,6 +24,7 @@ Default compose settings keep backend proxy mode disabled:
 
 ```env
 PUBLIC_DEMO=true
+DEMO_DIRECT_ALLOWED_HOSTS=dummyjson.com,petstore3.swagger.io,httpbin.org
 PROXY_ENABLED=false
 WEB_DIST_DIR=/app/apps/web/dist
 TRUST_PROXY=false
@@ -80,6 +81,8 @@ docker run -d --name specdock \
 
 Keep `PROXY_ENABLED=false` for public demo use. If you enable proxy mode,
 set `PUBLIC_DEMO=false` and provide a narrow `PROXY_ALLOWED_HOSTS` allowlist.
+When `PUBLIC_DEMO=true`, Direct Browser Mode is limited to
+`DEMO_DIRECT_ALLOWED_HOSTS`.
 
 Check health:
 

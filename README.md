@@ -122,8 +122,13 @@ Public/demo deployments should keep backend proxy mode disabled:
 
 ```env
 PUBLIC_DEMO=true
+DEMO_DIRECT_ALLOWED_HOSTS=dummyjson.com,petstore3.swagger.io,httpbin.org
 PROXY_ENABLED=false
 ```
+
+When `PUBLIC_DEMO=true`, Direct Browser Mode is limited to
+`DEMO_DIRECT_ALLOWED_HOSTS`. Run SpecDock locally or self-host it to test
+custom API hosts from the request builder.
 
 Trusted self-hosted deployments can enable restricted proxy mode:
 
