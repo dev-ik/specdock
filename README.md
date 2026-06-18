@@ -210,6 +210,7 @@ docs            Architecture, security, deployment, smoke tests, and roadmap
 - [Smoke tests](docs/SMOKE_TESTS.md)
 - [Release](docs/RELEASE.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## Open-Source Hygiene
 

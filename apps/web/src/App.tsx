@@ -1,10 +1,12 @@
-import { Moon, SlidersHorizontal, Sun } from "lucide-react";
+import { Github, Moon, SlidersHorizontal, Sun } from "lucide-react";
 import { useState } from "react";
 import { SettingsDialog } from "./components/SettingsDialog.js";
 import { WorkspaceColumns } from "./components/WorkspaceColumns.js";
 import { WorkspaceJumpNav } from "./components/WorkspaceJumpNav.js";
 import { type PanelId, usePanelLayout } from "./app/usePanelLayout.js";
 import { useSpecDockController } from "./app/useSpecDockController.js";
+
+const githubRepositoryUrl = "https://github.com/dev-ik/specdock";
 
 export const App = () => {
   const app = useSpecDockController();
@@ -22,9 +24,27 @@ export const App = () => {
     <main className="app-shell">
       <header className="app-header">
         <div className="app-header-inner">
-          <div className="min-w-0">
-            <h1 className="app-title">SpecDock</h1>
-            <p className="app-subtitle">API contract workspace</p>
+          <div className="app-brand">
+            <div className="app-title-row">
+              <h1 className="app-title">SpecDock</h1>
+              <span className="app-version-badge">v{app.appConfig.version}</span>
+              {app.appConfig.publicDemo ? (
+                <span className="app-demo-badge">Public demo</span>
+              ) : null}
+            </div>
+            <div className="app-subtitle-row">
+              <p className="app-subtitle">API contract workspace</p>
+              <a
+                className="app-github-link"
+                href={githubRepositoryUrl}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Open SpecDock repository on GitHub"
+              >
+                <Github size={15} aria-hidden="true" />
+                <span>GitHub</span>
+              </a>
+            </div>
           </div>
           <div className="app-header-actions">
             <div className="status-pill" title={app.status}>
