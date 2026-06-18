@@ -1,6 +1,11 @@
 # SpecDock
 
-Local-first API contract workspace for OpenAPI teams.
+[![CI](https://github.com/dev-ik/specdock/actions/workflows/ci.yml/badge.svg)](https://github.com/dev-ik/specdock/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/dev-ik/specdock?color=0f766e)](https://github.com/dev-ik/specdock/releases)
+[![Docker](https://img.shields.io/badge/docker-d8vik%2Fspecdock-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/r/d8vik/specdock)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+Local-first OpenAPI workspace to import specs, test requests, and generate SDKs.
 
 SpecDock keeps the everyday API contract loop in one browser workspace:
 
@@ -9,6 +14,8 @@ Import -> Explore -> Test -> Generate
 ```
 
 Try the hosted demo: [https://specdock.ru](https://specdock.ru)
+
+![SpecDock product preview](docs/assets/specdock-preview.svg)
 
 ## What It Does
 
@@ -206,11 +213,12 @@ docs            Architecture, security, deployment, smoke tests, and roadmap
 - [SDK output spec](docs/SDK_SPEC.md)
 - [Multi-language SDK generation plan](docs/implementation-plan/multi-language-sdk.md)
 - [Deployment](docs/DEPLOYMENT.md)
-- [Security](docs/SECURITY.md)
+- [Security](SECURITY.md)
 - [Smoke tests](docs/SMOKE_TESTS.md)
 - [Release](docs/RELEASE.md)
 - [Roadmap](docs/ROADMAP.md)
 - [Contributing](CONTRIBUTING.md)
+- [Code of conduct](CODE_OF_CONDUCT.md)
 
 ## Open-Source Hygiene
 
