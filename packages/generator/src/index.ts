@@ -1,61 +1,111 @@
 import JSZip from "jszip";
 import {
-  defaultGenerateOptions,
   extractOperations,
   extractSchemas,
   LIMITS,
   parseSpec,
+  resolveGenerateOptions,
   type GeneratedFile,
   type GenerateOptions,
   validateSpec
 } from "@specdock/core";
 import { generateClientFile } from "./client-file.js";
+import { generateCsharpFiles } from "./csharp-file.js";
 import { generateReactQueryFile } from "./hooks-file.js";
 import { generateIndexFile } from "./index-file.js";
+import { generateGoFiles } from "./go-file.js";
+import { generateJavaFiles } from "./java-file.js";
+import { appendMetadataFiles } from "./metadata-files.js";
 import { normalizeOutputPath } from "./naming.js";
+import { generatePhpFiles } from "./php-file.js";
+import { generatePythonFiles } from "./python-file.js";
+import { buildSdkModel } from "./sdk-model.js";
 import { generateTypesFile } from "./types-file.js";
 import { generateZodFile } from "./zod-file.js";
 
-export const GENERATOR_VERSION = "0.1.0";
+export const GENERATOR_VERSION = "0.2.0";
 
 export const generateSdk = (
   spec: unknown,
   options: Partial<GenerateOptions> = {}
 ): GeneratedFile[] => {
-  const resolvedOptions: GenerateOptions = {
-    ...defaultGenerateOptions,
-    ...options
-  };
+  const resolvedOptions = resolveGenerateOptions(options);
   const document = validateSpec(parseSpec(spec));
   const outputPath = normalizeOutputPath(resolvedOptions.outputPath);
   const operations = extractOperations(document);
   const schemas = extractSchemas(document);
   assertGenerateComplexity(document, operations.length, schemas.length);
+  const model = buildSdkModel(operations, schemas, resolvedOptions);
   const files: GeneratedFile[] = [];
+
+  if (resolvedOptions.language === "go") {
+    return appendMetadataFiles(
+      generateGoFiles(model, outputPath),
+      outputPath,
+      resolvedOptions,
+      GENERATOR_VERSION
+    );
+  }
+
+  if (resolvedOptions.language === "java") {
+    return appendMetadataFiles(
+      generateJavaFiles(model, outputPath),
+      outputPath,
+      resolvedOptions,
+      GENERATOR_VERSION
+    );
+  }
+
+  if (resolvedOptions.language === "csharp") {
+    return appendMetadataFiles(
+      generateCsharpFiles(model, outputPath),
+      outputPath,
+      resolvedOptions,
+      GENERATOR_VERSION
+    );
+  }
+
+  if (resolvedOptions.language === "php") {
+    return appendMetadataFiles(
+      generatePhpFiles(model, outputPath),
+      outputPath,
+      resolvedOptions,
+      GENERATOR_VERSION
+    );
+  }
+
+  if (resolvedOptions.language === "python") {
+    return appendMetadataFiles(
+      generatePythonFiles(model, outputPath),
+      outputPath,
+      resolvedOptions,
+      GENERATOR_VERSION
+    );
+  }
 
   if (resolvedOptions.generateTypes) {
     files.push({
       path: `${outputPath}/types.ts`,
-      content: generateTypesFile(schemas)
+      content: generateTypesFile(model.schemas)
     });
   }
 
   files.push({
     path: `${outputPath}/client.ts`,
-    content: generateClientFile(operations, resolvedOptions)
+    content: generateClientFile(model.operations, resolvedOptions)
   });
 
   if (resolvedOptions.generateReactQuery) {
     files.push({
       path: `${outputPath}/hooks.ts`,
-      content: generateReactQueryFile(operations, resolvedOptions)
+      content: generateReactQueryFile(model.operations)
     });
   }
 
   if (resolvedOptions.generateZod) {
     files.push({
       path: `${outputPath}/schemas.ts`,
-      content: generateZodFile(schemas)
+      content: generateZodFile(model.schemas)
     });
   }
 
@@ -64,7 +114,7 @@ export const generateSdk = (
     content: generateIndexFile(resolvedOptions)
   });
 
-  return files;
+  return appendMetadataFiles(files, outputPath, resolvedOptions, GENERATOR_VERSION);
 };
 
 const assertGenerateComplexity = (

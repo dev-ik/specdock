@@ -1,22 +1,15 @@
 import type React from "react";
-import {
-  type GenerateOptions,
-  type OpenApiProject
-} from "@specdock/core";
+import { type GenerateOptions, type OpenApiProject } from "@specdock/core";
 import { importOpenApiFromUrl } from "../import-url.js";
 import { importCurlCommand } from "../curl-import.js";
 import { persistProjectFromSpecText } from "../workspace.js";
 import { createAuthActions } from "./auth-actions.js";
-import {
-  downloadSdkZip,
-  downloadTextFile,
-  generateSdkFiles
-} from "./controller-helpers.js";
+import { downloadSdkZip, downloadTextFile, generateSdkFiles } from "./controller-helpers.js";
 import { createHttpCollection } from "./http-collection.js";
 import { createProjectActions } from "./project-actions.js";
 import { createRequestActions } from "./request-actions.js";
 import { createOperationKey } from "./request-utils.js";
-import { diffGeneratedFiles } from "./sdk-diff.js";
+import { canDiffGeneratedFiles, diffGeneratedFiles, generatedFilesTargetFromOptions } from "./sdk-diff.js";
 import { useSpecDockState } from "./useSpecDockState.js";
 
 export const useSpecDockController = () => {
@@ -35,6 +28,7 @@ export const useSpecDockController = () => {
     state.setSpecText(JSON.stringify(project.spec, null, 2));
     state.setFiles([]);
     state.setGeneratedDiff(undefined);
+    state.setGeneratedFilesTarget(undefined);
     state.setSelectedPath(undefined);
     state.setGenerateMeta(undefined);
     state.setSearchQuery("");
@@ -136,6 +130,7 @@ export const useSpecDockController = () => {
     state.setSpecText(text);
     state.setFiles([]);
     state.setGeneratedDiff(undefined);
+    state.setGeneratedFilesTarget(undefined);
     state.setSelectedPath(undefined);
     state.setGenerateMeta(undefined);
     try {
@@ -155,9 +150,12 @@ export const useSpecDockController = () => {
     state.setStatus("Generating SDK");
     try {
       const project = importCurrentSpec();
+      const currentTarget = generatedFilesTargetFromOptions(state.generateOptions);
       const payload = await generateSdkFiles(state.specText, state.generateOptions);
-      state.setGeneratedDiff(diffGeneratedFiles(state.files, payload.files));
+      const shouldDiff = canDiffGeneratedFiles(state.generatedFilesTarget, currentTarget);
+      state.setGeneratedDiff(shouldDiff ? diffGeneratedFiles(state.files, payload.files) : undefined);
       state.setFiles(payload.files);
+      state.setGeneratedFilesTarget(currentTarget);
       state.setSelectedPath(payload.files[0]?.path);
       state.setGenerateMeta(payload.meta);
       state.setStatus(`Generated ${payload.meta.fileCount} files for ${project.name}`);
@@ -190,10 +188,7 @@ export const useSpecDockController = () => {
       baseUrl: state.selectedBaseUrl,
       requestStates: state.requestStates
     });
-    downloadTextFile(
-      `${safeFileName(state.activeProject.name)}.http`,
-      content
-    );
+    downloadTextFile(`${safeFileName(state.activeProject.name)}.http`, content);
     state.setStatus(`Exported HTTP collection for ${state.activeProject.name}`);
   };
   const requestActions = createRequestActions(state);
@@ -210,7 +205,12 @@ export const useSpecDockController = () => {
       state.setBaseUrlsByProject((current) => ({ ...current, [projectId]: value }));
     },
     updateGenerateOptions: (patch: Partial<GenerateOptions>) => {
-      state.setGenerateOptions((current) => ({ ...current, ...patch }));
+      state.setGenerateOptions((current) => {
+        if (patch.language && patch.language !== current.language) {
+          state.setGeneratedDiff(undefined);
+        }
+        return { ...current, ...patch };
+      });
     },
     clearRequestHistory: () => {
       state.storageAdapter.saveHistory([]);
@@ -239,12 +239,6 @@ export const useSpecDockController = () => {
   };
 };
 
-const safeFileName = (value: string): string => {
-  const normalized = value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  return normalized || "specdock-collection";
-};
+const safeFileName = (value: string): string =>
+  value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") ||
+  "specdock-collection";

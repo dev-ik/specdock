@@ -1,6 +1,6 @@
 {
   "name": "specdock",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "license": "MIT",
   "engines": {
@@ -15,6 +15,7 @@
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "test:sdk-smoke": "npm exec --workspace @specdock/generator -- vitest run src/sdk-smoke.test.ts --passWithNoTests",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "format": "prettier --write ."
   },

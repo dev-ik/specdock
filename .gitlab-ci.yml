@@ -17,6 +17,7 @@ verify:
     - npm run lint
     - npm run typecheck
     - npm run test
+    - npm run test:sdk-smoke
     - npm run build
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'

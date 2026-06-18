@@ -66,6 +66,54 @@ describe("generate routes", () => {
     expect(errorCode(response)).toBe("VALIDATION_ERROR");
   });
 
+  it("accepts legacy generate options without an explicit language", async () => {
+    const response = await injectGenerate(
+      async (job) => ({
+        kind: "files",
+        files: [
+          {
+            path: "generated/client.ts",
+            content: `language:${job.options.language}`
+          }
+        ]
+      }),
+      {
+        ...request,
+        options: {
+          client: "fetch",
+          generateTypes: true,
+          generateReactQuery: false,
+          generateZod: false,
+          outputPath: "generated",
+          namingStyle: "operationId"
+        }
+      }
+    );
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      files: [{ content: "language:typescript" }]
+    });
+  });
+
+  it("rejects unsupported SDK languages before generation", async () => {
+    const response = await injectGenerate(
+      async () => {
+        throw new Error("Runner should not be called.");
+      },
+      {
+        ...request,
+        options: {
+          ...defaultGenerateOptions,
+          language: "ruby"
+        } as never
+      }
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect(errorCode(response)).toBe("VALIDATION_ERROR");
+  });
+
   it("maps generation timeout errors", async () => {
     const response = await injectGenerate(async () => {
       throw new GenerationTimeoutError();

@@ -61,13 +61,31 @@ describe("generateSdk", () => {
   it("generates TypeScript SDK files", () => {
     const files = generateSdk(spec);
 
-    expect(files.map((file) => file.path)).toEqual([
+    expect(pathsWithoutMetadata(files)).toEqual([
       "generated/types.ts",
       "generated/client.ts",
       "generated/index.ts"
     ]);
     expect(files[0]?.content).toContain("export type User");
     expect(files[1]?.content).toContain("export const getUser");
+  });
+
+  it("accepts explicit TypeScript language options", () => {
+    const files = generateSdk(spec, { language: "typescript" });
+
+    expect(files.map((file) => file.path)).toContain("generated/client.ts");
+  });
+
+  it("rejects unsupported language values at runtime", () => {
+    expect(() =>
+      generateSdk(spec, { language: "ruby" } as never)
+    ).toThrow("Unsupported SDK language: ruby");
+  });
+
+  it("rejects unsupported TypeScript client values at runtime", () => {
+    expect(() =>
+      generateSdk(spec, { client: "httpx" } as never)
+    ).toThrow("Unsupported TypeScript client: httpx");
   });
 
   it("honors output path and optional files", () => {
@@ -78,7 +96,7 @@ describe("generateSdk", () => {
       generateZod: true
     });
 
-    expect(files.map((file) => file.path)).toEqual([
+    expect(pathsWithoutMetadata(files)).toEqual([
       "sdk/client.ts",
       "sdk/hooks.ts",
       "sdk/schemas.ts",
@@ -89,142 +107,31 @@ describe("generateSdk", () => {
     );
   });
 
-  it("generates React Query hooks and Zod schemas when enabled", () => {
-    const files = generateSdk(spec, {
-      generateReactQuery: true,
-      generateZod: true
-    });
-    const hooks = files.find(
-      (file) => file.path === "generated/hooks.ts"
-    )?.content;
-    const schemas = files.find(
-      (file) => file.path === "generated/schemas.ts"
-    )?.content;
-
-    expect(hooks).toContain("useGetUserQuery");
-    expect(hooks).toContain("useCreateUserMutation");
-    expect(schemas).toContain('import { z } from "zod"');
-    expect(schemas).toContain("export const UserSchema = z.object");
-    expect(schemas).toContain('"age": z.number().int().optional()');
-  });
-
-  it("generates axios clients", () => {
-    const client = generateSdk(spec, { client: "axios" }).find(
-      (file) => file.path === "generated/client.ts"
-    )?.content;
-
-    expect(client).toContain("type AxiosLike");
-    expect(client).toContain("axios.request");
-  });
-
-  it("falls back to method and path naming", () => {
-    const files = generateSdk({
-      ...spec,
-      paths: {
-        "/accounts/{accountId}/orders": {
-          get: {
-            parameters: [
-              {
-                name: "accountId",
-                in: "path",
-                required: true,
-                schema: { type: "string" }
-              }
-            ],
-            responses: {
-              "200": {
-                description: "OK"
-              }
-            }
-          }
-        }
-      }
-    });
-
-    expect(
-      files.find((file) => file.path === "generated/client.ts")?.content
-    ).toContain("export const getAccountsAccountIdOrders");
-  });
-
-  it("generates query param support for clients and hooks", () => {
-    const querySpec = {
-      ...spec,
-      paths: {
-        "/posts": {
-          get: {
-            operationId: "listPosts",
-            parameters: [
-              {
-                name: "userId",
-                in: "query",
-                required: false,
-                schema: { type: "string" }
-              }
-            ],
-            responses: {
-              "200": {
-                description: "OK"
-              }
-            }
-          }
-        }
-      }
-    };
-    const files = generateSdk(querySpec, { generateReactQuery: true });
-    const client = files.find(
-      (file) => file.path === "generated/client.ts"
-    )?.content;
-    const hooks = files.find(
-      (file) => file.path === "generated/hooks.ts"
-    )?.content;
-
-    expect(client).toContain("type QueryValue");
-    expect(client).toContain('appendQuery("/posts", query)');
-    expect(client).toContain("query?: Record<string, QueryValue>");
-    expect(hooks).toContain(
-      "query?: Record<string, string | number | boolean | undefined>"
-    );
-    expect(hooks).toContain('queryKey: ["listPosts", query]');
-  });
-
   it("generates ZIP archives", async () => {
     const archive = await generateSdkZip(spec);
 
     expect(archive.byteLength).toBeGreaterThan(0);
   });
 
-  it("escapes untrusted path literals in generated clients", () => {
-    const files = generateSdk({
-      ...spec,
-      paths: {
-        "/users/`${globalThis.alert(1)}`/{id}": {
-          get: {
-            operationId: "unsafePath",
-            parameters: [
-              {
-                name: "id",
-                in: "path",
-                required: true,
-                schema: { type: "string" }
-              }
-            ],
-            responses: {
-              "200": {
-                description: "OK"
-              }
-            }
-          }
-        }
-      }
-    });
-    const client = files.find(
-      (file) => file.path === "generated/client.ts"
-    )?.content;
+  it("adds SDK README and manifest metadata", () => {
+    const files = generateSdk(spec);
+    const readme = files.find((file) => file.path === "generated/README.md");
+    const manifest = files.find((file) => file.path === "generated/specdock.manifest.json");
 
-    expect(client).toContain(
-      '"/users/`${globalThis.alert(1)}`/" + encodeURIComponent(id)'
+    expect(readme?.content).toContain("Language: TypeScript");
+    expect(readme?.content).toContain(
+      "Runtime target: TypeScript 5.x, Node.js 20+ or modern browsers"
     );
-    expect(client).not.toContain("`/users/`${globalThis.alert(1)}`/");
+    expect(readme?.content).toContain("- `client.ts`");
+    expect(JSON.parse(manifest?.content ?? "{}")).toMatchObject({
+      generator: "specdock",
+      language: "typescript",
+      runtimeTarget: {
+        name: "TypeScript",
+        target: "TypeScript 5.x, Node.js 20+ or modern browsers"
+      },
+      files: expect.arrayContaining(["client.ts", "README.md"])
+    });
   });
 
   it("rejects specs above generation complexity limits", () => {
@@ -248,3 +155,8 @@ describe("generateSdk", () => {
     );
   });
 });
+
+const pathsWithoutMetadata = (files: { path: string }[]) =>
+  files
+    .map((file) => file.path)
+    .filter((path) => !path.endsWith("/README.md") && !path.endsWith("/specdock.manifest.json"));

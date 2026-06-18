@@ -15,7 +15,7 @@ export type HealthResponse = {
 
 export type GenerateRequest = {
   spec: unknown;
-  options: GenerateOptions;
+  options?: Partial<GenerateOptions>;
 };
 
 export type GenerateResponse = {
@@ -49,8 +49,19 @@ export type GeneratedFile = {
   content: string;
 };
 
+export type GenerateLanguage =
+  | "typescript"
+  | "python"
+  | "go"
+  | "java"
+  | "csharp"
+  | "php";
+
+export type GenerateClient = "fetch" | "axios";
+
 export type GenerateOptions = {
-  client: "fetch" | "axios";
+  language: GenerateLanguage;
+  client: GenerateClient;
   generateTypes: boolean;
   generateReactQuery: boolean;
   generateZod: boolean;

@@ -1,6 +1,6 @@
 # MVP Smoke Tests
 
-Use this checklist before tagging `v0.1.0`.
+Use this checklist before tagging a release.
 
 ## Prerequisites
 
@@ -15,6 +15,7 @@ npm install
 npm run typecheck
 npm run lint
 npm run test
+npm run test:sdk-smoke
 npm run build
 ```
 
@@ -78,11 +79,11 @@ Expected result: public-demo mode returns a documented `PROXY_DISABLED` message 
 
 ### Generate
 
-1. Choose `fetch`.
-2. Enable `Types`.
-3. Optionally enable `React Query` and `Zod`.
-4. Click `Generate`.
-5. Confirm generated files appear.
+1. Select each SDK language once.
+2. For TypeScript, choose `fetch`, enable `Types`, and optionally enable `React Query` and `Zod`.
+3. Click `Generate`.
+4. Confirm generated files appear with visible file names.
+5. Confirm `README.md` and `specdock.manifest.json` are present.
 6. Click `ZIP` and confirm the archive downloads.
 
 ## Docker Smoke

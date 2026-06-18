@@ -1,12 +1,10 @@
-import type { ApiOperation, GenerateOptions } from "@specdock/core";
-import { operationName, safeIdentifier, sanitizeTypeName } from "./naming.js";
+import type { SdkOperation, SdkParameter } from "./sdk-model.js";
 
 export const generateReactQueryFile = (
-  operations: ApiOperation[],
-  options: GenerateOptions
+  operations: SdkOperation[]
 ): string => {
-  const hooks = operations.map((operation) => generateReactQueryHook(operation, options));
-  const operationImports = operations.map((operation) => operationName(operation, options));
+  const hooks = operations.map((operation) => generateReactQueryHook(operation));
+  const operationImports = operations.map((operation) => operation.name);
   const clientImport =
     operationImports.length > 0
       ? `import { createClient, ${operationImports.join(", ")} } from "./client";`
@@ -21,31 +19,28 @@ ${hooks.join("\n\n")}
 `;
 };
 
-const generateReactQueryHook = (operation: ApiOperation, options: GenerateOptions): string => {
-  const name = operationName(operation, options);
-  const hookName = `use${sanitizeTypeName(name)}${operation.method === "GET" ? "Query" : "Mutation"}`;
-  const pathParams = operation.parameters.filter((parameter) => parameter.in === "path");
-  const hasQuery = operation.parameters.some((parameter) => parameter.in === "query");
-  const hasBody = operation.requestBody !== undefined;
+const generateReactQueryHook = (operation: SdkOperation): string => {
+  const name = operation.name;
+  const hookName = `use${operation.typeName}${operation.method === "GET" ? "Query" : "Mutation"}`;
 
   if (operation.method === "GET") {
-    const params = pathParams.map((parameter) => `${safeIdentifier(parameter.name)}: string`);
+    const params = operation.pathParameters.map((parameter) => `${parameter.safeName}: string`);
     const signatureParams = [
       "client: SpecDockClient",
       ...params,
-      hasQuery ? "query?: Record<string, string | number | boolean | undefined>" : undefined,
+      operation.hasQuery ? "query?: Record<string, string | number | boolean | undefined>" : undefined,
       "headers?: Record<string, string>"
     ].filter(Boolean);
     const callArgs = [
       "client",
-      ...pathParams.map((parameter) => safeIdentifier(parameter.name)),
-      hasQuery ? "query" : undefined,
+      ...operation.pathParameters.map((parameter) => parameter.safeName),
+      operation.hasQuery ? "query" : undefined,
       "headers"
     ].filter(Boolean);
     const queryKeyParts = [
       `"${name}"`,
-      ...pathParams.map((parameter) => safeIdentifier(parameter.name)),
-      hasQuery ? "query" : undefined
+      ...operation.pathParameters.map((parameter) => parameter.safeName),
+      operation.hasQuery ? "query" : undefined
     ].filter(Boolean);
 
     return `export const ${hookName} = (${signatureParams.join(
@@ -59,26 +54,32 @@ const generateReactQueryHook = (operation: ApiOperation, options: GenerateOption
 };`;
   }
 
-  return generateMutationHook(name, hookName, pathParams, hasQuery, hasBody);
+  return generateMutationHook(
+    operation.name,
+    hookName,
+    operation.pathParameters,
+    operation.hasQuery,
+    operation.hasBody
+  );
 };
 
 const generateMutationHook = (
   name: string,
   hookName: string,
-  pathParams: ApiOperation["parameters"],
+  pathParams: SdkParameter[],
   hasQuery: boolean,
   hasBody: boolean
 ) => {
-  const variablesTypeName = `${sanitizeTypeName(name)}Variables`;
+  const variablesTypeName = `${hookName.replace(/^use/, "").replace(/Mutation$/, "")}Variables`;
   const variableFields = [
-    ...pathParams.map((parameter) => `  ${safeIdentifier(parameter.name)}: string;`),
+    ...pathParams.map((parameter) => `  ${parameter.safeName}: string;`),
     hasQuery ? "  query?: Record<string, string | number | boolean | undefined>;" : undefined,
     hasBody ? "  body?: unknown;" : undefined,
     "  headers?: Record<string, string>;"
   ].filter(Boolean);
   const callArgs = [
     "client",
-    ...pathParams.map((parameter) => `variables.${safeIdentifier(parameter.name)}`),
+    ...pathParams.map((parameter) => `variables.${parameter.safeName}`),
     hasQuery ? "variables.query" : undefined,
     hasBody ? "variables.body" : "undefined",
     "variables.headers"

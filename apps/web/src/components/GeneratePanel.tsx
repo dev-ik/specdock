@@ -42,12 +42,21 @@ export const GeneratePanel = ({
   >
     <div className="panel-body">
       <div className="generate-options-grid">
-        <SegmentedOption
-          label="Client"
-          value={options.client}
-          options={["fetch", "axios"]}
-          onChange={(client) => onOptionsChange({ client })}
+        <SelectOption
+          label="Language"
+          value={options.language}
+          options={languageOptions}
+          hint={languageOptions.find((option) => option.value === options.language)?.target}
+          onChange={(language) => onOptionsChange({ language })}
         />
+        {options.language === "typescript" ? (
+          <SegmentedOption
+            label="Client"
+            value={options.client}
+            options={["fetch", "axios"]}
+            onChange={(client) => onOptionsChange({ client })}
+          />
+        ) : undefined}
         <label className="block">
           <span className="field-label">Output path</span>
           <input
@@ -65,26 +74,28 @@ export const GeneratePanel = ({
         />
       </div>
 
-      <div className="generate-toggle-list">
-        <GenerateToggle
-          checked={options.generateTypes}
-          label="Types"
-          meta="types.ts"
-          onChange={(checked) => onOptionsChange({ generateTypes: checked })}
-        />
-        <GenerateToggle
-          checked={options.generateReactQuery}
-          label="React Query"
-          meta="hooks.ts"
-          onChange={(checked) => onOptionsChange({ generateReactQuery: checked })}
-        />
-        <GenerateToggle
-          checked={options.generateZod}
-          label="Zod"
-          meta="schemas.ts"
-          onChange={(checked) => onOptionsChange({ generateZod: checked })}
-        />
-      </div>
+      {options.language === "typescript" ? (
+        <div className="generate-toggle-list">
+          <GenerateToggle
+            checked={options.generateTypes}
+            label="Types"
+            meta="types.ts"
+            onChange={(checked) => onOptionsChange({ generateTypes: checked })}
+          />
+          <GenerateToggle
+            checked={options.generateReactQuery}
+            label="React Query"
+            meta="hooks.ts"
+            onChange={(checked) => onOptionsChange({ generateReactQuery: checked })}
+          />
+          <GenerateToggle
+            checked={options.generateZod}
+            label="Zod"
+            meta="schemas.ts"
+            onChange={(checked) => onOptionsChange({ generateZod: checked })}
+          />
+        </div>
+      ) : undefined}
 
       <div className="request-actions">
         <div className="generate-summary">
@@ -117,6 +128,45 @@ export const GeneratePanel = ({
       </div>
     </div>
   </Panel>
+);
+
+const languageOptions = [
+  { value: "typescript", label: "TypeScript", target: "TypeScript 5.x, Node.js 20+ or browsers" },
+  { value: "python", label: "Python", target: "Python >=3.11, httpx >=0.27.0" },
+  { value: "go", label: "Go", target: "Go 1.22, standard library" },
+  { value: "java", label: "Java", target: "Java 17, Jackson 2.17.2" },
+  { value: "csharp", label: "C#", target: ".NET 8.0, System.Text.Json" },
+  { value: "php", label: "PHP", target: "PHP >=8.1, Guzzle ^7.0" }
+] satisfies { value: GenerateOptions["language"]; label: string; target: string }[];
+
+const SelectOption = <T extends string>({
+  label,
+  value,
+  options,
+  hint,
+  onChange
+}: {
+  label: string;
+  value: T;
+  options: { value: T; label: string; target?: string }[];
+  hint?: string;
+  onChange(value: T): void;
+}) => (
+  <label className="block">
+    <span className="field-label">{label}</span>
+    <select
+      className="field w-full"
+      value={value}
+      onChange={(event) => onChange(event.target.value as T)}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+    {hint ? <span className="field-hint">{hint}</span> : null}
+  </label>
 );
 
 const SegmentedOption = <T extends string>({

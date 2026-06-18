@@ -29,13 +29,57 @@ WEB_DIST_DIR=/app/apps/web/dist
 TRUST_PROXY=false
 ```
 
+Published image:
+
+```txt
+https://hub.docker.com/r/d8vik/specdock
+```
+
 Published image tags:
 
 ```txt
 docker.io/d8vik/specdock:v0.1.0
+docker.io/d8vik/specdock:v0.2.0
 ```
 
-Use version tags for repeatable deployments. Do not rely on `latest` for the `v0.1.0` release.
+Use version tags for repeatable deployments. Do not rely on `latest`.
+
+## Run Without Cloning
+
+You can run the
+[published Docker Hub image](https://hub.docker.com/r/d8vik/specdock)
+directly if you do not want to clone the repository:
+
+```bash
+docker run -d --name specdock \
+  -p 127.0.0.1:3000:3000 \
+  -e PUBLIC_DEMO=true \
+  -e PROXY_ENABLED=false \
+  docker.io/d8vik/specdock:v0.2.0
+```
+
+To pass more configuration, either add more `-e` flags or use an env file:
+
+```env
+PUBLIC_DEMO=false
+PROXY_ENABLED=true
+PROXY_ALLOWED_HOSTS=api.example.com,staging-api.example.com
+PROXY_ALLOW_PRIVATE_TARGETS=false
+PROXY_TIMEOUT_MS=15000
+PROXY_MAX_REQUEST_BYTES=5242880
+PROXY_MAX_RESPONSE_BYTES=10485760
+TRUST_PROXY=false
+```
+
+```bash
+docker run -d --name specdock \
+  -p 127.0.0.1:3000:3000 \
+  --env-file ./specdock.env \
+  docker.io/d8vik/specdock:v0.2.0
+```
+
+Keep `PROXY_ENABLED=false` for public demo use. If you enable proxy mode,
+set `PUBLIC_DEMO=false` and provide a narrow `PROXY_ALLOWED_HOSTS` allowlist.
 
 Check health:
 

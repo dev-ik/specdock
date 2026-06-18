@@ -1,6 +1,6 @@
 # Release
 
-This document describes the manual release path for `v0.1.0`.
+This document describes the manual release path for `v0.2.0`.
 
 ## Preflight
 
@@ -10,6 +10,7 @@ npm ci
 npm run typecheck
 npm run lint
 npm run test
+npm run test:sdk-smoke
 npm run build
 ```
 
@@ -19,7 +20,7 @@ Build a local image for smoke testing:
 
 ```bash
 docker build \
-  -t docker.io/d8vik/specdock:v0.1.0 \
+  -t docker.io/d8vik/specdock:v0.2.0 \
   .
 ```
 
@@ -29,7 +30,7 @@ Smoke the image locally:
 docker run --rm -p 127.0.0.1:3000:3000 \
   -e PUBLIC_DEMO=true \
   -e PROXY_ENABLED=false \
-  docker.io/d8vik/specdock:v0.1.0
+  docker.io/d8vik/specdock:v0.2.0
 ```
 
 Check:
@@ -44,21 +45,21 @@ Publish the Docker Hub multi-arch version tag:
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t docker.io/d8vik/specdock:v0.1.0 \
+  -t docker.io/d8vik/specdock:v0.2.0 \
   --push \
   .
 ```
 
-Always publish an immutable version tag. Do not publish `latest` for the first release unless you intentionally want a moving tag.
+Always publish an immutable version tag. Do not publish `latest` unless you intentionally want a moving tag.
 
 ## Git Release
 
 ```bash
-git tag v0.1.0
+git tag v0.2.0
 git push origin main
-git push origin v0.1.0
+git push origin v0.2.0
 git push gitlab main
-git push gitlab v0.1.0
+git push gitlab v0.2.0
 ```
 
 The GitHub Actions Docker workflow publishes the Docker Hub image when `v*` tags are pushed, assuming these repository secrets exist:

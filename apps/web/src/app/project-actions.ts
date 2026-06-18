@@ -59,6 +59,7 @@ const clearActiveProject = (state: State, message: string) => {
   state.setSpecText("");
   state.setFiles([]);
   state.setGeneratedDiff(undefined);
+  state.setGeneratedFilesTarget(undefined);
   state.setSelectedPath(undefined);
   state.setGenerateMeta(undefined);
   state.setSearchQuery("");

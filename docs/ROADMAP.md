@@ -7,6 +7,20 @@ Detailed implementation stages are tracked in
 and
 [`docs/implementation-plan/multi-language-sdk.md`](implementation-plan/multi-language-sdk.md).
 
+## Completed Since v0.1.0
+
+### Multi-Language SDK Generation
+
+- language-aware generator options
+- shared SDK intermediate model
+- Python SDK
+- Go SDK
+- Java SDK
+- C# SDK
+- PHP SDK
+- generated SDK README and manifest metadata
+- target runtime versions per language
+
 ## Post-v0.1.0
 
 ### Auth Profiles
@@ -40,13 +54,3 @@ Auth Profiles must preserve the existing public-demo security model:
 - mock server
 - collection export
 - generated SDK customization presets
-
-### Multi-Language SDK Generation
-
-- language-aware generator options
-- shared SDK intermediate model
-- Python SDK
-- Go SDK
-- Java SDK
-- C# SDK
-- PHP SDK

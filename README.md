@@ -17,7 +17,7 @@ Try the hosted demo: [https://specdock.ru](https://specdock.ru)
 - Build requests with path/query/header params, JSON body, cURL preview, and saved Base URL/Mode.
 - Execute requests in Direct Browser Mode or restricted self-hosted Proxy Mode.
 - Inspect saved request/response exchanges per endpoint or latest request.
-- Generate TypeScript SDK files and ZIP downloads.
+- Generate TypeScript, Python, Go, Java, C#, and PHP SDK files with ZIP downloads.
 - Store projects, settings, safe request preferences, and history metadata in local browser storage.
 
 The hosted demo is for evaluation. It does not provide unrestricted proxying for arbitrary third-party APIs. For controlled proxy execution, run SpecDock yourself and configure an explicit host allowlist.
@@ -59,12 +59,41 @@ Run from source:
 docker compose up -d --build
 ```
 
-Run the published Docker Hub image:
+Run the
+[published Docker Hub image](https://hub.docker.com/r/d8vik/specdock)
+without cloning the repository:
+
+```bash
+docker run -d --name specdock \
+  -p 127.0.0.1:3000:3000 \
+  -e PUBLIC_DEMO=true \
+  -e PROXY_ENABLED=false \
+  docker.io/d8vik/specdock:v0.2.0
+```
+
+Or keep configuration in a local env file:
+
+```env
+PUBLIC_DEMO=false
+PROXY_ENABLED=true
+PROXY_ALLOWED_HOSTS=api.example.com,staging-api.example.com
+PROXY_ALLOW_PRIVATE_TARGETS=false
+```
+
+```bash
+docker run -d --name specdock \
+  -p 127.0.0.1:3000:3000 \
+  --env-file ./specdock.env \
+  docker.io/d8vik/specdock:v0.2.0
+```
+
+If you prefer Compose with the published image, create your own
+`docker-compose.yml`:
 
 ```yaml
 services:
   specdock:
-    image: docker.io/d8vik/specdock:v0.1.0
+    image: docker.io/d8vik/specdock:v0.2.0
     ports:
       - "127.0.0.1:3000:3000"
     environment:
@@ -84,7 +113,8 @@ Check health:
 curl -fsS http://127.0.0.1:3000/api/health
 ```
 
-Use immutable version tags such as `docker.io/d8vik/specdock:v0.1.0`. The project does not rely on `latest` for the first release.
+Use immutable version tags such as `docker.io/d8vik/specdock:v0.2.0`.
+The project does not rely on `latest` for releases.
 
 ## Configuration
 
@@ -116,17 +146,33 @@ nvm use
 npm run typecheck
 npm run lint
 npm run test
+npm run test:sdk-smoke
 npm run build
 ```
 
-## SDK Generation Roadmap
+## SDK Generation
 
-SpecDock currently generates TypeScript SDKs with fetch or axios clients.
-Post-v0.1 work tracks multi-language SDK generation in this order:
+SpecDock currently generates TypeScript SDKs with fetch or axios clients,
+Python SDKs with httpx clients, Go SDKs with the standard library, and Java
+SDKs with `java.net.http.HttpClient`, and C# SDKs with `HttpClient` plus
+`System.Text.Json`. It also generates PHP SDKs with Guzzle clients.
+Generated SDK metadata includes the target runtime version for each language:
+TypeScript 5.x on Node.js 20+ or modern browsers, Python >=3.11, Go 1.22,
+Java 17, .NET 8.0, and PHP >=8.1.
 
-```txt
-TypeScript hardening -> Python -> Go -> Java -> C# -> PHP
-```
+| Language | Runtime target | HTTP runtime |
+| --- | --- | --- |
+| TypeScript | TypeScript 5.x, Node.js 20+ or modern browsers | fetch or axios |
+| Python | Python >=3.11 | httpx >=0.27.0 |
+| Go | Go 1.22 | net/http |
+| Java | Java 17 | java.net.http + Jackson 2.17.2 |
+| C# | .NET 8.0 | HttpClient + System.Text.Json |
+| PHP | PHP >=8.1 | Guzzle ^7.0 |
+
+Each generated SDK includes a `README.md` and `specdock.manifest.json` with
+the selected language, runtime target, naming style, generator version, and
+generated file list. The smoke test generates every supported language and
+runs syntax/build checks when the matching runtime is available locally.
 
 The generator roadmap keeps language-specific rendering behind shared
 OpenAPI-to-SDK planning, so generated clients remain predictable while each
@@ -138,7 +184,7 @@ language can use its native HTTP and typing conventions.
 apps/api        Fastify API, proxy endpoint, generation endpoint, static web serving
 apps/web        React/Vite web workspace
 packages/core   OpenAPI normalization, storage contracts, shared types
-packages/generator TypeScript SDK generation
+packages/generator SDK generation
 packages/ui     Shared UI package placeholder
 docs            Architecture, security, deployment, smoke tests, and roadmap
 ```
@@ -146,6 +192,7 @@ docs            Architecture, security, deployment, smoke tests, and roadmap
 ## Documentation
 
 - [Master plan](docs/SPECDOCK_MASTER_PLAN.md)
+- [Changelog](CHANGELOG.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [API contracts](docs/API_CONTRACTS.md)
 - [Data models](docs/DATA_MODELS.md)

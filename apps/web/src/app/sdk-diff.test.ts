@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createGeneratedFileManifest, diffGeneratedFiles } from "./sdk-diff.js";
+import {
+  canDiffGeneratedFiles,
+  createGeneratedFileManifest,
+  diffGeneratedFiles,
+  generatedFilesTargetFromOptions
+} from "./sdk-diff.js";
 
 describe("sdk diff", () => {
   it("creates stable manifests sorted by path", () => {
@@ -60,5 +65,29 @@ describe("sdk diff", () => {
         unchanged: 1
       }
     });
+  });
+
+  it("does not diff generated files across SDK languages", () => {
+    const typescriptTarget = generatedFilesTargetFromOptions({
+      language: "typescript",
+      client: "fetch",
+      generateTypes: true,
+      generateReactQuery: false,
+      generateZod: false,
+      outputPath: "generated",
+      namingStyle: "operationId"
+    });
+    const javaTarget = generatedFilesTargetFromOptions({
+      language: "java",
+      client: "fetch",
+      generateTypes: true,
+      generateReactQuery: false,
+      generateZod: false,
+      outputPath: "generated",
+      namingStyle: "operationId"
+    });
+
+    expect(canDiffGeneratedFiles(typescriptTarget, typescriptTarget)).toBe(true);
+    expect(canDiffGeneratedFiles(typescriptTarget, javaTarget)).toBe(false);
   });
 });

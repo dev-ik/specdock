@@ -1,6 +1,6 @@
 {
   "name": "@specdock/generator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "main": "dist/index.js",
@@ -14,11 +14,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint .",
-    "test": "vitest run --passWithNoTests --exclude='dist/**'",
+    "test": "vitest run --passWithNoTests --exclude='dist/**' --exclude='src/sdk-smoke.test.ts'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@specdock/core": "0.1.0",
+    "@specdock/core": "0.2.0",
     "jszip": "3.10.1"
   },
   "devDependencies": {

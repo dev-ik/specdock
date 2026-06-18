@@ -4,6 +4,7 @@ const generateOptionsSchema = {
   type: "object",
   additionalProperties: false,
   properties: {
+    language: { type: "string", enum: ["typescript", "python", "go", "java", "csharp", "php"] },
     client: { type: "string", enum: ["fetch", "axios"] },
     generateTypes: { type: "boolean" },
     generateReactQuery: { type: "boolean" },

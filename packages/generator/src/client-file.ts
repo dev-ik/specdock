@@ -1,14 +1,14 @@
-import type { ApiOperation, GenerateOptions } from "@specdock/core";
-import { operationName, safeIdentifier } from "./naming.js";
+import type { GenerateOptions } from "@specdock/core";
+import type { SdkOperation } from "./sdk-model.js";
 
 export const generateClientFile = (
-  operations: ApiOperation[],
+  operations: SdkOperation[],
   options: GenerateOptions
 ): string => {
   const requestHelper =
     options.client === "axios" ? axiosClientHelper : fetchClientHelper;
   const functions = operations.map((operation) =>
-    generateOperationFunction(operation, options)
+    generateOperationFunction(operation)
   );
 
   return `${requestHelper}\n${functions.join("\n\n")}\n`;
@@ -73,37 +73,27 @@ const appendQuery = (path: string, query?: Record<string, QueryValue>) => {
 `;
 
 const generateOperationFunction = (
-  operation: ApiOperation,
-  options: GenerateOptions
+  operation: SdkOperation
 ): string => {
-  const name = operationName(operation, options);
-  const hasBody = operation.requestBody !== undefined;
-  const pathParams = operation.parameters.filter(
-    (parameter) => parameter.in === "path"
-  );
-  const hasQuery = operation.parameters.some(
-    (parameter) => parameter.in === "query"
-  );
+  const name = operation.name;
   const args = [
-    ...pathParams.map(
-      (parameter) => `${safeIdentifier(parameter.name)}: string`
-    ),
-    hasQuery ? "query?: Record<string, QueryValue>" : undefined,
-    hasBody ? "body?: unknown" : undefined,
+    ...operation.pathParameters.map((parameter) => `${parameter.safeName}: string`),
+    operation.hasQuery ? "query?: Record<string, QueryValue>" : undefined,
+    operation.hasBody ? "body?: unknown" : undefined,
     "headers?: Record<string, string>"
   ].filter(Boolean);
-  const path = pathParams.reduce(
+  const path = operation.pathParameters.reduce(
     (nextPath, parameter) =>
       nextPath.replace(
         `{${parameter.name}}`,
-        parameterPlaceholder(parameter.name)
+        parameterPlaceholder(parameter.safeName)
       ),
     operation.path
   );
-  const pathExpression = hasQuery
+  const pathExpression = operation.hasQuery
     ? `appendQuery(${pathToExpression(path)}, query)`
     : pathToExpression(path);
-  const bodyArg = hasBody ? "body" : "undefined";
+  const bodyArg = operation.hasBody ? "body" : "undefined";
 
   return `export const ${name} = async (client: ReturnType<typeof createClient>, ${args.join(
     ", "
@@ -152,7 +142,7 @@ const pathToExpression = (path: string): string => {
         part.startsWith(pathParameterMarker) &&
         part.endsWith(pathParameterMarker)
       ) {
-        return `encodeURIComponent(${safeIdentifier(part.slice(1, -1))})`;
+        return `encodeURIComponent(${part.slice(1, -1)})`;
       }
 
       return JSON.stringify(part);

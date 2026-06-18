@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   type AuthProfile,
-  defaultGenerateOptions,
   type GeneratedFile,
   type GenerateOptions,
   type OpenApiProject,
@@ -30,7 +29,8 @@ import {
   hydrateStoredRequestStates,
   sanitizeRequestStatesForStorage
 } from "./request-state-storage.js";
-import type { GeneratedFilesDiff } from "./sdk-diff.js";
+import type { GeneratedFilesDiff, GeneratedFilesTarget } from "./sdk-diff.js";
+import { hydrateGenerateOptions } from "./generate-options.js";
 import { useSpecDockDerivedState } from "./useSpecDockDerivedState.js";
 import type {
   ExchangeMap,
@@ -50,8 +50,7 @@ export const useSpecDockState = () => {
   const [projects, setProjects] = useState<OpenApiProject[]>(() =>
     storageAdapter.getProjects()
   );
-  const [previousProjectForDiff, setPreviousProjectForDiff] =
-    useState<OpenApiProject>();
+  const [previousProjectForDiff, setPreviousProjectForDiff] = useState<OpenApiProject>();
   const [historyCount, setHistoryCount] = useState(
     () => storageAdapter.getHistory().length
   );
@@ -81,14 +80,11 @@ export const useSpecDockState = () => {
   );
   const [files, setFiles] = useState<GeneratedFile[]>([]);
   const [generatedDiff, setGeneratedDiff] = useState<GeneratedFilesDiff>();
+  const [generatedFilesTarget, setGeneratedFilesTarget] = useState<GeneratedFilesTarget>();
   const [selectedPath, setSelectedPath] = useState<string | undefined>();
   const [generateMeta, setGenerateMeta] = useState<GenerateMeta | undefined>();
-  const [exchangesByOperation, setExchangesByOperation] = useState<ExchangeMap>(
-    {}
-  );
-  const [latestExchangeKey, setLatestExchangeKey] = useState<
-    string | undefined
-  >();
+  const [exchangesByOperation, setExchangesByOperation] = useState<ExchangeMap>({});
+  const [latestExchangeKey, setLatestExchangeKey] = useState<string | undefined>();
   const [responseScope, setResponseScope] = useState<ResponseScope>(() =>
     readLocalString(responseScopeStorageKey) === "latest"
       ? "latest"
@@ -99,12 +95,11 @@ export const useSpecDockState = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
-  const [generateOptions, setGenerateOptions] = useState<GenerateOptions>(
-    () => ({
-      ...defaultGenerateOptions,
-      client: storageAdapter.getSettings().defaultClient,
-      ...readLocalJson<Partial<GenerateOptions>>(generateOptionsStorageKey, {})
-    })
+  const [generateOptions, setGenerateOptions] = useState<GenerateOptions>(() =>
+    hydrateGenerateOptions(
+      storageAdapter.getSettings().defaultClient,
+      readLocalJson<Partial<GenerateOptions>>(generateOptionsStorageKey, {})
+    )
   );
 
   const derived = useSpecDockDerivedState({
@@ -226,6 +221,8 @@ export const useSpecDockState = () => {
     setFiles,
     generatedDiff,
     setGeneratedDiff,
+    generatedFilesTarget,
+    setGeneratedFilesTarget,
     selectedPath,
     setSelectedPath,
     generateMeta,

@@ -27,10 +27,11 @@ For MVP prefer JSON response first because it is easier to test. ZIP generation 
 ```ts
 export type GenerateRequest = {
   spec: unknown;
-  options: GenerateOptions;
+  options?: Partial<GenerateOptions>;
 };
 
 export type GenerateOptions = {
+  language: "typescript" | "python" | "go" | "java" | "csharp" | "php";
   client: "fetch" | "axios";
   generateTypes: boolean;
   generateReactQuery: boolean;
@@ -53,6 +54,7 @@ Default options:
 
 ```ts
 export const defaultGenerateOptions: GenerateOptions = {
+  language: "typescript",
   client: "fetch",
   generateTypes: true,
   generateReactQuery: false,

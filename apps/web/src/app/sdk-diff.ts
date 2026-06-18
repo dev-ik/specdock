@@ -1,4 +1,4 @@
-import type { GeneratedFile } from "@specdock/core";
+import type { GeneratedFile, GenerateOptions } from "@specdock/core";
 
 export type GeneratedFileDiffStatus = "added" | "changed" | "removed" | "unchanged";
 
@@ -17,6 +17,23 @@ export type GeneratedFileDiffEntry = {
 export type GeneratedFilesDiff = {
   entries: GeneratedFileDiffEntry[];
   summary: Record<GeneratedFileDiffStatus, number>;
+};
+
+export type GeneratedFilesTarget = {
+  language: GenerateOptions["language"];
+};
+
+export const generatedFilesTargetFromOptions = (
+  options: GenerateOptions
+): GeneratedFilesTarget => ({
+  language: options.language
+});
+
+export const canDiffGeneratedFiles = (
+  previousTarget: GeneratedFilesTarget | undefined,
+  currentTarget: GeneratedFilesTarget
+): boolean => {
+  return previousTarget?.language === currentTarget.language;
 };
 
 export const createGeneratedFileManifest = (

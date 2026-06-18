@@ -73,10 +73,11 @@ export const GeneratedFilesPanel = ({
                   selectedPath === entry.path || selectedFile?.path === entry.path ? "is-active" : ""
                 }`}
                 type="button"
+                title={entry.path}
                 onClick={() => onSelectPath(entry.path)}
               >
                 <FileIcon />
-                <span className="truncate">{entry.path}</span>
+                <FilePath path={entry.path} />
                 <span className={`file-diff-badge file-diff-${entry.status}`}>{entry.status}</span>
               </button>
             ))
@@ -85,6 +86,19 @@ export const GeneratedFilesPanel = ({
         <GeneratedFilePreview entry={selectedEntry} fallbackCode={code} viewMode={viewMode} />
       </div>
     </Panel>
+  );
+};
+
+const FilePath = ({ path }: { path: string }) => {
+  const index = path.lastIndexOf("/");
+  const directory = index > -1 ? path.slice(0, index + 1) : "";
+  const fileName = index > -1 ? path.slice(index + 1) : path;
+
+  return (
+    <span className="file-path">
+      <span className="file-name">{fileName}</span>
+      {directory ? <span className="file-directory">{directory}</span> : null}
+    </span>
   );
 };
 
