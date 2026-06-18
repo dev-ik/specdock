@@ -1,7 +1,9 @@
+import { APP_VERSION } from "@specdock/core";
 import { describe, expect, it } from "vitest";
 import { directRequestBlockReason } from "./deployment-policy.js";
 
 const publicDemoConfig = {
+  version: APP_VERSION,
   publicDemo: true,
   directRequest: {
     restricted: true,
@@ -13,7 +15,11 @@ describe("directRequestBlockReason", () => {
   it("allows unrestricted self-hosted direct requests", () => {
     expect(
       directRequestBlockReason(
-        { publicDemo: false, directRequest: { restricted: false, allowedHosts: [] } },
+        {
+          version: APP_VERSION,
+          publicDemo: false,
+          directRequest: { restricted: false, allowedHosts: [] }
+        },
         "direct",
         "https://api.example.com/users"
       )

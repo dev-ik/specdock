@@ -1,4 +1,4 @@
-import type { AppConfigResponse } from "@specdock/core";
+import { APP_VERSION, type AppConfigResponse } from "@specdock/core";
 
 const defaultDemoDirectAllowedHosts = [
   "dummyjson.com",
@@ -12,6 +12,7 @@ export const resolveAppConfigResponse = (
   const publicDemo = env.PUBLIC_DEMO === "true";
 
   return {
+    version: APP_VERSION,
     publicDemo,
     directRequest: {
       restricted: publicDemo,

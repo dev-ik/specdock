@@ -47,6 +47,7 @@ describe("app", () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.json()).toEqual({
+        version: expect.stringMatching(/^\d+\.\d+\.\d+$/),
         publicDemo: true,
         directRequest: {
           restricted: true,

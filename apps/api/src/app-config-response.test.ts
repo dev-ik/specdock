@@ -4,6 +4,7 @@ import { resolveAppConfigResponse } from "./app-config-response.js";
 describe("resolveAppConfigResponse", () => {
   it("keeps direct requests unrestricted outside public demo mode", () => {
     expect(resolveAppConfigResponse({ PUBLIC_DEMO: "false" })).toEqual({
+      version: expect.stringMatching(/^\d+\.\d+\.\d+$/),
       publicDemo: false,
       directRequest: {
         restricted: false,
@@ -14,6 +15,7 @@ describe("resolveAppConfigResponse", () => {
 
   it("restricts direct requests to default demo hosts in public demo mode", () => {
     expect(resolveAppConfigResponse({ PUBLIC_DEMO: "true" })).toMatchObject({
+      version: expect.stringMatching(/^\d+\.\d+\.\d+$/),
       publicDemo: true,
       directRequest: {
         restricted: true,
