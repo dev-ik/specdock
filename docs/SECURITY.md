@@ -1,6 +1,10 @@
 # Security
 
-SpecDock is local-first. Imported contracts, safe request preferences, and generated previews stay in the user's browser storage unless the user exports or sends them. Manual request headers and bodies are session-only by default. Endpoint request/response exchanges are kept in memory for the current session and are cleared on reload.
+SpecDock is local-first. Imported contracts, auth profiles, safe request
+preferences, and generated previews stay in the user's browser storage unless
+the user exports or sends them. Manual request headers and bodies are
+session-only by default. Endpoint request/response exchanges are kept in memory
+for the current session and are cleared on reload.
 
 ## Public Demo
 
@@ -46,7 +50,11 @@ and network egress policy remains useful defense in depth.
 
 ## Sensitive Data
 
-Do not put production credentials into shared browsers. Manual headers and request bodies stay in memory for the current browser session and are not persisted to localStorage.
+Do not put production credentials into shared browsers. Auth profiles are stored
+in browser `localStorage` and can include bearer tokens, API keys, basic-auth
+passwords, cookies, CSRF tokens, origin values, and referers. Manual headers and
+request bodies stay in memory for the current browser session and are not
+persisted to localStorage.
 
 Backend logs must not include request bodies or sensitive headers such as:
 

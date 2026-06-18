@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.3
+
+### Fixed
+
+- Published a patch release target that includes public-demo Direct Browser Mode host restrictions.
+- Updated public Docker examples to use `docker.io/d8vik/specdock:v0.2.3`.
+
+### Security
+
+- Clarified that auth profiles are local browser data and may contain credentials.
+- Clarified that shared or public devices should not be used for stored auth profiles.
+
 ## v0.2.2
 
 ### Fixed

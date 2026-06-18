@@ -55,14 +55,18 @@ export type StorageAdapter = {
 
 ## Secrets
 
-Auth profiles are deferred from the MVP because they may contain secrets.
+Auth profiles can contain bearer tokens, API keys, basic-auth passwords,
+cookies, CSRF tokens, origin values, and referers. They are stored only in the
+user's browser `localStorage`; SpecDock does not send them to a backend except
+when the user explicitly executes a request.
 
 Manual request headers and bodies are not persisted to localStorage. Stored
 request preferences must omit headers and bodies and redact sensitive query
-values.
+values. Request/response exchanges are kept in memory for the current browser
+session and are cleared on reload.
 
 UI warning:
 
 ```txt
-Auth data is stored only in your browser.
+Auth data is stored only in this browser. Avoid shared or public devices.
 ```

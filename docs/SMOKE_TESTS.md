@@ -31,7 +31,7 @@ npm run dev --workspace @specdock/web
 Open:
 
 ```txt
-http://127.0.0.1:5173
+http://127.0.0.1:5174
 ```
 
 ### Import
@@ -41,7 +41,7 @@ http://127.0.0.1:5173
 3. Import the same spec by URL:
 
 ```txt
-http://127.0.0.1:5173/examples/specdock-demo-openapi.yaml
+http://127.0.0.1:5174/examples/specdock-demo-openapi.yaml
 ```
 
 Expected result: the URL import succeeds without CORS or size errors.

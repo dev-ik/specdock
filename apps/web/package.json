@@ -1,6 +1,6 @@
 {
   "name": "@specdock/web",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,9 +11,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@specdock/core": "0.2.2",
-    "@specdock/generator": "0.2.2",
-    "@specdock/ui": "0.2.2",
+    "@specdock/core": "0.2.3",
+    "@specdock/generator": "0.2.3",
+    "@specdock/ui": "0.2.3",
     "@tailwindcss/vite": "4.3.1",
     "@vitejs/plugin-react": "6.0.2",
     "tailwindcss": "4.3.1",
