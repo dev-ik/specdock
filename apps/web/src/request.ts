@@ -1,4 +1,10 @@
-import type { ApiOperation, HttpMethod, RequestState } from "@specdock/core";
+import {
+  generateRequestBodyExample,
+  selectRequestMediaType,
+  type ApiOperation,
+  type HttpMethod,
+  type RequestState
+} from "@specdock/core";
 
 export type ApiRequest = {
   url: string;
@@ -36,12 +42,14 @@ export const buildApiRequest = (
     Object.entries(requestState.headers).filter(([name, value]) => name.trim() && value.trim())
   );
   const hasBody = !["GET", "HEAD"].includes(operation.method) && requestState.body?.trim();
+  const requestBody = hasBody ? requestState.body : undefined;
+  const requestHeaders = addDefaultContentType(headers, requestBody, operation);
 
   return {
     url: url.toString(),
     method: operation.method,
-    headers,
-    body: hasBody ? requestState.body : undefined
+    headers: requestHeaders,
+    body: requestBody
   };
 };
 
@@ -101,7 +109,7 @@ export const createRequestState = (
       .filter((parameter) => parameter.in === "header")
       .map((parameter) => [parameter.name, parameter.example ? String(parameter.example) : ""])
   ),
-  body: operation.requestBody ? "{\n  \n}" : undefined,
+  body: defaultBodyForOperation(operation),
   requestMode
 });
 
@@ -144,6 +152,47 @@ const formatBody = (
 const looksLikeJson = (body: string): boolean => {
   const trimmed = body.trim();
   return trimmed.startsWith("{") || trimmed.startsWith("[");
+};
+
+const defaultBodyForMethod = (method: HttpMethod): string | undefined => {
+  return ["GET", "HEAD"].includes(method) ? undefined : "{}";
+};
+
+const defaultBodyForOperation = (operation: ApiOperation): string | undefined => {
+  if (!operation.requestBody) {
+    return defaultBodyForMethod(operation.method);
+  }
+
+  const example = generateRequestBodyExample(operation);
+  if (example !== undefined) {
+    return example;
+  }
+
+  const contentType = selectRequestMediaType(operation.requestBody.content)?.contentType;
+  return contentType?.includes("json") ? "{\n  \n}" : "";
+};
+
+const addDefaultContentType = (
+  headers: Record<string, string>,
+  body: string | undefined,
+  operation: ApiOperation
+): Record<string, string> => {
+  if (!body || hasHeader(headers, "content-type")) {
+    return headers;
+  }
+
+  const contentType = selectRequestMediaType(operation.requestBody?.content)?.contentType;
+  if (contentType) {
+    return { ...headers, "content-type": contentType };
+  }
+
+  return looksLikeJson(body) ? { ...headers, "content-type": "application/json" } : headers;
+};
+
+const hasHeader = (headers: Record<string, string>, name: string): boolean => {
+  return Object.keys(headers).some(
+    (headerName) => headerName.toLowerCase() === name
+  );
 };
 
 const shellQuote = (value: string): string => {

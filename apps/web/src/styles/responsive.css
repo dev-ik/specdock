@@ -56,8 +56,16 @@
   .generated-grid,
   .generate-options-grid,
   .generate-toggle-list,
+  .auth-profile-fields,
+  .auth-profile-fields-three,
+  .auth-profile-fields-session,
   .request-field-row {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .auth-profile-fields-session > :nth-child(4),
+  .auth-profile-fields-session > :nth-child(5) {
+    grid-column: auto;
   }
 
   .request-field-row.has-remove {
@@ -119,6 +127,15 @@
 
   .button-row {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .auth-profile-card-header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .auth-profile-card-header .field-remove-button {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 
   .segmented-control {

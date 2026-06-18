@@ -103,6 +103,14 @@ export const createRequestActions = (state: State) => {
       }
     });
   };
+  const fillRequestBodyExample = () => {
+    if (!state.selectedOperation || !state.operationKey || !state.requestBodyExample)
+      return;
+    updateRequestState(state.operationKey, state.selectedOperation, {
+      body: state.requestBodyExample
+    });
+    state.setStatus("Request body example filled");
+  };
   const executeRequest = async () => {
     if (
       !state.activeProject ||
@@ -154,6 +162,7 @@ export const createRequestActions = (state: State) => {
     renameRecordField,
     removeRecordField,
     addHeader,
+    fillRequestBodyExample,
     executeRequest
   };
 };

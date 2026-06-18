@@ -71,6 +71,19 @@ export const downloadSdkZip = async (spec: string, options: GenerateOptions) => 
   URL.revokeObjectURL(url);
 };
 
+export const downloadTextFile = (
+  fileName: string,
+  content: string,
+  type = "text/plain;charset=utf-8"
+) => {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
 export const createFailedResponse = (error: unknown): ResponseViewModel => ({
   status: 0,
   statusText: "Request failed",

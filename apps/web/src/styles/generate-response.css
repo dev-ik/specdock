@@ -130,6 +130,7 @@
 .generated-grid {
   display: grid;
   grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
+  min-width: 0;
 }
 
 .generated-list {
@@ -147,6 +148,9 @@
 
 .generated-code {
   min-height: 18rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow: auto;
   border: 0;
   border-radius: 0;
   background: transparent;

@@ -38,6 +38,7 @@ export const Panel = ({
     if (!reorder) return;
 
     event.preventDefault();
+    event.stopPropagation();
     const rect = event.currentTarget.getBoundingClientRect();
     reorder.onDrop(event.clientY > rect.top + rect.height / 2 ? "after" : "before");
   };

@@ -47,16 +47,16 @@ Expected result: the URL import succeeds without CORS or size errors.
 
 ### Explore
 
-1. Search for `users`.
-2. Select `GET /users/{id}`.
+1. Search for `posts`.
+2. Select `GET /posts/{id}`.
 3. Confirm the operation panel shows path params, responses, summary, and description.
 4. Switch to a narrow mobile viewport and confirm endpoint rows, method badges, and request controls remain readable.
 
 ### Direct Request
 
-1. Keep Base URL as `https://jsonplaceholder.typicode.com`.
+1. Keep Base URL as `https://dummyjson.com`.
 2. Keep Mode as `direct`.
-3. Set path param `id` to `1` for `GET /users/{id}`.
+3. Set path param `id` to `1` for `GET /posts/{id}`.
 4. Click `Send`.
 
 Expected result: Response shows `200`, JSON body, response headers, duration, and a saved request line.

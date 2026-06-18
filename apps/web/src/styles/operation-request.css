@@ -42,7 +42,8 @@
   flex-wrap: wrap;
 }
 
-.fact-chip {
+.fact-chip,
+.fact-param-card {
   width: fit-content;
   max-width: 100%;
   border: 1px solid var(--border);
@@ -54,10 +55,114 @@
   overflow-wrap: anywhere;
 }
 
+.fact-param-card {
+  width: 100%;
+}
+
+.schema-field-list,
+.schema-input-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}
+
+.schema-field-card,
+.schema-input-row {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-subtle);
+}
+
+.schema-field-card {
+  padding: 0.62rem 0.7rem;
+}
+
+.schema-field-title,
+.schema-input-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.schema-field-title,
+.schema-input-heading,
+.request-field-title {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.schema-field-title,
+.schema-input-name {
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.schema-type {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  background: var(--selected);
+  padding: 0.08rem 0.42rem;
+  color: var(--subtle);
+  font-size: 0.76rem;
+  font-weight: 650;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.schema-field-description,
+.schema-input-description {
+  display: block;
+  margin-top: 0.32rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.schema-input-row {
+  padding: 0.62rem 0.7rem;
+}
+
+.schema-input-row > span {
+  min-width: 0;
+}
+
+.request-field-name-cell {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
+}
+
+.schema-input-row .field {
+  max-width: 16rem;
+}
+
+.schema-input-row input[type="checkbox"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--accent);
+}
+
+.body-editor-with-fields {
+  margin-top: 0.85rem;
+}
+
 .required-label {
   margin-left: 0.45rem;
   color: var(--subtle);
   font-size: 0.74rem;
+}
+
+.schema-input-heading .required-label,
+.request-field-title .required-label {
+  margin-left: 0;
 }
 
 .empty-state,
@@ -91,7 +196,7 @@
 
 .request-topline {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem) auto;
   gap: 0.85rem;
   align-items: end;
 }

@@ -22,6 +22,8 @@ Before implementation read:
 - [Phases 5-7: Backend, SDK generation, web foundation](implementation-plan/phases-05-07.md)
 - [Phases 8-11: Import, explorer, request builder, response viewer](implementation-plan/phases-08-11.md)
 - [Phases 12-14: Generate UI, Docker/deployment, hardening](implementation-plan/phases-12-14.md)
+- [Post-v0.1 Improvements](implementation-plan/post-v0.1-improvements.md)
+- [Multi-Language SDK Generation](implementation-plan/multi-language-sdk.md)
 
 ## Current Release Notes
 

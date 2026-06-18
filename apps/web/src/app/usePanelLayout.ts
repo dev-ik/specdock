@@ -1,36 +1,60 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { readLocalJson, writeLocalJson } from "./local-storage.js";
+import {
+  defaultPanelLayout,
+  findPanelColumn,
+  insertInColumn,
+  moveInColumn,
+  normalizePanelIds,
+  readStoredPanelLayout,
+  reorderInColumn,
+  type PanelColumnId,
+  type PanelDropPosition,
+  type PanelId,
+  type PanelLayout,
+  type PanelMoveDirection,
+  type StoredPanelLayout
+} from "./panel-layout-model.js";
 import { panelLayoutStorageKey } from "./storage-keys.js";
 
-export type PanelColumnId = "import" | "explorer" | "workspace";
-export type PanelDropPosition = "before" | "after";
-export type PanelMoveDirection = -1 | 1;
-export type PanelId =
-  | "local-projects"
-  | "import"
-  | "endpoints"
-  | "operation"
-  | "request"
-  | "response"
-  | "generate"
-  | "generated-files";
-
-export type PanelLayout = Record<PanelColumnId, PanelId[]>;
-
-export const defaultPanelLayout: PanelLayout = {
-  import: ["local-projects", "import"],
-  explorer: ["endpoints", "operation"],
-  workspace: ["request", "response", "generate", "generated-files"]
-};
+export {
+  defaultPanelLayout,
+  orderPanelIds,
+  panelLabels
+} from "./panel-layout-model.js";
+export type {
+  PanelColumnId,
+  PanelDropPosition,
+  PanelId,
+  PanelLayout,
+  PanelMoveDirection
+} from "./panel-layout-model.js";
 
 export const usePanelLayout = () => {
-  const [layout, setLayout] = useState<PanelLayout>(() =>
-    normalizePanelLayout(readLocalJson<Partial<PanelLayout>>(panelLayoutStorageKey, defaultPanelLayout))
+  const storedLayout = useMemo(
+    () => readStoredPanelLayout(readLocalJson<StoredPanelLayout>(panelLayoutStorageKey, defaultPanelLayout)),
+    []
+  );
+  const [layout, setLayout] = useState<PanelLayout>(storedLayout.layout);
+  const [hiddenPanelIds, setHiddenPanelIds] = useState<PanelId[]>(
+    storedLayout.hiddenPanelIds
   );
   const [draggingPanelId, setDraggingPanelId] = useState<PanelId | undefined>();
   const draggingPanelRef = useRef<PanelId | undefined>(undefined);
 
-  useEffect(() => writeLocalJson(panelLayoutStorageKey, layout), [layout]);
+  useEffect(
+    () => writeLocalJson(panelLayoutStorageKey, { layout, hiddenPanelIds }),
+    [hiddenPanelIds, layout]
+  );
+
+  const visibleLayout = useMemo<PanelLayout>(
+    () => ({
+      import: layout.import.filter((panelId) => !hiddenPanelIds.includes(panelId)),
+      explorer: layout.explorer.filter((panelId) => !hiddenPanelIds.includes(panelId)),
+      workspace: layout.workspace.filter((panelId) => !hiddenPanelIds.includes(panelId))
+    }),
+    [hiddenPanelIds, layout]
+  );
 
   const movePanel = useCallback((panelId: PanelId, direction: PanelMoveDirection) => {
     setLayout((current) => {
@@ -59,79 +83,74 @@ export const usePanelLayout = () => {
 
       const sourceColumn = findPanelColumn(current, draggedPanelId);
       const targetColumn = findPanelColumn(current, targetPanelId);
-      if (!sourceColumn || sourceColumn !== targetColumn) return current;
+      if (!sourceColumn || !targetColumn) return current;
+
+      if (sourceColumn === targetColumn) {
+        return {
+          ...current,
+          [sourceColumn]: reorderInColumn(current[sourceColumn], draggedPanelId, targetPanelId, position)
+        };
+      }
 
       return {
         ...current,
-        [sourceColumn]: reorderInColumn(current[sourceColumn], draggedPanelId, targetPanelId, position)
+        [sourceColumn]: current[sourceColumn].filter((id) => id !== draggedPanelId),
+        [targetColumn]: insertInColumn(
+          current[targetColumn],
+          draggedPanelId,
+          targetPanelId,
+          position
+        )
       };
     });
   }, []);
 
+  const dropPanelToColumn = useCallback((columnId: PanelColumnId) => {
+    setLayout((current) => {
+      const draggedPanelId = draggingPanelRef.current;
+      if (!draggedPanelId) return current;
+
+      const sourceColumn = findPanelColumn(current, draggedPanelId);
+      if (!sourceColumn) return current;
+
+      const sourceIds = current[sourceColumn];
+      if (sourceColumn === columnId && sourceIds[sourceIds.length - 1] === draggedPanelId) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [sourceColumn]: sourceIds.filter((id) => id !== draggedPanelId),
+        [columnId]: [...current[columnId].filter((id) => id !== draggedPanelId), draggedPanelId]
+      };
+    });
+  }, []);
+
+  const setPanelVisibility = useCallback((panelId: PanelId, visible: boolean) => {
+    setHiddenPanelIds((current) =>
+      visible
+        ? current.filter((hiddenPanelId) => hiddenPanelId !== panelId)
+        : current.includes(panelId)
+          ? current
+          : [...current, panelId]
+    );
+  }, []);
+
+  const setHiddenPanels = useCallback((panelIds: PanelId[]) => {
+    setHiddenPanelIds(normalizePanelIds(panelIds));
+  }, []);
+
   return {
     layout,
+    visibleLayout,
+    hiddenPanelIds,
     draggingPanelId,
     startDragging,
     stopDragging,
     dropPanel,
-    movePanel
+    dropPanelToColumn,
+    movePanel,
+    setPanelVisibility,
+    setHiddenPanels
   };
-};
-
-export const orderPanelIds = <T extends PanelId>(defaultIds: readonly T[], savedIds: PanelId[]): T[] => {
-  const knownIds = new Set<PanelId>(defaultIds);
-  const orderedIds = savedIds.filter((id): id is T => knownIds.has(id));
-  const missingIds = defaultIds.filter((id) => !orderedIds.includes(id));
-
-  return [...orderedIds, ...missingIds];
-};
-
-const normalizePanelLayout = (savedLayout: Partial<PanelLayout>): PanelLayout => ({
-  import: orderPanelIds(defaultPanelLayout.import, savedLayout.import ?? []),
-  explorer: orderPanelIds(defaultPanelLayout.explorer, savedLayout.explorer ?? []),
-  workspace: orderPanelIds(defaultPanelLayout.workspace, savedLayout.workspace ?? [])
-});
-
-const findPanelColumn = (layout: PanelLayout, panelId: PanelId): PanelColumnId | undefined => {
-  return (Object.keys(layout) as PanelColumnId[]).find((columnId) =>
-    layout[columnId].includes(panelId)
-  );
-};
-
-const moveInColumn = (
-  ids: PanelId[],
-  panelId: PanelId,
-  direction: PanelMoveDirection
-): PanelId[] => {
-  const index = ids.indexOf(panelId);
-  const nextIndex = index + direction;
-
-  if (index === -1 || nextIndex < 0 || nextIndex >= ids.length) return ids;
-
-  const nextIds = [...ids];
-  const currentPanelId = nextIds[index];
-  const nextPanelId = nextIds[nextIndex];
-  if (!currentPanelId || !nextPanelId) return ids;
-
-  nextIds[index] = nextPanelId;
-  nextIds[nextIndex] = currentPanelId;
-  return nextIds;
-};
-
-const reorderInColumn = (
-  ids: PanelId[],
-  draggedPanelId: PanelId,
-  targetPanelId: PanelId,
-  position: PanelDropPosition
-): PanelId[] => {
-  const withoutDragged = ids.filter((id) => id !== draggedPanelId);
-  const targetIndex = withoutDragged.indexOf(targetPanelId);
-  if (targetIndex === -1) return ids;
-
-  const insertIndex = position === "after" ? targetIndex + 1 : targetIndex;
-  return [
-    ...withoutDragged.slice(0, insertIndex),
-    draggedPanelId,
-    ...withoutDragged.slice(insertIndex)
-  ];
 };

@@ -107,7 +107,20 @@ const extractContent = (content: unknown): ApiMediaType[] => {
     return {
       contentType,
       schema: mediaTypeRecord.schema,
-      example: mediaTypeRecord.example
+      example: mediaTypeRecord.example ?? extractFirstNamedExample(mediaTypeRecord.examples)
     };
   });
+};
+
+const extractFirstNamedExample = (examples: unknown): unknown => {
+  if (!isRecord(examples)) {
+    return undefined;
+  }
+
+  const firstExample = Object.values(examples)[0];
+  if (!isRecord(firstExample)) {
+    return undefined;
+  }
+
+  return firstExample.value;
 };

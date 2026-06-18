@@ -4,7 +4,11 @@
 @import "./styles/panels.css";
 @import "./styles/controls.css";
 @import "./styles/endpoints.css";
+@import "./styles/quality.css";
 @import "./styles/operation-request.css";
 @import "./styles/generate-response.css";
+@import "./styles/generated-diff.css";
 @import "./styles/settings.css";
+@import "./styles/settings-workspace-blocks.css";
 @import "./styles/responsive.css";
+@import "./styles/responsive-mobile.css";

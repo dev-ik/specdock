@@ -2,6 +2,11 @@
 
 This roadmap tracks work intentionally deferred from `v0.1.0`.
 
+Detailed implementation stages are tracked in
+[`docs/implementation-plan/post-v0.1-improvements.md`](implementation-plan/post-v0.1-improvements.md)
+and
+[`docs/implementation-plan/multi-language-sdk.md`](implementation-plan/multi-language-sdk.md).
+
 ## Post-v0.1.0
 
 ### Auth Profiles
@@ -35,3 +40,13 @@ Auth Profiles must preserve the existing public-demo security model:
 - mock server
 - collection export
 - generated SDK customization presets
+
+### Multi-Language SDK Generation
+
+- language-aware generator options
+- shared SDK intermediate model
+- Python SDK
+- Go SDK
+- Java SDK
+- C# SDK
+- PHP SDK

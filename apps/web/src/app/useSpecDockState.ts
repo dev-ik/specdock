@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  type AuthProfile,
   defaultGenerateOptions,
   type GeneratedFile,
   type GenerateOptions,
@@ -29,6 +30,7 @@ import {
   hydrateStoredRequestStates,
   sanitizeRequestStatesForStorage
 } from "./request-state-storage.js";
+import type { GeneratedFilesDiff } from "./sdk-diff.js";
 import { useSpecDockDerivedState } from "./useSpecDockDerivedState.js";
 import type {
   ExchangeMap,
@@ -48,6 +50,8 @@ export const useSpecDockState = () => {
   const [projects, setProjects] = useState<OpenApiProject[]>(() =>
     storageAdapter.getProjects()
   );
+  const [previousProjectForDiff, setPreviousProjectForDiff] =
+    useState<OpenApiProject>();
   const [historyCount, setHistoryCount] = useState(
     () => storageAdapter.getHistory().length
   );
@@ -66,6 +70,9 @@ export const useSpecDockState = () => {
   const [requestStates, setRequestStates] = useState<RequestStateMap>(() =>
     hydrateStoredRequestStates(readLocalJson(requestStatesStorageKey, {}))
   );
+  const [authProfiles, setAuthProfiles] = useState<AuthProfile[]>(() =>
+    storageAdapter.getAuthProfiles()
+  );
   const [defaultRequestMode, setDefaultRequestMode] = useState<
     RequestState["requestMode"]
   >(() => storageAdapter.getSettings().defaultRequestMode);
@@ -73,6 +80,7 @@ export const useSpecDockState = () => {
     () => readLocalJson(baseUrlsStorageKey, {})
   );
   const [files, setFiles] = useState<GeneratedFile[]>([]);
+  const [generatedDiff, setGeneratedDiff] = useState<GeneratedFilesDiff>();
   const [selectedPath, setSelectedPath] = useState<string | undefined>();
   const [generateMeta, setGenerateMeta] = useState<GenerateMeta | undefined>();
   const [exchangesByOperation, setExchangesByOperation] = useState<ExchangeMap>(
@@ -101,9 +109,11 @@ export const useSpecDockState = () => {
 
   const derived = useSpecDockDerivedState({
     projects,
+    previousProjectForDiff,
     activeProjectId,
     selectedOperationId,
     requestStates,
+    authProfiles,
     defaultRequestMode,
     baseUrlsByProject,
     files,
@@ -190,6 +200,8 @@ export const useSpecDockState = () => {
     setSpecText,
     projects,
     setProjects,
+    previousProjectForDiff,
+    setPreviousProjectForDiff,
     historyCount,
     setHistoryCount,
     activeProjectId,
@@ -205,11 +217,16 @@ export const useSpecDockState = () => {
     setSelectedOperationId,
     requestStates,
     setRequestStates,
+    authProfiles,
+    setAuthProfiles,
     defaultRequestMode,
     setDefaultRequestMode,
     setBaseUrlsByProject,
     files,
     setFiles,
+    generatedDiff,
+    setGeneratedDiff,
+    selectedPath,
     setSelectedPath,
     generateMeta,
     setGenerateMeta,

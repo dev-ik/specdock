@@ -25,7 +25,7 @@ export type AuthProfile = {
   id: string;
   projectId: string;
   name: string;
-  type: "none" | "bearer" | "apiKey" | "basic";
+  type: "none" | "bearer" | "apiKey" | "basic" | "cookieCsrf";
   values: Record<string, string>;
   createdAt: string;
   updatedAt: string;

@@ -1,6 +1,13 @@
-import type { ApiOperation } from "@specdock/core";
+import type { ApiOperation, SchemaField } from "@specdock/core";
+import { SchemaFieldsSummary } from "./SchemaFieldsSummary.js";
 
-export const OperationFacts = ({ operation }: { operation: ApiOperation }) => {
+export const OperationFacts = ({
+  operation,
+  requestBodyFields
+}: {
+  operation: ApiOperation;
+  requestBodyFields: SchemaField[];
+}) => {
   const parametersByType = ["path", "query", "header"].map((type) => ({
     type,
     parameters: operation.parameters.filter((parameter) => parameter.in === type)
@@ -16,9 +23,16 @@ export const OperationFacts = ({ operation }: { operation: ApiOperation }) => {
           ) : (
             <div className="fact-list">
               {parameters.map((parameter) => (
-                <div key={`${type}-${parameter.name}`} className="fact-chip">
-                  <span>{parameter.name}</span>
-                  {parameter.required ? <span className="required-label">required</span> : null}
+                <div key={`${type}-${parameter.name}`} className="fact-param-card">
+                  <div className="request-field-title">
+                    <span>{parameter.name}</span>
+                    {parameter.required ? <span className="required-label">required</span> : null}
+                  </div>
+                  {parameter.description ? (
+                    <div className="schema-field-description">
+                      {parameter.description}
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -30,6 +44,7 @@ export const OperationFacts = ({ operation }: { operation: ApiOperation }) => {
         <div className="fact-text">
           {operation.requestBody?.content.map((content) => content.contentType).join(", ") || "None"}
         </div>
+        {operation.requestBody ? <SchemaFieldsSummary fields={requestBodyFields} /> : null}
       </div>
       <div>
         <div className="fact-label">Responses</div>

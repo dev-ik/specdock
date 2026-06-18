@@ -93,3 +93,26 @@ export type NormalizedOpenApi = {
   operations: ApiOperation[];
   schemas: ApiSchema[];
 };
+
+export type OpenApiQualitySeverity = "error" | "warning" | "info";
+
+export type OpenApiQualityCode =
+  | "duplicate-operation-id"
+  | "missing-operation-id"
+  | "missing-operation-summary"
+  | "missing-operation-description"
+  | "operation-without-tags"
+  | "undefined-operation-tag"
+  | "missing-error-response"
+  | "missing-request-example"
+  | "missing-response-example";
+
+export type OpenApiQualityFinding = {
+  severity: OpenApiQualitySeverity;
+  code: OpenApiQualityCode;
+  message: string;
+  location: string;
+  operationId?: string;
+  method?: HttpMethod;
+  path?: string;
+};

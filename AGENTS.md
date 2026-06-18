@@ -74,6 +74,15 @@ Proxy mode must be:
 
 Public demo must use direct browser requests only.
 
+After code changes, perform a security check before final reporting:
+
+- Review the diff for new trust boundaries, network calls, persistence, logging, generated output, and request execution behavior.
+- Verify no secrets, Authorization headers, Cookie headers, API keys, tokens, request bodies, or response bodies are logged or persisted unintentionally.
+- Verify frontend changes do not introduce raw HTML or code execution sinks such as `dangerouslySetInnerHTML`, `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write`, `eval`, `new Function`, or string-based timers.
+- Verify URL handling, redirects, proxy targets, and imports do not bypass SSRF protections, allowed hosts, timeout limits, size limits, or public demo restrictions.
+- Treat OpenAPI specs, imported files, cURL input, URL input, localStorage, and network responses as untrusted input; render them through safe escaping or validate before use.
+- Include the security check result in the final response, including any residual risk or skipped verification.
+
 ## Architecture Rules
 
 - Do not put OpenAPI parsing directly into React components.

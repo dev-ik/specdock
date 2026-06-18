@@ -9,6 +9,7 @@ describe("request state storage", () => {
     const stored = sanitizeRequestStatesForStorage({
       "project:operation": {
         operationId: "operation",
+        authProfileId: "auth-1",
         pathParams: { id: "123" },
         queryParams: { page: "1" },
         headers: { authorization: "Bearer token", "x-trace": "abc" },
@@ -19,6 +20,7 @@ describe("request state storage", () => {
 
     expect(stored["project:operation"]).toEqual({
       operationId: "operation",
+      authProfileId: "auth-1",
       pathParams: { id: "123" },
       queryParams: { page: "1" },
       requestMode: "proxy"
@@ -29,6 +31,7 @@ describe("request state storage", () => {
     const hydrated = hydrateStoredRequestStates({
       "project:operation": {
         operationId: "operation",
+        authProfileId: "auth-1",
         pathParams: { id: "123" },
         queryParams: { access_token: "secret", page: "1" },
         headers: { authorization: "Bearer token" },
@@ -39,6 +42,7 @@ describe("request state storage", () => {
 
     expect(hydrated["project:operation"]).toEqual({
       operationId: "operation",
+      authProfileId: "auth-1",
       pathParams: { id: "123" },
       queryParams: { access_token: "", page: "1" },
       headers: {},

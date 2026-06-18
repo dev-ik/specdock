@@ -119,6 +119,19 @@ npm run test
 npm run build
 ```
 
+## SDK Generation Roadmap
+
+SpecDock currently generates TypeScript SDKs with fetch or axios clients.
+Post-v0.1 work tracks multi-language SDK generation in this order:
+
+```txt
+TypeScript hardening -> Python -> Go -> Java -> C# -> PHP
+```
+
+The generator roadmap keeps language-specific rendering behind shared
+OpenAPI-to-SDK planning, so generated clients remain predictable while each
+language can use its native HTTP and typing conventions.
+
 ## Repository Layout
 
 ```txt
@@ -138,6 +151,7 @@ docs            Architecture, security, deployment, smoke tests, and roadmap
 - [Data models](docs/DATA_MODELS.md)
 - [Storage model](docs/STORAGE_MODEL.md)
 - [SDK output spec](docs/SDK_SPEC.md)
+- [Multi-language SDK generation plan](docs/implementation-plan/multi-language-sdk.md)
 - [Deployment](docs/DEPLOYMENT.md)
 - [Security](docs/SECURITY.md)
 - [Smoke tests](docs/SMOKE_TESTS.md)

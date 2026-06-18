@@ -1,4 +1,4 @@
-import { Download, Wand2 } from "lucide-react";
+import { Download, FileDown, Wand2 } from "lucide-react";
 import type { GenerateOptions } from "@specdock/core";
 import type { GenerateMeta } from "../app/types.js";
 import { GenerateToggle, Panel, type PanelReorderProps } from "./common.js";
@@ -7,20 +7,24 @@ export const GeneratePanel = ({
   options,
   meta,
   fileCount,
+  canExportHttp,
   isGenerating,
   isDownloadingZip,
   onOptionsChange,
   onGenerate,
+  onExportHttp,
   onDownloadZip,
   reorder
 }: {
   options: GenerateOptions;
   meta?: GenerateMeta;
   fileCount: number;
+  canExportHttp: boolean;
   isGenerating: boolean;
   isDownloadingZip: boolean;
   onOptionsChange(patch: Partial<GenerateOptions>): void;
   onGenerate(): void;
+  onExportHttp(): void;
   onDownloadZip(): void;
   reorder?: PanelReorderProps;
 }) => (
@@ -90,6 +94,15 @@ export const GeneratePanel = ({
           <button className="button button-primary" type="button" disabled={isGenerating} onClick={onGenerate}>
             <Wand2 size={16} aria-hidden="true" />
             Generate
+          </button>
+          <button
+            className="button button-secondary"
+            type="button"
+            disabled={!canExportHttp}
+            onClick={onExportHttp}
+          >
+            <FileDown size={16} aria-hidden="true" />
+            HTTP
           </button>
           <button
             className="button button-secondary"

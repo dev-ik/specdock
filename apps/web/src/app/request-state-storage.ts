@@ -3,7 +3,7 @@ import type { RequestStateMap } from "./types.js";
 
 export type PersistedRequestState = Pick<
   RequestState,
-  "operationId" | "pathParams" | "queryParams" | "requestMode"
+  "operationId" | "authProfileId" | "pathParams" | "queryParams" | "requestMode"
 >;
 
 export const sanitizeRequestStatesForStorage = (
@@ -31,6 +31,10 @@ export const hydrateStoredRequestStates = (
           key,
           {
             operationId: state.operationId,
+            authProfileId:
+              typeof state.authProfileId === "string"
+                ? state.authProfileId
+                : undefined,
             pathParams: safeRecord(state.pathParams),
             queryParams: safeQueryParams(state.queryParams),
             headers: {},
@@ -47,6 +51,7 @@ const sanitizeRequestStateForStorage = (
   state: RequestState
 ): PersistedRequestState => ({
   operationId: state.operationId,
+  authProfileId: state.authProfileId,
   pathParams: safeRecord(state.pathParams),
   queryParams: safeQueryParams(state.queryParams),
   requestMode: state.requestMode

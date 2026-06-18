@@ -6,10 +6,17 @@ import {
 import { importOpenApiFromUrl } from "../import-url.js";
 import { importCurlCommand } from "../curl-import.js";
 import { persistProjectFromSpecText } from "../workspace.js";
-import { downloadSdkZip, generateSdkFiles } from "./controller-helpers.js";
+import { createAuthActions } from "./auth-actions.js";
+import {
+  downloadSdkZip,
+  downloadTextFile,
+  generateSdkFiles
+} from "./controller-helpers.js";
+import { createHttpCollection } from "./http-collection.js";
 import { createProjectActions } from "./project-actions.js";
 import { createRequestActions } from "./request-actions.js";
 import { createOperationKey } from "./request-utils.js";
+import { diffGeneratedFiles } from "./sdk-diff.js";
 import { useSpecDockState } from "./useSpecDockState.js";
 
 export const useSpecDockController = () => {
@@ -20,9 +27,14 @@ export const useSpecDockController = () => {
     state.setHistoryCount(state.storageAdapter.getHistory().length);
     state.setActiveProjectId(projectId ?? state.storageAdapter.getActiveProjectId());
   };
-  const activateProject = (project: OpenApiProject, message: string) => {
+  const activateProject = (
+    project: OpenApiProject,
+    message: string,
+    previousProjectForDiff?: OpenApiProject
+  ) => {
     state.setSpecText(JSON.stringify(project.spec, null, 2));
     state.setFiles([]);
+    state.setGeneratedDiff(undefined);
     state.setSelectedPath(undefined);
     state.setGenerateMeta(undefined);
     state.setSearchQuery("");
@@ -31,6 +43,7 @@ export const useSpecDockController = () => {
       [project.id]: current[project.id] ?? project.servers[0]?.url ?? ""
     }));
     state.setSelectedOperationId(project.operations[0]?.id);
+    state.setPreviousProjectForDiff(previousProjectForDiff);
     state.setActiveProjectId(project.id);
     state.storageAdapter.saveActiveProjectId(project.id);
     state.setStatus(message);
@@ -40,6 +53,7 @@ export const useSpecDockController = () => {
     activateProject(project, `Opened ${project.name}`);
   };
   const importCurrentSpec = () => {
+    const previousProject = state.activeProject;
     const project = persistProjectFromSpecText(
       state.storageAdapter,
       state.specText,
@@ -52,6 +66,7 @@ export const useSpecDockController = () => {
       [project.id]: current[project.id] ?? project.servers[0]?.url ?? state.selectedBaseUrl
     }));
     state.setSelectedOperationId(project.operations[0]?.id);
+    state.setPreviousProjectForDiff(previousProject);
     return project;
   };
   const importFromUrl = async () => {
@@ -75,10 +90,11 @@ export const useSpecDockController = () => {
   };
   const importRawSpec = () => {
     try {
+      const previousProject = state.activeProject;
       state.setCurrentSource({ type: "raw" });
       const project = persistProjectFromSpecText(state.storageAdapter, state.specText, { type: "raw" }, state.activeProject);
       refreshStoredProjects(project.id);
-      activateProject(project, `Imported ${project.name}`);
+      activateProject(project, `Imported ${project.name}`, previousProject);
     } catch (error) {
       state.setStatus(error instanceof Error ? error.message : "Unable to import raw OpenAPI.");
     }
@@ -119,6 +135,7 @@ export const useSpecDockController = () => {
   const importUploadedText = (fileName: string, text: string) => {
     state.setSpecText(text);
     state.setFiles([]);
+    state.setGeneratedDiff(undefined);
     state.setSelectedPath(undefined);
     state.setGenerateMeta(undefined);
     try {
@@ -139,6 +156,7 @@ export const useSpecDockController = () => {
     try {
       const project = importCurrentSpec();
       const payload = await generateSdkFiles(state.specText, state.generateOptions);
+      state.setGeneratedDiff(diffGeneratedFiles(state.files, payload.files));
       state.setFiles(payload.files);
       state.setSelectedPath(payload.files[0]?.path);
       state.setGenerateMeta(payload.meta);
@@ -161,8 +179,26 @@ export const useSpecDockController = () => {
       state.setIsDownloadingZip(false);
     }
   };
+  const exportHttpCollection = () => {
+    if (!state.activeProject) {
+      state.setStatus("Import a spec before exporting HTTP collection.");
+      return;
+    }
+
+    const content = createHttpCollection({
+      project: state.activeProject,
+      baseUrl: state.selectedBaseUrl,
+      requestStates: state.requestStates
+    });
+    downloadTextFile(
+      `${safeFileName(state.activeProject.name)}.http`,
+      content
+    );
+    state.setStatus(`Exported HTTP collection for ${state.activeProject.name}`);
+  };
   const requestActions = createRequestActions(state);
   const projectActions = createProjectActions(state, activateProject);
+  const authActions = createAuthActions(state);
 
   return {
     ...state,
@@ -196,7 +232,19 @@ export const useSpecDockController = () => {
     importRawSpec,
     uploadSpec,
     ...requestActions,
+    ...authActions,
     generate,
-    downloadZip
+    downloadZip,
+    exportHttpCollection
   };
+};
+
+const safeFileName = (value: string): string => {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return normalized || "specdock-collection";
 };

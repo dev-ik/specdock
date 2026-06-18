@@ -1,12 +1,7 @@
 import { Moon, SlidersHorizontal, Sun } from "lucide-react";
 import { useState } from "react";
-import { ExplorerPanel } from "./components/ExplorerPanel.js";
-import { GeneratePanel } from "./components/GeneratePanel.js";
-import { GeneratedFilesPanel } from "./components/GeneratedFilesPanel.js";
-import { ProjectsImportPanel } from "./components/ProjectsImportPanel.js";
-import { RequestPanel } from "./components/RequestPanel.js";
-import { ResponsePanel } from "./components/ResponsePanel.js";
 import { SettingsDialog } from "./components/SettingsDialog.js";
+import { WorkspaceColumns } from "./components/WorkspaceColumns.js";
 import { WorkspaceJumpNav } from "./components/WorkspaceJumpNav.js";
 import { type PanelId, usePanelLayout } from "./app/usePanelLayout.js";
 import { useSpecDockController } from "./app/useSpecDockController.js";
@@ -58,115 +53,26 @@ export const App = () => {
         <WorkspaceJumpNav />
       </header>
 
-      <section className="workspace-grid">
-        <ProjectsImportPanel
-          projects={app.projects}
-          activeProjectId={app.activeProjectId}
-          specText={app.specText}
-          urlInput={app.urlInput}
-          curlInput={app.curlInput}
-          isImportingUrl={app.isImportingUrl}
-          onOpenProject={app.openProject}
-          onDeleteProject={app.deleteProject}
-          onSpecTextChange={app.setSpecTextAsRaw}
-          onUrlInputChange={app.setUrlInput}
-          onCurlInputChange={app.setCurlInput}
-          onUrlImport={() => void app.importFromUrl()}
-          onCurlImport={app.importCurl}
-          onRawImport={app.importRawSpec}
-          onUpload={app.uploadSpec}
-          panelOrder={panelLayout.layout.import}
-          getPanelReorderProps={getPanelReorderProps}
-        />
-        <ExplorerPanel
-          operationCount={app.activeProject?.operations.length ?? 0}
-          operationGroups={app.operationGroups}
-          selectedOperation={app.selectedOperation}
-          searchQuery={app.searchQuery}
-          hasProject={Boolean(app.activeProject)}
-          onSearchChange={app.setSearchQuery}
-          onSelectOperation={app.setSelectedOperationId}
-          panelOrder={panelLayout.layout.explorer}
-          getPanelReorderProps={getPanelReorderProps}
-        />
-        <section className="panel-stack">
-          {panelLayout.layout.workspace.map((panelId) => {
-            if (panelId === "request") {
-              return (
-                <div key={panelId} id="request" className="scroll-target">
-                  <RequestPanel
-                    historyCount={app.historyCount}
-                    activeProjectId={app.activeProject?.id}
-                    operation={app.selectedOperation}
-                    operationKey={app.operationKey}
-                    requestState={app.requestState}
-                    baseUrl={app.selectedBaseUrl}
-                    curlPreview={app.curlPreview}
-                    isExecuting={app.isExecuting}
-                    onBaseUrlChange={app.updateProjectBaseUrl}
-                    onRequestStateChange={app.updateRequestState}
-                    onRecordFieldChange={app.updateRecordField}
-                    onRecordFieldRename={app.renameRecordField}
-                    onRecordFieldRemove={app.removeRecordField}
-                    onAddHeader={app.addHeader}
-                    onExecute={() => void app.executeRequest()}
-                    reorder={getPanelReorderProps(panelId)}
-                  />
-                </div>
-              );
-            }
-
-            if (panelId === "response") {
-              return (
-                <ResponsePanel
-                  key={panelId}
-                  exchange={app.displayedExchange}
-                  context={app.displayedContext}
-                  responseScope={app.responseScope}
-                  onResponseScopeChange={app.setResponseScope}
-                  onCopyText={(label, value) => void app.copyText(label, value)}
-                  reorder={getPanelReorderProps(panelId)}
-                />
-              );
-            }
-
-            if (panelId === "generate") {
-              return (
-                <div key={panelId} id="generate" className="scroll-target">
-                  <GeneratePanel
-                    options={app.generateOptions}
-                    meta={app.generateMeta}
-                    fileCount={app.files.length}
-                    isGenerating={app.isGenerating}
-                    isDownloadingZip={app.isDownloadingZip}
-                    onOptionsChange={app.updateGenerateOptions}
-                    onGenerate={() => void app.generate()}
-                    onDownloadZip={() => void app.downloadZip()}
-                    reorder={getPanelReorderProps(panelId)}
-                  />
-                </div>
-              );
-            }
-
-            return (
-              <div key={panelId} id="generated-files" className="scroll-target">
-                <GeneratedFilesPanel
-                  files={app.files}
-                  selectedFile={app.selectedFile}
-                  onSelectPath={app.setSelectedPath}
-                  reorder={getPanelReorderProps(panelId)}
-                />
-              </div>
-            );
-          })}
-        </section>
-      </section>
+      <WorkspaceColumns
+        app={app}
+        layout={panelLayout.visibleLayout}
+        getPanelReorderProps={getPanelReorderProps}
+        onColumnDrop={panelLayout.dropPanelToColumn}
+      />
       <SettingsDialog
         open={isSettingsOpen}
+        activeProjectId={app.activeProject?.id}
         projectCount={app.projects.length}
         historyCount={app.historyCount}
+        authProfiles={app.projectAuthProfiles}
+        hiddenPanelIds={panelLayout.hiddenPanelIds}
         onClose={() => setIsSettingsOpen(false)}
         onClearHistory={app.clearRequestHistory}
+        onPanelVisibilityChange={panelLayout.setPanelVisibility}
+        onHiddenPanelsChange={panelLayout.setHiddenPanels}
+        onAddAuthProfile={app.addAuthProfile}
+        onUpdateAuthProfile={app.updateAuthProfile}
+        onDeleteAuthProfile={app.deleteAuthProfile}
       />
     </main>
   );

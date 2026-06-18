@@ -1,0 +1,127 @@
+.settings-preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.settings-section-toggle {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-subtle);
+  padding: 0.68rem 0.76rem;
+  text-align: left;
+}
+
+.settings-section-toggle:hover,
+.settings-section-toggle:focus-visible {
+  border-color: var(--selected-border);
+}
+
+.settings-section-toggle svg {
+  color: var(--muted);
+  transition: transform 0.16s ease;
+}
+
+.settings-section-toggle h3 {
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 750;
+}
+
+.settings-section-toggle p {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.settings-section-toggle svg.is-open {
+  transform: rotate(90deg);
+}
+
+.settings-section-summary {
+  border-radius: 999px;
+  background: var(--selected);
+  padding: 0.18rem 0.55rem;
+  color: var(--selected-text);
+  font-size: 0.7rem;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.settings-block-list,
+.settings-block-group {
+  display: grid;
+}
+
+.settings-block-list {
+  gap: 0.75rem;
+}
+
+.settings-block-group {
+  gap: 0.45rem;
+}
+
+.settings-block-group-header,
+.settings-block-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-block-group-header {
+  gap: 0.75rem;
+  color: var(--subtle);
+  font-size: 0.7rem;
+  font-weight: 780;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.settings-block-toggle {
+  width: 100%;
+  gap: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-subtle);
+  padding: 0.52rem 0.62rem;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.settings-block-toggle:hover,
+.settings-block-toggle:focus-visible {
+  border-color: var(--selected-border);
+}
+
+.settings-block-toggle.is-hidden {
+  color: var(--muted);
+  opacity: 0.72;
+}
+
+.settings-block-toggle > span:last-child {
+  border-radius: 999px;
+  background: var(--selected);
+  padding: 0.16rem 0.5rem;
+  color: var(--selected-text);
+  font-size: 0.68rem;
+  font-weight: 760;
+}
+
+.settings-block-toggle.is-hidden > span:last-child {
+  background: var(--border);
+  color: var(--muted);
+}
+
+.settings-block-name {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.45rem;
+}

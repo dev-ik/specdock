@@ -6,6 +6,7 @@ import type {
   RequestState
 } from "@specdock/core";
 import type { ApiRequest, ResponseViewModel } from "../request.js";
+import type { GeneratedFilesDiff } from "./sdk-diff.js";
 
 export type GenerateApiResponse = {
   files: GeneratedFile[];
@@ -50,6 +51,7 @@ export type GenerateState = {
   meta?: GenerateMeta;
   options: GenerateOptions;
   selectedFile?: GeneratedFile;
+  diff?: GeneratedFilesDiff;
 };
 
 export type ActiveSelection = {

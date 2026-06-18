@@ -4,44 +4,42 @@ info:
   version: 0.1.0
   description: A small CORS-friendly contract for import, explorer, request, response, and SDK generation smoke tests.
 servers:
-  - url: https://jsonplaceholder.typicode.com
-    description: Public JSONPlaceholder API
+  - url: https://dummyjson.com
+    description: Public DummyJSON API
 tags:
-  - name: Users
   - name: Posts
+  - name: Comments
 paths:
-  /users:
+  /posts:
     get:
       tags:
-        - Users
-      operationId: listUsers
-      summary: List users
-      description: Returns demo users from JSONPlaceholder.
+        - Posts
+      operationId: listPosts
+      summary: List posts
+      description: Returns demo posts from DummyJSON.
       parameters:
-        - name: _limit
+        - name: limit
           in: query
           required: false
           example: 5
           schema:
             type: integer
             minimum: 1
-            maximum: 10
+            maximum: 30
       responses:
         "200":
-          description: Users
+          description: Posts
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/User"
-  /users/{id}:
+                $ref: "#/components/schemas/PostList"
+  /posts/{id}:
     get:
       tags:
-        - Users
-      operationId: getUser
-      summary: Get user
-      description: Returns one demo user by id.
+        - Posts
+      operationId: getPost
+      summary: Get post
+      description: Returns one demo post by id.
       parameters:
         - name: id
           in: path
@@ -51,40 +49,41 @@ paths:
             type: integer
       responses:
         "200":
-          description: User
+          description: Post
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/Post"
         "404":
-          description: User not found
-  /posts:
+          description: Post not found
+  /posts/{id}/comments:
     get:
       tags:
-        - Posts
-      operationId: listPosts
-      summary: List posts
+        - Comments
+      operationId: listPostComments
+      summary: List post comments
+      description: Returns comments for one demo post.
       parameters:
-        - name: userId
-          in: query
-          required: false
+        - name: id
+          in: path
+          required: true
           example: 1
           schema:
             type: integer
       responses:
         "200":
-          description: Posts
+          description: Comments
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Post"
+                $ref: "#/components/schemas/CommentList"
+  /posts/add:
     post:
       tags:
         - Posts
       operationId: createPost
       summary: Create post
+      description: Simulates creating a post. DummyJSON returns a created response but does not persist it.
       requestBody:
         required: true
         content:
@@ -104,20 +103,24 @@ paths:
                 $ref: "#/components/schemas/Post"
 components:
   schemas:
-    User:
+    PostList:
       type: object
       required:
-        - id
-        - name
-        - email
+        - posts
+        - total
+        - skip
+        - limit
       properties:
-        id:
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Post"
+        total:
           type: integer
-        name:
-          type: string
-        email:
-          type: string
-          format: email
+        skip:
+          type: integer
+        limit:
+          type: integer
     Post:
       type: object
       required:
@@ -133,6 +136,45 @@ components:
         body:
           type: string
         userId:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        views:
+          type: integer
+    CommentList:
+      type: object
+      required:
+        - comments
+        - total
+        - skip
+        - limit
+      properties:
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+        total:
+          type: integer
+        skip:
+          type: integer
+        limit:
+          type: integer
+    Comment:
+      type: object
+      required:
+        - id
+        - body
+        - postId
+      properties:
+        id:
+          type: integer
+        body:
+          type: string
+        postId:
+          type: integer
+        likes:
           type: integer
     CreatePostRequest:
       type: object

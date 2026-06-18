@@ -106,6 +106,6 @@ Minimum production smoke:
 1. Open `/` and confirm the web app loads.
 2. Call `/api/health` and confirm `{ "status": "ok" }`.
 3. Import `/examples/specdock-demo-openapi.yaml` by URL.
-4. Browse endpoints and run `GET /users/{id}` in Direct Browser Mode.
+4. Browse endpoints and run `GET /posts/{id}` in Direct Browser Mode.
 5. Generate SDK files and download ZIP.
 6. In public demo mode, verify proxy requests return `PROXY_DISABLED`.
