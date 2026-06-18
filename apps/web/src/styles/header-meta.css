@@ -1,0 +1,68 @@
+.app-brand {
+  min-width: 0;
+}
+
+.app-title-row,
+.app-subtitle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.app-title-row {
+  flex-wrap: wrap;
+}
+
+.app-subtitle-row {
+  margin-top: 0.2rem;
+}
+
+.app-subtitle-row .app-subtitle {
+  margin-top: 0;
+}
+
+.app-version-badge,
+.app-demo-badge,
+.app-github-link {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.app-version-badge,
+.app-demo-badge {
+  border: 1px solid var(--border);
+  background: var(--panel-subtle);
+  padding: 0.26rem 0.45rem;
+  color: var(--muted);
+}
+
+.app-demo-badge {
+  border-color: rgba(34, 197, 94, 0.32);
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+}
+
+.app-github-link {
+  gap: 0.28rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.app-github-link:hover,
+.app-github-link:focus-visible {
+  color: var(--text);
+  outline: none;
+}
+
+@media (max-width: 560px) {
+  .app-subtitle-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+}

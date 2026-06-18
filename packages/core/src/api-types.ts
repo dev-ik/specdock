@@ -14,6 +14,7 @@ export type HealthResponse = {
 };
 
 export type AppConfigResponse = {
+  version: string;
   publicDemo: boolean;
   directRequest: {
     restricted: boolean;

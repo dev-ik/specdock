@@ -1,0 +1,56 @@
+name: Feature request
+description: Suggest an improvement or new capability for SpecDock.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What workflow problem should this solve?
+      placeholder: When exploring an API contract, I need to...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior you want.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Import
+        - Explore
+        - Test
+        - Generate
+        - Storage
+        - Public demo
+        - Self-hosting
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workarounds or other designs have you considered?
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add links, screenshots, examples, or constraints.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: This request fits SpecDock's local-first API contract workspace goal.
+          required: true
+        - label: I searched existing issues before opening this request.
+          required: true

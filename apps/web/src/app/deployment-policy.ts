@@ -1,6 +1,7 @@
-import type { AppConfigResponse, RequestState } from "@specdock/core";
+import { APP_VERSION, type AppConfigResponse, type RequestState } from "@specdock/core";
 
 export const defaultAppConfig: AppConfigResponse = {
+  version: APP_VERSION,
   publicDemo: false,
   directRequest: {
     restricted: false,
