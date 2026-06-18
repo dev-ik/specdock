@@ -9,7 +9,7 @@ on:
       version:
         description: "Docker image version tag"
         required: true
-        default: "v0.2.0"
+        default: "v0.2.1"
 
 env:
   DOCKERHUB_IMAGE: docker.io/d8vik/specdock
@@ -22,7 +22,7 @@ jobs:
     env:
       VERSION: ${{ inputs.version || github.ref_name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: docker/setup-qemu-action@v3
 

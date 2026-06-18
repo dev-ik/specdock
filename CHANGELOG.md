@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.1
+
+### Fixed
+
+- Added generated PHP Composer metadata required by `composer validate --strict`.
+- Updated GitHub Actions to Node-24-compatible action majors.
+
 ## v0.2.0
 
 ### Added

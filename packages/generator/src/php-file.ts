@@ -18,7 +18,9 @@ export const generatePhpFiles = (model: SdkModel, outputPath: string) => [
 
 const generateComposerFile = () => `{
   "name": "specdock/generated-client",
+  "description": "Generated SpecDock API client.",
   "type": "library",
+  "license": "MIT",
   "require": {
     "php": ">=8.1",
     "guzzlehttp/guzzle": "^7.0"
