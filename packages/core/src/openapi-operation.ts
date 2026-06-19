@@ -43,10 +43,26 @@ export const extractParameters = (
         required: Boolean(parameter.required),
         description: typeof parameter.description === "string" ? parameter.description : undefined,
         schema: parameter.schema,
-        example: parameter.example
+        example: parameter.example,
+        style: parameterStyle(parameter.style),
+        explode: typeof parameter.explode === "boolean" ? parameter.explode : undefined
       }
     ];
   });
+};
+
+const parameterStyle = (style: unknown): ApiParameter["style"] | undefined => {
+  if (
+    style === "simple" ||
+    style === "form" ||
+    style === "spaceDelimited" ||
+    style === "pipeDelimited" ||
+    style === "deepObject"
+  ) {
+    return style;
+  }
+
+  return undefined;
 };
 
 export const extractRequestBody = (requestBody: unknown): ApiOperation["requestBody"] => {

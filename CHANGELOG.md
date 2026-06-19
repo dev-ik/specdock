@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.3.0
+
+### Added
+
+- Added Swagger 2.0 import by converting supported contracts into normalized OpenAPI 3 documents.
+- Added OpenAPI parameter serialization for path/query request execution and cURL preview.
+- Added multipart/form-data and application/octet-stream request body support with session-only file inputs.
+- Added SDK preset options for package name, client name, naming style, and base URL strategy metadata.
+- Added local `.specdock.json` project export/import with Zod validation and secret/body redaction.
+
+### Security
+
+- Public proxy behavior is unchanged.
+- Project exports exclude auth secret values, manual headers, request bodies, response bodies, and file contents.
+- Multipart and binary files stay in memory for the current browser session only.
+
 ## v0.2.3
 
 ### Fixed

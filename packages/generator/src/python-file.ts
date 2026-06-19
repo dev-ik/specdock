@@ -1,4 +1,4 @@
-import type { ApiSchema } from "@specdock/core";
+import type { ApiSchema, GenerateOptions } from "@specdock/core";
 import type { SdkModel, SdkOperation } from "./sdk-model.js";
 import {
   parameterPlaceholder,
@@ -9,29 +9,33 @@ import {
 } from "./python-naming.js";
 import { isRecord } from "./schema-utils.js";
 
-const PACKAGE_NAME = "specdock_client";
+const DEFAULT_PACKAGE_NAME = "specdock_client";
 
-export const generatePythonFiles = (model: SdkModel, outputPath: string) => [
+export const generatePythonFiles = (model: SdkModel, outputPath: string, options: GenerateOptions) => {
+  const packageName = pythonPackageName(options.packageName);
+
+  return [
   {
     path: `${outputPath}/pyproject.toml`,
-    content: generatePyprojectFile()
+    content: generatePyprojectFile(options.packageName)
   },
   {
-    path: `${outputPath}/${PACKAGE_NAME}/__init__.py`,
-    content: generatePythonInitFile(model.operations, model.schemas)
+    path: `${outputPath}/${packageName}/__init__.py`,
+    content: generatePythonInitFile(model.operations, model.schemas, options.clientName)
   },
   {
-    path: `${outputPath}/${PACKAGE_NAME}/client.py`,
-    content: generatePythonClientFile(model.operations)
+    path: `${outputPath}/${packageName}/client.py`,
+    content: generatePythonClientFile(model.operations, options.clientName)
   },
   {
-    path: `${outputPath}/${PACKAGE_NAME}/models.py`,
+    path: `${outputPath}/${packageName}/models.py`,
     content: generatePythonModelsFile(model.schemas)
   }
-];
+  ];
+};
 
-const generatePyprojectFile = () => `[project]
-name = "specdock-generated-client"
+const generatePyprojectFile = (packageName: string) => `[project]
+name = "${packageName}"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
@@ -41,20 +45,22 @@ dependencies = [
 
 const generatePythonInitFile = (
   operations: SdkOperation[],
-  schemas: ApiSchema[]
+  schemas: ApiSchema[],
+  clientName: string
 ) => {
   const operationNames = operations.map((operation) => pythonIdentifier(operation.name));
   const schemaNames = schemas.map((schema) => pythonClassName(schema.name));
-  const exports = ["SpecDockClient", ...operationNames, ...schemaNames];
+  const className = pythonClassName(clientName);
+  const exports = [className, ...operationNames, ...schemaNames];
 
-  return `from .client import SpecDockClient${operationNames.length > 0 ? `, ${operationNames.join(", ")}` : ""}
+  return `from .client import ${className}${operationNames.length > 0 ? `, ${operationNames.join(", ")}` : ""}
 from .models import ${schemaNames.length > 0 ? schemaNames.join(", ") : "JsonValue"}
 
 __all__ = ${JSON.stringify(exports, null, 2)}
 `;
 };
 
-const generatePythonClientFile = (operations: SdkOperation[]) => `from __future__ import annotations
+const generatePythonClientFile = (operations: SdkOperation[], clientName: string) => `from __future__ import annotations
 
 from typing import Any
 from urllib.parse import quote
@@ -62,7 +68,7 @@ from urllib.parse import quote
 import httpx
 
 
-class SpecDockClient:
+class ${pythonClassName(clientName)}:
     def __init__(self, base_url: str = "", client: httpx.Client | None = None) -> None:
         self.base_url = base_url.rstrip("/")
         self._client = client or httpx.Client()
@@ -75,10 +81,12 @@ class SpecDockClient:
         json: Any | None = None,
         headers: dict[str, str] | None = None,
         params: dict[str, Any] | None = None,
+        base_url: str | None = None,
     ) -> Any:
+        request_base_url = (base_url or self.base_url).rstrip("/")
         response = self._client.request(
             method,
-            f"{self.base_url}{path}",
+            f"{request_base_url}{path}",
             json=json,
             headers=headers,
             params=_clean_params(params),
@@ -92,7 +100,7 @@ class SpecDockClient:
         if self._owns_client:
             self._client.close()
 
-    def __enter__(self) -> "SpecDockClient":
+    def __enter__(self) -> "${pythonClassName(clientName)}":
         return self
 
     def __exit__(self, *args: object) -> None:
@@ -105,17 +113,23 @@ def _clean_params(params: dict[str, Any] | None) -> dict[str, Any] | None:
     return {key: value for key, value in params.items() if value not in (None, "")}
 
 
-${operations.map(generatePythonOperation).join("\n\n")}
+${operations.map((operation) => generatePythonOperation(operation, clientName)).join("\n\n")}
 `;
 
-const generatePythonOperation = (operation: SdkOperation): string => {
+const pythonPackageName = (packageName: string): string => {
+  if (packageName === "specdock-generated-client") return DEFAULT_PACKAGE_NAME;
+  return pythonIdentifier(packageName.replaceAll("-", "_").replaceAll("/", "_"));
+};
+
+const generatePythonOperation = (operation: SdkOperation, clientName: string): string => {
   const name = pythonIdentifier(operation.name);
   const pathParams = operation.pathParameters.map(
     (parameter) => `${pythonIdentifier(parameter.safeName)}: str`
   );
   const args = [
-    "client: SpecDockClient",
+    `client: ${pythonClassName(clientName)}`,
     ...pathParams,
+    operation.baseUrlStrategy === "perRequest" ? "base_url: str" : undefined,
     operation.hasQuery ? "query: dict[str, Any] | None = None" : undefined,
     operation.hasBody ? "body: Any | None = None" : undefined,
     "headers: dict[str, str] | None = None"
@@ -130,10 +144,11 @@ const generatePythonOperation = (operation: SdkOperation): string => {
   );
   const bodyArg = operation.hasBody ? "body" : "None";
   const queryArg = operation.hasQuery ? "query" : "None";
+  const baseUrlArg = operation.baseUrlStrategy === "perRequest" ? "base_url" : "None";
 
   return `def ${name}(${args.join(", ")}) -> Any:
     path = ${pathToPythonExpression(path)}
-    return client.request("${operation.method}", path, json=${bodyArg}, headers=headers, params=${queryArg})`;
+    return client.request("${operation.method}", path, json=${bodyArg}, headers=headers, params=${queryArg}, base_url=${baseUrlArg})`;
 };
 
 const generatePythonModelsFile = (schemas: ApiSchema[]) => {

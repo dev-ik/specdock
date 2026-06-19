@@ -19,14 +19,15 @@ Try the hosted demo: [https://specdock.ru](https://specdock.ru)
 
 ## What It Does
 
-- Import OpenAPI 3.0/3.1 specs from raw text, file upload, or URL.
+- Import OpenAPI 3.0/3.1 and Swagger 2.0 specs from raw text, file upload, or URL.
 - Explore endpoints grouped by tags with search and operation details.
-- Build requests with path/query/header params, JSON body, cURL preview, and saved Base URL/Mode.
+- Build requests with OpenAPI parameter serialization, JSON, form, multipart, binary bodies, cURL preview, and saved Base URL/Mode.
 - Store per-project auth profiles locally in the browser for repeat testing.
 - Execute requests in Direct Browser Mode or restricted self-hosted Proxy Mode.
 - Inspect saved request/response exchanges per endpoint or latest request.
-- Generate TypeScript, Python, Go, Java, C#, and PHP SDK files with ZIP downloads.
+- Generate TypeScript, Python, Go, Java, C#, and PHP SDK files with basic naming presets and ZIP downloads.
 - Store projects, settings, safe request preferences, and history metadata in local browser storage.
+- Export/import local `.specdock.json` project files without auth secrets or request/response bodies.
 
 The hosted demo is for evaluation. It does not provide unrestricted proxying for arbitrary third-party APIs. For controlled proxy execution, run SpecDock yourself and configure an explicit host allowlist.
 
@@ -76,7 +77,7 @@ docker run -d --name specdock \
   -p 127.0.0.1:3000:3000 \
   -e PUBLIC_DEMO=true \
   -e PROXY_ENABLED=false \
-  docker.io/d8vik/specdock:v0.2.3
+  docker.io/d8vik/specdock:v0.3.0
 ```
 
 Or keep configuration in a local env file:
@@ -92,7 +93,7 @@ PROXY_ALLOW_PRIVATE_TARGETS=false
 docker run -d --name specdock \
   -p 127.0.0.1:3000:3000 \
   --env-file ./specdock.env \
-  docker.io/d8vik/specdock:v0.2.3
+  docker.io/d8vik/specdock:v0.3.0
 ```
 
 If you prefer Compose with the published image, create your own
@@ -101,7 +102,7 @@ If you prefer Compose with the published image, create your own
 ```yaml
 services:
   specdock:
-    image: docker.io/d8vik/specdock:v0.2.3
+    image: docker.io/d8vik/specdock:v0.3.0
     ports:
       - "127.0.0.1:3000:3000"
     environment:
@@ -121,7 +122,7 @@ Check health:
 curl -fsS http://127.0.0.1:3000/api/health
 ```
 
-Use immutable version tags such as `docker.io/d8vik/specdock:v0.2.3`.
+Use immutable version tags such as `docker.io/d8vik/specdock:v0.3.0`.
 The project does not rely on `latest` for releases.
 
 ## Configuration

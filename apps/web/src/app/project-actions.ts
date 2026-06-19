@@ -23,6 +23,7 @@ export const createProjectActions = (
     state.setHistoryCount(state.storageAdapter.getHistory().length);
     state.setBaseUrlsByProject((current) => omitProjectKey(current, project.id));
     state.setRequestStates((current) => omitProjectOperationKeys(current, project.id));
+    state.setRequestBodyFilesByOperation((current) => omitProjectOperationKeys(current, project.id));
     state.setExchangesByOperation((current) => {
       const next = Object.fromEntries(
         Object.entries(current).filter(([, exchange]) => exchange.projectId !== project.id)

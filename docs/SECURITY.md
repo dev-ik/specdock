@@ -67,3 +67,9 @@ Proxy-Authorization
 ```
 
 Request history stores execution metadata for browsing recent calls. It must not be used as a response-body archive. Sensitive query parameters are redacted before history is saved.
+
+Local `.specdock.json` exports include project metadata, the normalized API
+spec, safe request preferences, and SDK preset settings. They exclude auth
+profile secret values, manual headers, request bodies, response bodies, and
+file contents by default. Imported workspace files are validated before they are
+stored.

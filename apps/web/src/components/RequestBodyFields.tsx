@@ -3,10 +3,14 @@ import type { SchemaField } from "@specdock/core";
 export const RequestBodyFields = ({
   fields,
   values,
+  fileValues = {},
+  onFileChange,
   onChange
 }: {
   fields: SchemaField[];
   values: Record<string, string>;
+  fileValues?: Record<string, File>;
+  onFileChange?: (field: SchemaField, file: File | undefined) => void;
   onChange(field: SchemaField, value: string): void;
 }) => {
   if (fields.length === 0) {
@@ -27,7 +31,13 @@ export const RequestBodyFields = ({
               <span className="schema-input-description">{field.description}</span>
             ) : null}
           </span>
-          {field.enumValues?.length ? (
+          {field.type === "string:binary" ? (
+            <input
+              className="field"
+              type="file"
+              onChange={(event) => onFileChange?.(field, event.currentTarget.files?.[0])}
+            />
+          ) : field.enumValues?.length ? (
             <select
               className="field"
               value={values[field.name] ?? ""}
@@ -54,6 +64,9 @@ export const RequestBodyFields = ({
               onChange={(event) => onChange(field, event.target.value)}
             />
           )}
+          {field.type === "string:binary" && fileValues[field.name] ? (
+            <span className="field-hint">{fileValues[field.name]?.name}</span>
+          ) : null}
         </label>
       ))}
     </div>

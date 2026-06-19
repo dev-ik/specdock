@@ -7,6 +7,7 @@ export type OpenApiProject = {
   id: string;
   name: string;
   source: OpenApiSource;
+  specFormat?: "openapi3" | "swagger2";
   spec: unknown;
   servers: ApiServer[];
   tags: ApiTag[];
@@ -81,6 +82,8 @@ export type ApiParameter = {
   description?: string;
   schema?: unknown;
   example?: unknown;
+  style?: "simple" | "form" | "spaceDelimited" | "pipeDelimited" | "deepObject";
+  explode?: boolean;
 };
 ```
 

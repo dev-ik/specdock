@@ -23,8 +23,8 @@
 
 .project-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
   border: 1px solid transparent;
   border-radius: 8px;
   color: var(--muted);
@@ -60,13 +60,19 @@
   color: var(--selected-text);
 }
 
-.project-delete-button {
+.project-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.6rem 0.6rem 0 0;
+}
+
+.project-icon-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  margin-right: 0.45rem;
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;
@@ -74,8 +80,16 @@
   opacity: 0.72;
 }
 
-.project-delete-button:hover,
-.project-delete-button:focus-visible {
+.project-icon-button:hover,
+.project-icon-button:focus-visible {
+  border-color: var(--border-strong);
+  background: var(--panel-subtle);
+  color: var(--text);
+  opacity: 1;
+}
+
+.project-danger-button:hover,
+.project-danger-button:focus-visible {
   border-color: var(--method-delete-border);
   background: var(--method-delete-bg);
   color: var(--method-delete-text);
@@ -83,7 +97,6 @@
 }
 
 .project-active-badge {
-  margin-right: 0.3rem;
   border: 1px solid var(--selected-border);
   border-radius: 999px;
   padding: 0.28rem 0.5rem;

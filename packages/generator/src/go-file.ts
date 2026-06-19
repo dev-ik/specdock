@@ -1,4 +1,4 @@
-import type { ApiSchema } from "@specdock/core";
+import type { ApiSchema, GenerateOptions } from "@specdock/core";
 import type { SdkModel, SdkOperation } from "./sdk-model.js";
 import {
   goExportedName,
@@ -9,10 +9,10 @@ import {
 } from "./go-naming.js";
 import { isRecord } from "./schema-utils.js";
 
-export const generateGoFiles = (model: SdkModel, outputPath: string) => [
+export const generateGoFiles = (model: SdkModel, outputPath: string, options: GenerateOptions) => [
   {
     path: `${outputPath}/go.mod`,
-    content: generateGoModFile()
+    content: generateGoModFile(options.packageName)
   },
   {
     path: `${outputPath}/client.go`,
@@ -24,7 +24,7 @@ export const generateGoFiles = (model: SdkModel, outputPath: string) => [
   }
 ];
 
-const generateGoModFile = () => `module specdockclient
+const generateGoModFile = (packageName: string) => `module ${goModuleName(packageName)}
 
 go 1.22
 `;
@@ -55,6 +55,10 @@ func NewClient(baseURL string) *Client {
 }
 
 func (c *Client) Request(ctx context.Context, method string, path string, query map[string]string, body any, headers map[string]string) (any, error) {
+	return c.RequestWithBaseURL(ctx, c.BaseURL, method, path, query, body, headers)
+}
+
+func (c *Client) RequestWithBaseURL(ctx context.Context, baseURL string, method string, path string, query map[string]string, body any, headers map[string]string) (any, error) {
 	var requestBody io.Reader
 	if body != nil {
 		payload, err := json.Marshal(body)
@@ -64,7 +68,7 @@ func (c *Client) Request(ctx context.Context, method string, path string, query 
 		requestBody = bytes.NewReader(payload)
 	}
 
-	requestURL := c.BaseURL + path
+	requestURL := strings.TrimRight(baseURL, "/") + path
 	if len(query) > 0 {
 		values := url.Values{}
 		for key, value := range query {
@@ -127,6 +131,7 @@ const generateGoOperation = (operation: SdkOperation): string => {
     "ctx context.Context",
     "client *Client",
     ...pathParams,
+    operation.baseUrlStrategy === "perRequest" ? "baseURL string" : undefined,
     operation.hasQuery ? "query map[string]string" : undefined,
     operation.hasBody ? "body any" : undefined,
     "headers map[string]string"
@@ -141,11 +146,19 @@ const generateGoOperation = (operation: SdkOperation): string => {
   );
   const queryArg = operation.hasQuery ? "query" : "nil";
   const bodyArg = operation.hasBody ? "body" : "nil";
+  const requestCall = operation.baseUrlStrategy === "perRequest"
+    ? `client.RequestWithBaseURL(ctx, baseURL, "${operation.method}", path, ${queryArg}, ${bodyArg}, headers)`
+    : `client.Request(ctx, "${operation.method}", path, ${queryArg}, ${bodyArg}, headers)`;
 
   return `func ${name}(${args.join(", ")}) (any, error) {
 	path := ${pathToGoExpression(path)}
-	return client.Request(ctx, "${operation.method}", path, ${queryArg}, ${bodyArg}, headers)
+	return ${requestCall}
 }`;
+};
+
+const goModuleName = (packageName: string): string => {
+  if (packageName === "specdock-generated-client") return "specdockclient";
+  return packageName.toLowerCase().replace(/[^a-z0-9_./-]+/g, "").replaceAll("-", "");
 };
 
 const generateGoModelsFile = (schemas: ApiSchema[]) => {

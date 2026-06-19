@@ -1,4 +1,4 @@
-import type { ApiSchema } from "@specdock/core";
+import type { ApiSchema, GenerateOptions } from "@specdock/core";
 import {
   csharpClassName,
   csharpMethodName,
@@ -10,9 +10,9 @@ import {
 import type { SdkModel, SdkOperation } from "./sdk-model.js";
 import { isRecord } from "./schema-utils.js";
 
-export const generateCsharpFiles = (model: SdkModel, outputPath: string) => [
+export const generateCsharpFiles = (model: SdkModel, outputPath: string, options: GenerateOptions) => [
   { path: `${outputPath}/SpecDock.Client.csproj`, content: generateProjectFile() },
-  { path: `${outputPath}/SpecDockClient.cs`, content: generateClientFile(model.operations) },
+  { path: `${outputPath}/SpecDockClient.cs`, content: generateClientFile(model.operations, options.clientName) },
   { path: `${outputPath}/Models.cs`, content: generateModelsFile(model.schemas) }
 ];
 
@@ -25,20 +25,20 @@ const generateProjectFile = () => `<Project Sdk="Microsoft.NET.Sdk">
 </Project>
 `;
 
-const generateClientFile = (operations: SdkOperation[]) => `namespace SpecDock.Client;
+const generateClientFile = (operations: SdkOperation[], clientName: string) => `namespace SpecDock.Client;
 
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 
-public sealed class SpecDockClient
+public sealed class ${csharpClassName(clientName)}
 {
   private readonly string baseUrl;
   private readonly HttpClient httpClient;
   private readonly JsonSerializerOptions jsonOptions;
 
-  public SpecDockClient(string baseUrl, HttpClient? httpClient = null, JsonSerializerOptions? jsonOptions = null)
+  public ${csharpClassName(clientName)}(string baseUrl, HttpClient? httpClient = null, JsonSerializerOptions? jsonOptions = null)
   {
     this.baseUrl = baseUrl.TrimEnd('/');
     this.httpClient = httpClient ?? new HttpClient();
@@ -53,7 +53,19 @@ public sealed class SpecDockClient
     IReadOnlyDictionary<string, string>? headers = null,
     CancellationToken cancellationToken = default)
   {
-    using var request = new HttpRequestMessage(new HttpMethod(method), BuildUri(path, query));
+    return await RequestWithBaseUrlAsync(baseUrl, method, path, query, body, headers, cancellationToken).ConfigureAwait(false);
+  }
+
+  public async Task<JsonElement?> RequestWithBaseUrlAsync(
+    string requestBaseUrl,
+    string method,
+    string path,
+    IReadOnlyDictionary<string, string?>? query = null,
+    object? body = null,
+    IReadOnlyDictionary<string, string>? headers = null,
+    CancellationToken cancellationToken = default)
+  {
+    using var request = new HttpRequestMessage(new HttpMethod(method), BuildUri(requestBaseUrl, path, query));
     if (body is not null) {
       var json = JsonSerializer.Serialize(body, jsonOptions);
       request.Content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -74,9 +86,9 @@ public sealed class SpecDockClient
 
 ${operations.map(generateOperation).join("\n\n")}
 
-  private Uri BuildUri(string path, IReadOnlyDictionary<string, string?>? query)
+  private Uri BuildUri(string requestBaseUrl, string path, IReadOnlyDictionary<string, string?>? query)
   {
-    var builder = new StringBuilder(baseUrl).Append(path);
+    var builder = new StringBuilder(requestBaseUrl.TrimEnd('/')).Append(path);
     var pairs = query?.Where(pair => !string.IsNullOrEmpty(pair.Value)).ToArray();
     if (pairs is { Length: > 0 }) {
       builder.Append('?').Append(string.Join("&", pairs.Select(pair =>
@@ -93,6 +105,7 @@ const generateOperation = (operation: SdkOperation): string => {
   );
   const args = [
     ...pathParams,
+    operation.baseUrlStrategy === "perRequest" ? "string baseUrl" : undefined,
     operation.hasQuery ? "IReadOnlyDictionary<string, string?>? query = null" : undefined,
     operation.hasBody ? "object? body = null" : undefined,
     "IReadOnlyDictionary<string, string>? headers = null",
@@ -108,11 +121,14 @@ const generateOperation = (operation: SdkOperation): string => {
   );
   const queryArg = operation.hasQuery ? "query" : "null";
   const bodyArg = operation.hasBody ? "body" : "null";
+  const requestCall = operation.baseUrlStrategy === "perRequest"
+    ? `RequestWithBaseUrlAsync(baseUrl, "${operation.method}", path, ${queryArg}, ${bodyArg}, headers, cancellationToken)`
+    : `RequestAsync("${operation.method}", path, ${queryArg}, ${bodyArg}, headers, cancellationToken)`;
 
   return `  public Task<JsonElement?> ${csharpMethodName(operation.name)}(${args.join(", ")})
   {
     var path = ${pathToCsharpExpression(path)};
-    return RequestAsync("${operation.method}", path, ${queryArg}, ${bodyArg}, headers, cancellationToken);
+    return ${requestCall};
   }`;
 };
 

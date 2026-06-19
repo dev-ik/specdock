@@ -1,4 +1,5 @@
 import type { GenerateOptions } from "@specdock/core";
+import { sanitizeTypeName } from "./naming.js";
 import type { SdkOperation } from "./sdk-model.js";
 
 export const generateClientFile = (
@@ -8,10 +9,12 @@ export const generateClientFile = (
   const requestHelper =
     options.client === "axios" ? axiosClientHelper : fetchClientHelper;
   const functions = operations.map((operation) =>
-    generateOperationFunction(operation)
+    generateOperationFunction(operation, options)
   );
 
-  return `${requestHelper}\n${functions.join("\n\n")}\n`;
+  const clientTypeName = sanitizeTypeName(options.clientName) || "SpecDockClient";
+
+  return `${requestHelper}\nexport type ${clientTypeName} = ReturnType<typeof createClient>;\n\n${functions.join("\n\n")}\n`;
 };
 
 const fetchClientHelper = `export const createClient = (baseUrl = "") => ({
@@ -46,6 +49,8 @@ const appendQuery = (path: string, query?: Record<string, QueryValue>) => {
 
   return \`\${path}\${path.includes("?") ? "&" : "?"}\${search.toString()}\`;
 };
+
+const withBaseUrl = (baseUrl: string, path: string) => baseUrl.replace(/\\/+$/, "") + path;
 `;
 
 const axiosClientHelper = `type AxiosLike = { request<T>(config: { method: string; url: string; data?: unknown; headers?: Record<string, string> }): Promise<{ data: T }> };
@@ -70,14 +75,18 @@ const appendQuery = (path: string, query?: Record<string, QueryValue>) => {
 
   return \`\${path}\${path.includes("?") ? "&" : "?"}\${search.toString()}\`;
 };
+
+const withBaseUrl = (baseUrl: string, path: string) => baseUrl.replace(/\\/+$/, "") + path;
 `;
 
 const generateOperationFunction = (
-  operation: SdkOperation
+  operation: SdkOperation,
+  options: GenerateOptions
 ): string => {
   const name = operation.name;
   const args = [
     ...operation.pathParameters.map((parameter) => `${parameter.safeName}: string`),
+    options.baseUrlStrategy === "perRequest" ? "baseUrl: string" : undefined,
     operation.hasQuery ? "query?: Record<string, QueryValue>" : undefined,
     operation.hasBody ? "body?: unknown" : undefined,
     "headers?: Record<string, string>"
@@ -93,11 +102,15 @@ const generateOperationFunction = (
   const pathExpression = operation.hasQuery
     ? `appendQuery(${pathToExpression(path)}, query)`
     : pathToExpression(path);
+  const requestPathExpression =
+    options.baseUrlStrategy === "perRequest"
+      ? `withBaseUrl(baseUrl, ${pathExpression})`
+      : pathExpression;
   const bodyArg = operation.hasBody ? "body" : "undefined";
 
   return `export const ${name} = async (client: ReturnType<typeof createClient>, ${args.join(
     ", "
-  )}) => {\n  return client.request<unknown>("${operation.method}", ${pathExpression}, ${bodyArg}, headers);\n};`;
+  )}) => {\n  return client.request<unknown>("${operation.method}", ${requestPathExpression}, ${bodyArg}, headers);\n};`;
 };
 
 const pathParameterMarker = "\u0000";
