@@ -1,4 +1,12 @@
-import type { ApiOperation, GenerateOptions } from "@specdock/core";
+import type {
+  ApiOperation,
+  GenerateOptions,
+  MockRouteUpsertRequest,
+  MockRouteUpsertResponse,
+  MockRoutesResponse,
+  MockResponseRequest,
+  MockResponseResult
+} from "@specdock/core";
 import { responseViewerMessageForError, type ResponseViewModel } from "../request.js";
 import type { ApiErrorResponse, GenerateApiResponse, OperationGroup } from "./types.js";
 
@@ -69,6 +77,51 @@ export const downloadSdkZip = async (spec: string, options: GenerateOptions) => 
   link.download = "specdock-generated.zip";
   link.click();
   URL.revokeObjectURL(url);
+};
+
+export const generateMockResponse = async (
+  request: MockResponseRequest
+): Promise<MockResponseResult> => {
+  const response = await fetch("/api/mock/response", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(request)
+  });
+  const payload = (await response.json()) as MockResponseResult | ApiErrorResponse;
+
+  if (!response.ok || "error" in payload) {
+    throw new Error("error" in payload ? payload.error.message : "Mock response failed.");
+  }
+
+  return payload;
+};
+
+export const saveMockRoute = async (
+  request: MockRouteUpsertRequest
+): Promise<MockRouteUpsertResponse> => {
+  const response = await fetch("/api/mock/routes", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(request)
+  });
+  const payload = (await response.json()) as MockRouteUpsertResponse | ApiErrorResponse;
+
+  if (!response.ok || "error" in payload) {
+    throw new Error("error" in payload ? payload.error.message : "Unable to save mock route.");
+  }
+
+  return payload;
+};
+
+export const listMockRoutes = async (): Promise<MockRoutesResponse> => {
+  const response = await fetch("/api/mock/routes");
+  const payload = (await response.json()) as MockRoutesResponse | ApiErrorResponse;
+
+  if (!response.ok || "error" in payload) {
+    throw new Error("error" in payload ? payload.error.message : "Unable to load mock routes.");
+  }
+
+  return payload;
 };
 
 export const downloadTextFile = (

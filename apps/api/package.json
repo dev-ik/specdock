@@ -1,6 +1,6 @@
 {
   "name": "@specdock/api",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,8 +12,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@specdock/core": "0.3.0",
-    "@specdock/generator": "0.3.0",
+    "@specdock/core": "0.5.0",
+    "@specdock/generator": "0.5.0",
     "fastify": "5.8.5",
     "tsx": "4.22.4"
   },

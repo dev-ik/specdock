@@ -7,6 +7,7 @@ Backend responsibilities for MVP:
 - Healthcheck
 - SDK generation
 - Optional secure proxy request execution
+- Optional self-hosted mock response generation and in-memory live routes
 
 Base API prefix:
 
@@ -64,6 +65,8 @@ Max spec size: 10 MB
 Max generated JSON files response: 10 MB
 Max proxy request body: 5 MB
 Max proxy response body: 10 MB
+Max mock response body: 10 MB
+Mock route storage: in-memory, current API process only
 Generate timeout: 10 sec
 Proxy timeout: 15 sec
 Max generate paths: 2000
@@ -80,6 +83,7 @@ Self-hosted proxy deployments can lower proxy limits with:
 PROXY_TIMEOUT_MS
 PROXY_MAX_REQUEST_BYTES
 PROXY_MAX_RESPONSE_BYTES
+MOCK_MAX_RESPONSE_BYTES
 ```
 
 Set `TRUST_PROXY=loopback` only when a trusted loopback reverse proxy strips

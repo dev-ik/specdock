@@ -106,6 +106,7 @@ After code changes, perform a security check before final reporting:
 - Use Docker Hub as the public container registry: `docker.io/d8vik/specdock`.
 - Publish immutable version tags such as `docker.io/d8vik/specdock:v0.1.0`.
 - Do not rely on `latest` for the v0.1.0 release.
+- Create a release note for every release under `docs/release-notes/`, named after the release version, before tagging or publishing.
 - Run before release:
 
 ```bash

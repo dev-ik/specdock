@@ -10,6 +10,8 @@ import { resolveAppConfigResponse } from "./app-config-response.js";
 import { resolveTrustProxy } from "./app-config.js";
 import { sendError } from "./errors.js";
 import { registerGenerateRoutes } from "./generate-routes.js";
+import { resolveMockServerConfig } from "./mock-config.js";
+import { registerMockRoutes } from "./mock-routes.js";
 import type { GenerationRunner } from "./generation-runner.js";
 import { registerProxyRoute } from "./proxy-route.js";
 import {
@@ -75,12 +77,15 @@ export const buildApp = (options: AppOptions = {}) => {
 
   registerGenerateRoutes(app, options.generationRunner);
   registerProxyRoute(app, fetchImplementation);
+  if (resolveMockServerConfig().enabled) {
+    registerMockRoutes(app);
+  }
 
   app.get("/*", async (request, reply) => {
     const pathname = requestPathname(request.url);
 
-    if (pathname.startsWith("/api/")) {
-      return sendError(reply, 404, "NOT_FOUND", "API route not found.");
+    if (pathname.startsWith("/api/") || pathname.startsWith("/mock/")) {
+      return sendError(reply, 404, "NOT_FOUND", "Route not found.");
     }
 
     if (!webDistDir) {

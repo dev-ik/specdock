@@ -52,6 +52,33 @@ describe("app", () => {
         directRequest: {
           restricted: true,
           allowedHosts: ["dummyjson.com", "httpbin.org"]
+        },
+        mockServer: {
+          enabled: false
+        }
+      });
+    } finally {
+      await app.close();
+    }
+  });
+
+  it("does not serve disabled mock paths from the app shell", async () => {
+    const webDistDir = mkdtempSync(join(tmpdir(), "specdock-web-"));
+    tempDirs.push(webDistDir);
+    writeFileSync(
+      join(webDistDir, "index.html"),
+      "<!doctype html><html></html>"
+    );
+    const app = buildApp({ logger: false, webDistDir });
+
+    try {
+      const response = await app.inject({ method: "GET", url: "/mock/users/1" });
+
+      expect(response.statusCode).toBe(404);
+      expect(response.json()).toEqual({
+        error: {
+          code: "NOT_FOUND",
+          message: "Route not found."
         }
       });
     } finally {

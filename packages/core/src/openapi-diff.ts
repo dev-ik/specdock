@@ -1,16 +1,16 @@
-import type {
-  ApiMediaType,
-  ApiOperation,
-  ApiParameter,
-  ApiResponse,
-  OpenApiProject
-} from "./types.js";
+import type { ApiMediaType, ApiOperation, ApiParameter, ApiResponse, OpenApiProject } from "./types.js";
+import {
+  diffRequiredRequestProperties,
+  diffRequiredResponseProperties
+} from "./openapi-diff-schema.js";
 
 export type OpenApiDiffSeverity = "breaking" | "non-breaking" | "info";
 
 export type OpenApiDiffCode =
   | "operation-added"
   | "operation-removed"
+  | "request-required-property-added"
+  | "response-required-property-added"
   | "required-parameter-added"
   | "request-body-required"
   | "response-status-added"
@@ -23,6 +23,7 @@ export type OpenApiDiffFinding = {
   message: string;
   method?: ApiOperation["method"];
   path?: string;
+  tags?: string[];
   location: string;
 };
 
@@ -62,6 +63,7 @@ const diffOperation = (
   current: ApiOperation
 ): OpenApiDiffFinding[] => [
   ...diffRequiredParameters(previous, current),
+  ...diffRequiredRequestProperties(previous, current),
   ...diffRequestBody(previous, current),
   ...diffResponses(previous, current)
 ];
@@ -80,6 +82,7 @@ const diffRequiredParameters = (
       code: "required-parameter-added",
       method: current.method,
       path: current.path,
+      tags: current.tags,
       location: `${current.method} ${current.path} parameter ${parameter.in}.${parameter.name}`,
       message: `Required ${parameter.in} parameter "${parameter.name}" was added.`
     }));
@@ -96,6 +99,7 @@ const diffRequestBody = (
         code: "request-body-required",
         method: current.method,
         path: current.path,
+        tags: current.tags,
         location: `${current.method} ${current.path} requestBody`,
         message: "Request body became required."
       }
@@ -121,11 +125,15 @@ const diffResponses = (
     }
 
     if (stableJson(response.content) !== stableJson(currentResponse.content)) {
+      findings.push(
+        ...diffRequiredResponseProperties(response, currentResponse, current, statusCode)
+      );
       findings.push({
         severity: "breaking",
         code: "response-schema-changed",
         method: current.method,
         path: current.path,
+        tags: current.tags,
         location: `${current.method} ${current.path} response ${statusCode}`,
         message: `Response ${statusCode} schema or content changed.`
       });
@@ -150,6 +158,7 @@ const operationFinding = (
   code,
   method: operation.method,
   path: operation.path,
+  tags: operation.tags,
   location: `${operation.method} ${operation.path}`,
   message:
     code === "operation-added"
@@ -167,6 +176,7 @@ const responseFinding = (
   code,
   method: operation.method,
   path: operation.path,
+  tags: operation.tags,
   location: `${operation.method} ${operation.path} response ${statusCode}`,
   message:
     code === "response-status-added"

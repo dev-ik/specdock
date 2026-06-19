@@ -20,6 +20,9 @@ export type AppConfigResponse = {
     restricted: boolean;
     allowedHosts: string[];
   };
+  mockServer: {
+    enabled: boolean;
+  };
 };
 
 export type GenerateRequest = {
@@ -51,6 +54,49 @@ export type ProxyResponse = {
   body: string;
   contentType?: string;
   durationMs: number;
+};
+
+export type MockResponseRequest = {
+  spec: unknown;
+  method: HttpMethod;
+  path: string;
+  statusCode?: string;
+};
+
+export type MockResponseResult = {
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+  body: string;
+  contentType?: string;
+  operationId?: string;
+};
+
+export type MockRouteUpsertRequest = {
+  method: HttpMethod;
+  path: string;
+  status: number;
+  statusText?: string;
+  body: string;
+  contentType?: string;
+  operationId?: string;
+};
+
+export type MockRouteSummary = {
+  method: HttpMethod;
+  path: string;
+  status: number;
+  contentType?: string;
+  operationId?: string;
+  url: string;
+};
+
+export type MockRouteUpsertResponse = {
+  route: MockRouteSummary;
+};
+
+export type MockRoutesResponse = {
+  routes: MockRouteSummary[];
 };
 
 export type GeneratedFile = {

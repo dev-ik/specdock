@@ -14,11 +14,15 @@ Public demo deployments must run with proxy mode disabled:
 PUBLIC_DEMO=true
 DEMO_DIRECT_ALLOWED_HOSTS=dummyjson.com,petstore3.swagger.io,httpbin.org
 PROXY_ENABLED=false
+MOCK_SERVER_ENABLED=false
 ```
 
 In this mode, backend proxy execution is disabled and Direct Browser Mode is
 limited to `DEMO_DIRECT_ALLOWED_HOSTS`. Browser CORS rules still decide which
 allowed upstream APIs can be called.
+
+Mock server routes are not registered in public demo deployments, even if
+`MOCK_SERVER_ENABLED=true` is set accidentally.
 
 ## Self-Hosted Proxy Mode
 
@@ -47,6 +51,30 @@ Use `PROXY_ALLOW_PRIVATE_TARGETS=true` only for local/internal-network testing.
 Self-hosted proxy deployments should also enforce outbound firewall rules to
 internal networks. SpecDock pins proxy requests to the validated DNS address,
 and network egress policy remains useful defense in depth.
+
+## Self-Hosted Mock Server
+
+Mock response generation is disabled by default:
+
+```env
+MOCK_SERVER_ENABLED=false
+```
+
+Trusted self-hosted deployments can enable it with:
+
+```env
+PUBLIC_DEMO=false
+MOCK_SERVER_ENABLED=true
+MOCK_MAX_RESPONSE_BYTES=10485760
+```
+
+The mock response endpoint accepts an OpenAPI spec and a method/path target,
+generates a response from examples or schemas, and does not persist the spec.
+Generated mock response bodies are size-limited.
+
+Saved live mock routes are stored in memory in the current API process and are
+lost on restart. They can be called through `/mock/*` only in trusted
+self-hosted mode.
 
 ## Sensitive Data
 

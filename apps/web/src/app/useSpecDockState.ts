@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  type AuthProfile,
-  type GeneratedFile,
-  type GenerateOptions,
-  type OpenApiProject,
-  type OpenApiSource,
-  type RequestState
-} from "@specdock/core";
+import type { AuthProfile, GeneratedFile, GenerateOptions, OpenApiDiffReport, OpenApiProject, OpenApiSource, RequestState } from "@specdock/core";
 import { createRequestState } from "../request.js";
 import { createWorkspaceStorage } from "../workspace.js";
 import {
@@ -32,11 +25,13 @@ import {
 import type { GeneratedFilesDiff, GeneratedFilesTarget } from "./sdk-diff.js";
 import { applyProjectBaseUrl } from "./base-url.js";
 import { hydrateGenerateOptions } from "./generate-options.js";
+import { useMockRouteHydration } from "./mock-route-hydration.js";
 import { useAppConfig } from "./useAppConfig.js";
 import { useSpecDockDerivedState } from "./useSpecDockDerivedState.js";
 import type {
   ExchangeMap,
   GenerateMeta,
+  MockServerState,
   ProjectBaseUrlMap,
   RequestBodyFileMap,
   RequestStateMap,
@@ -53,10 +48,7 @@ export const useSpecDockState = () => {
   const [projects, setProjects] = useState<OpenApiProject[]>(() =>
     storageAdapter.getProjects()
   );
-  const [previousProjectForDiff, setPreviousProjectForDiff] = useState<OpenApiProject>();
-  const [historyCount, setHistoryCount] = useState(
-    () => storageAdapter.getHistory().length
-  );
+  const [historyCount, setHistoryCount] = useState(() => storageAdapter.getHistory().length);
   const [activeProjectId, setActiveProjectId] = useState<string | undefined>(
     () => storageAdapter.getActiveProjectId()
   );
@@ -80,16 +72,16 @@ export const useSpecDockState = () => {
   );
   const [files, setFiles] = useState<GeneratedFile[]>([]);
   const [generatedDiff, setGeneratedDiff] = useState<GeneratedFilesDiff>();
+  const [contractDiffReport, setContractDiffReport] = useState<OpenApiDiffReport>();
   const [generatedFilesTarget, setGeneratedFilesTarget] = useState<GeneratedFilesTarget>();
   const [selectedPath, setSelectedPath] = useState<string | undefined>();
   const [generateMeta, setGenerateMeta] = useState<GenerateMeta | undefined>();
   const [exchangesByOperation, setExchangesByOperation] = useState<ExchangeMap>({});
   const [latestExchangeKey, setLatestExchangeKey] = useState<string | undefined>();
   const [responseScope, setResponseScope] = useState<ResponseScope>(() =>
-    readLocalString(responseScopeStorageKey) === "latest"
-      ? "latest"
-      : "operation"
+    readLocalString(responseScopeStorageKey) === "latest" ? "latest" : "operation"
   );
+  const [mockServerState, setMockServerState] = useState<MockServerState>({});
   const appConfig = useAppConfig();
   const [status, setStatus] = useState("Ready");
   const [isImportingUrl, setIsImportingUrl] = useState(false);
@@ -105,7 +97,6 @@ export const useSpecDockState = () => {
 
   const derived = useSpecDockDerivedState({
     projects,
-    previousProjectForDiff,
     activeProjectId,
     selectedOperationId,
     requestStates,
@@ -142,6 +133,12 @@ export const useSpecDockState = () => {
         : activeProject.operations[0]?.id
     );
   }, [derived.activeProject]);
+  useMockRouteHydration({
+    activeProject: derived.activeProject,
+    appConfig,
+    mockServerState,
+    setMockServerState
+  });
   useEffect(() => {
     const selectedOperation = derived.selectedOperation;
     const operationKey = derived.operationKey;
@@ -191,8 +188,6 @@ export const useSpecDockState = () => {
     setSpecText,
     projects,
     setProjects,
-    previousProjectForDiff,
-    setPreviousProjectForDiff,
     historyCount,
     setHistoryCount,
     activeProjectId,
@@ -220,6 +215,8 @@ export const useSpecDockState = () => {
     setFiles,
     generatedDiff,
     setGeneratedDiff,
+    contractDiffReport,
+    setContractDiffReport,
     generatedFilesTarget,
     setGeneratedFilesTarget,
     selectedPath,
@@ -231,6 +228,8 @@ export const useSpecDockState = () => {
     latestExchangeKey,
     responseScope,
     setResponseScope,
+    mockServerState,
+    setMockServerState,
     appConfig,
     status,
     setStatus,

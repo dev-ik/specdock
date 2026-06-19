@@ -3,14 +3,12 @@ import type {
   GeneratedFile,
   AuthProfile,
   OpenApiQualityFinding,
-  OpenApiDiffFinding,
   OpenApiProject,
   RequestState,
   SchemaField
 } from "@specdock/core";
 import {
   analyzeOpenApiQuality,
-  diffOpenApiProjects,
   generateRequestBodyExample,
   getRequestBodySchemaFields
 } from "@specdock/core";
@@ -31,7 +29,6 @@ import type {
 
 type DerivedStateInput = {
   projects: OpenApiProject[];
-  previousProjectForDiff?: OpenApiProject;
   activeProjectId?: string;
   selectedOperationId?: string;
   requestStates: RequestStateMap;
@@ -49,7 +46,6 @@ type DerivedStateInput = {
 
 export const useSpecDockDerivedState = ({
   projects,
-  previousProjectForDiff,
   activeProjectId,
   selectedOperationId,
   requestStates,
@@ -67,17 +63,6 @@ export const useSpecDockDerivedState = ({
   const activeProject = useMemo(
     () => projects.find((project) => project.id === activeProjectId),
     [activeProjectId, projects]
-  );
-  const comparisonProject = useMemo(
-    () =>
-      activeProject
-        ? (previousProjectForDiff ??
-          projects.find(
-            (project) =>
-              project.id !== activeProject.id && project.name === activeProject.name
-          ))
-        : undefined,
-    [activeProject, previousProjectForDiff, projects]
   );
   const selectedOperation = useMemo(
     () =>
@@ -135,10 +120,6 @@ export const useSpecDockDerivedState = ({
     () => (activeProject ? analyzeOpenApiQuality(activeProject) : []),
     [activeProject]
   );
-  const diffFindings = useMemo<OpenApiDiffFinding[]>(
-    () => diffOpenApiProjects(comparisonProject, activeProject),
-    [activeProject, comparisonProject]
-  );
   const requestBodyExample = useMemo(
     () => (selectedOperation ? generateRequestBodyExample(selectedOperation) : undefined),
     [selectedOperation]
@@ -189,7 +170,6 @@ export const useSpecDockDerivedState = ({
 
   return {
     activeProject,
-    comparisonProject,
     selectedOperation,
     operationKey,
     requestState,
@@ -199,7 +179,6 @@ export const useSpecDockDerivedState = ({
     selectedFile,
     operationGroups,
     qualityFindings,
-    diffFindings,
     requestBodyExample,
     requestBodyFields,
     requestBodyFiles,

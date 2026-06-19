@@ -6,6 +6,7 @@
 @import "./styles/controls.css";
 @import "./styles/endpoints.css";
 @import "./styles/quality.css";
+@import "./styles/contract-diff.css";
 @import "./styles/operation-request.css";
 @import "./styles/generate-response.css";
 @import "./styles/generated-diff.css";

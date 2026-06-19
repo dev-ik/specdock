@@ -8,6 +8,9 @@ const publicDemoConfig = {
   directRequest: {
     restricted: true,
     allowedHosts: ["dummyjson.com"]
+  },
+  mockServer: {
+    enabled: false
   }
 };
 
@@ -18,7 +21,8 @@ describe("directRequestBlockReason", () => {
         {
           version: APP_VERSION,
           publicDemo: false,
-          directRequest: { restricted: false, allowedHosts: [] }
+          directRequest: { restricted: false, allowedHosts: [] },
+          mockServer: { enabled: false }
         },
         "direct",
         "https://api.example.com/users"

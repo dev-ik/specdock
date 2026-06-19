@@ -6,6 +6,9 @@ export const defaultAppConfig: AppConfigResponse = {
   directRequest: {
     restricted: false,
     allowedHosts: []
+  },
+  mockServer: {
+    enabled: false
   }
 };
 

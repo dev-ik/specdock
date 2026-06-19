@@ -87,3 +87,71 @@ export const proxyRequestSchema = {
     }
   }
 } as const;
+
+export const mockResponseRequestSchema = {
+  body: {
+    type: "object",
+    required: ["spec", "method", "path"],
+    additionalProperties: false,
+    properties: {
+      spec: {},
+      method: {
+        type: "string",
+        enum: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
+      },
+      path: {
+        type: "string",
+        minLength: 1,
+        maxLength: 2048,
+        pattern: "^/"
+      },
+      statusCode: {
+        type: "string",
+        minLength: 3,
+        maxLength: 3,
+        pattern: "^[1-5][0-9][0-9]$"
+      }
+    }
+  }
+} as const;
+
+export const mockRouteUpsertSchema = {
+  body: {
+    type: "object",
+    required: ["method", "path", "status", "body"],
+    additionalProperties: false,
+    properties: {
+      method: {
+        type: "string",
+        enum: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
+      },
+      path: {
+        type: "string",
+        minLength: 1,
+        maxLength: 2048,
+        pattern: "^/"
+      },
+      status: {
+        type: "integer",
+        minimum: 100,
+        maximum: 599
+      },
+      statusText: {
+        type: "string",
+        maxLength: 160
+      },
+      body: {
+        type: "string",
+        maxLength: LIMITS.maxProxyResponseBodyBytes
+      },
+      contentType: {
+        type: "string",
+        maxLength: 160
+      },
+      operationId: {
+        type: "string",
+        maxLength: 240
+      }
+    }
+  }
+} as const;

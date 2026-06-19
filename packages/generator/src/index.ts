@@ -23,7 +23,7 @@ import { buildSdkModel } from "./sdk-model.js";
 import { generateTypesFile } from "./types-file.js";
 import { generateZodFile } from "./zod-file.js";
 
-export const GENERATOR_VERSION = "0.3.0";
+export const GENERATOR_VERSION = "0.5.0";
 
 export const generateSdk = (
   spec: unknown,
