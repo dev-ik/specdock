@@ -17,7 +17,7 @@ describe("panel layout model", () => {
     expect(readStoredPanelLayout({ layout: savedLayout }).layout).toEqual({
       import: ["local-projects", "request"],
       explorer: ["quality", "endpoints", "contract-diff", "operation"],
-      workspace: ["import", "response", "generate", "generated-files"]
+      workspace: ["import", "mock-server", "response", "generate", "generated-files"]
     });
   });
 

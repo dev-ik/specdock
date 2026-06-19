@@ -81,6 +81,23 @@ Self-hosted deployments should also enforce outbound firewall rules. The app
 pins proxy requests to the validated DNS address, and platform egress policy is
 still recommended as defense in depth.
 
+## Mock Server
+
+Default:
+
+```env
+MOCK_SERVER_ENABLED=false
+```
+
+When enabled for self-hosted deployments:
+
+```txt
+Max mock response body: 10 MB
+Public demo route registration: disabled
+Response source order: OpenAPI examples, then schema examples
+Live route storage: in-memory, current API process only
+```
+
 ## Browser Support
 
 Latest stable:

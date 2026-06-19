@@ -125,6 +125,37 @@
   outline: none;
 }
 
+.code-textarea {
+  width: 100%;
+  min-height: 8rem;
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.mock-live-url {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.mock-live-url-content {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.mock-live-url-content code {
+  overflow-x: auto;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.mock-live-url-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 select.field {
   appearance: none;
   padding-right: 2.85rem;

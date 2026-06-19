@@ -152,3 +152,94 @@ REQUEST_TOO_LARGE
 RESPONSE_TOO_LARGE
 UPSTREAM_REQUEST_FAILED
 ```
+
+## POST /api/mock/response
+
+Registered only when:
+
+```env
+MOCK_SERVER_ENABLED=true
+PUBLIC_DEMO=false
+```
+
+```ts
+export type MockResponseRequest = {
+  spec: unknown;
+  method: HttpMethod;
+  path: string;
+  statusCode?: string;
+};
+
+export type MockResponseResult = {
+  status: number;
+  statusText: string;
+  headers: Record<string, string>;
+  body: string;
+  contentType?: string;
+  operationId?: string;
+};
+```
+
+Mock responses are generated from OpenAPI media examples first, then schema
+examples. The endpoint does not persist imported specs.
+
+## POST /api/mock/routes
+
+Registered only when:
+
+```env
+MOCK_SERVER_ENABLED=true
+PUBLIC_DEMO=false
+```
+
+```ts
+export type MockRouteUpsertRequest = {
+  method: HttpMethod;
+  path: string;
+  status: number;
+  statusText?: string;
+  body: string;
+  contentType?: string;
+  operationId?: string;
+};
+
+export type MockRouteUpsertResponse = {
+  route: MockRouteSummary;
+};
+```
+
+Stores a generated mock response as an in-memory route for the current API
+process. Routes are lost when the process restarts. OpenAPI path templates
+such as `/users/{id}` are accepted.
+
+## GET /api/mock/routes
+
+Registered only when mock routes are enabled.
+
+```ts
+export type MockRouteSummary = {
+  method: HttpMethod;
+  path: string;
+  status: number;
+  contentType?: string;
+  operationId?: string;
+  url: string;
+};
+
+export type MockRoutesResponse = {
+  routes: MockRouteSummary[];
+};
+```
+
+## ALL /mock/*
+
+Registered only when mock routes are enabled. A saved route such as
+`GET /users/{id}` is shown as `GET /mock/users/1` and also matches concrete
+requests such as `GET /mock/users/123`.
+
+Mock error codes:
+
+```txt
+MOCK_ROUTE_NOT_FOUND
+MOCK_RESPONSE_TOO_LARGE
+```

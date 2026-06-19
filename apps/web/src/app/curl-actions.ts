@@ -9,7 +9,7 @@ type State = ReturnType<typeof useSpecDockState>;
 type ActivateProject = (
   project: OpenApiProject,
   message: string,
-  options?: { previousProjectForDiff?: OpenApiProject; baseUrlMode?: BaseUrlMode }
+  options?: { baseUrlMode?: BaseUrlMode }
 ) => void;
 
 export const createCurlActions = (
@@ -47,7 +47,6 @@ export const createCurlActions = (
     }
 
     try {
-      const previousProject = state.activeProject;
       const imported = appendCurlCommandToSpec(
         state.activeProject.spec,
         state.curlInput,
@@ -66,7 +65,6 @@ export const createCurlActions = (
 
       refreshStoredProjects(project.id);
       activateProject(project, `Added ${operation.method} ${operation.path} to ${project.name}`, {
-        previousProjectForDiff: previousProject,
         baseUrlMode: "preserve"
       });
       state.setSpecText(imported.specText);

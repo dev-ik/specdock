@@ -9,6 +9,7 @@ export type PanelId =
   | "endpoints"
   | "operation"
   | "request"
+  | "mock-server"
   | "response"
   | "generate"
   | "generated-files";
@@ -22,7 +23,7 @@ export type StoredPanelLayout = Partial<PanelLayout> | {
 export const defaultPanelLayout: PanelLayout = {
   import: ["local-projects", "import"],
   explorer: ["quality", "contract-diff", "endpoints", "operation"],
-  workspace: ["request", "response", "generate", "generated-files"]
+  workspace: ["request", "mock-server", "response", "generate", "generated-files"]
 };
 
 export const panelLabels: Record<PanelId, string> = {
@@ -33,6 +34,7 @@ export const panelLabels: Record<PanelId, string> = {
   endpoints: "Endpoints",
   operation: "Operation",
   request: "Request",
+  "mock-server": "Mock server",
   response: "Response",
   generate: "Generate",
   "generated-files": "Generated files"

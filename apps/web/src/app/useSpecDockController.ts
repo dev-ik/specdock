@@ -1,13 +1,19 @@
 import type React from "react";
 import { type GenerateOptions, type OpenApiProject } from "@specdock/core";
+import { createContractDiffActions } from "./contract-diff-actions.js";
 import { importOpenApiFromUrl } from "../import-url.js";
 import { persistProjectFromSpecText } from "../workspace.js";
 import { createAuthActions } from "./auth-actions.js";
 import { applyProjectBaseUrl, type BaseUrlMode } from "./base-url.js";
-import { downloadSdkZip, downloadTextFile, generateSdkFiles } from "./controller-helpers.js";
+import {
+  downloadSdkZip,
+  downloadTextFile,
+  generateSdkFiles
+} from "./controller-helpers.js";
 import { createCurlActions } from "./curl-actions.js";
 import { directRequestBlockReason } from "./deployment-policy.js";
 import { createHttpCollection } from "./http-collection.js";
+import { createMockActions } from "./mock-actions.js";
 import { createProjectActions } from "./project-actions.js";
 import { createProjectTransferActions } from "./project-transfer-actions.js";
 import { createRequestActions } from "./request-actions.js";
@@ -22,17 +28,17 @@ export const useSpecDockController = () => {
     state.setHistoryCount(state.storageAdapter.getHistory().length);
     state.setActiveProjectId(projectId ?? state.storageAdapter.getActiveProjectId());
   };
-  const activateProject = (project: OpenApiProject, message: string, options: { previousProjectForDiff?: OpenApiProject; baseUrlMode?: BaseUrlMode } = {}) => {
+  const activateProject = (project: OpenApiProject, message: string, options: { baseUrlMode?: BaseUrlMode } = {}) => {
     state.setSpecText(JSON.stringify(project.spec, null, 2));
     state.setFiles([]);
     state.setGeneratedDiff(undefined);
     state.setGeneratedFilesTarget(undefined);
     state.setSelectedPath(undefined);
     state.setGenerateMeta(undefined);
+    state.setMockServerState({});
     state.setSearchQuery("");
     state.setBaseUrlsByProject((current) => applyProjectBaseUrl(current, project, options.baseUrlMode ?? "preserve", ""));
     state.setSelectedOperationId(project.operations[0]?.id);
-    state.setPreviousProjectForDiff(options.previousProjectForDiff);
     state.setActiveProjectId(project.id);
     state.storageAdapter.saveActiveProjectId(project.id);
     state.setStatus(message);
@@ -42,12 +48,10 @@ export const useSpecDockController = () => {
     activateProject(project, `Opened ${project.name}`);
   };
   const importCurrentSpec = () => {
-    const previousProject = state.activeProject;
     const project = persistProjectFromSpecText(state.storageAdapter, state.specText, state.currentSource, state.activeProject);
     refreshStoredProjects(project.id);
     state.setBaseUrlsByProject((current) => ({ ...current, [project.id]: current[project.id] ?? project.servers[0]?.url ?? state.selectedBaseUrl }));
     state.setSelectedOperationId(project.operations[0]?.id);
-    state.setPreviousProjectForDiff(previousProject);
     return project;
   };
   const importFromUrl = async () => {
@@ -68,11 +72,10 @@ export const useSpecDockController = () => {
   };
   const importRawSpec = () => {
     try {
-      const previousProject = state.activeProject;
       state.setCurrentSource({ type: "raw" });
       const project = persistProjectFromSpecText(state.storageAdapter, state.specText, { type: "raw" }, state.activeProject);
       refreshStoredProjects(project.id);
-      activateProject(project, `Imported ${project.name}`, { previousProjectForDiff: previousProject, baseUrlMode: "reset" });
+      activateProject(project, `Imported ${project.name}`, { baseUrlMode: "reset" });
     } catch (error) {
       state.setStatus(error instanceof Error ? error.message : "Unable to import raw OpenAPI.");
     }
@@ -161,6 +164,8 @@ export const useSpecDockController = () => {
   const projectTransferActions = createProjectTransferActions(state, activateProject, refreshStoredProjects);
   const curlActions = createCurlActions(state, activateProject, refreshStoredProjects);
   const authActions = createAuthActions(state);
+  const contractDiffActions = createContractDiffActions(state);
+  const mockActions = createMockActions(state);
   const requestExecutionBlockReason = directRequestBlockReason(
     state.appConfig,
     state.requestState?.requestMode,
@@ -209,7 +214,9 @@ export const useSpecDockController = () => {
     ...authActions,
     generate,
     downloadZip,
-    exportHttpCollection
+    exportHttpCollection,
+    ...contractDiffActions,
+    ...mockActions
   };
 };
 

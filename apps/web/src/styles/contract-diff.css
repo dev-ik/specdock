@@ -1,0 +1,49 @@
+.diff-input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.diff-slot {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.diff-slot > span {
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 780;
+}
+
+.diff-slot select,
+.diff-slot input,
+.diff-slot textarea,
+.quality-filters select,
+.quality-filters input {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--panel-subtle);
+  color: var(--text);
+  padding: 0.48rem 0.55rem;
+  font: inherit;
+  font-size: 0.78rem;
+}
+
+.diff-slot textarea {
+  min-height: 7.5rem;
+  resize: vertical;
+  font-family: var(--font-mono);
+  line-height: 1.35;
+}
+
+.diff-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quality-filters input {
+  flex: 1 1 9rem;
+}

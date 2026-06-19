@@ -1,4 +1,5 @@
 import { APP_VERSION, type AppConfigResponse } from "@specdock/core";
+import { resolveMockServerConfig } from "./mock-config.js";
 
 const defaultDemoDirectAllowedHosts = [
   "dummyjson.com",
@@ -11,6 +12,8 @@ export const resolveAppConfigResponse = (
 ): AppConfigResponse => {
   const publicDemo = env.PUBLIC_DEMO === "true";
 
+  const mockConfig = resolveMockServerConfig(env);
+
   return {
     version: APP_VERSION,
     publicDemo,
@@ -20,6 +23,9 @@ export const resolveAppConfigResponse = (
         ? parseAllowedHosts(env.DEMO_DIRECT_ALLOWED_HOSTS) ??
           defaultDemoDirectAllowedHosts
         : []
+    },
+    mockServer: {
+      enabled: mockConfig.enabled
     }
   };
 };

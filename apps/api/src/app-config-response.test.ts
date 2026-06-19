@@ -9,6 +9,9 @@ describe("resolveAppConfigResponse", () => {
       directRequest: {
         restricted: false,
         allowedHosts: []
+      },
+      mockServer: {
+        enabled: false
       }
     });
   });
@@ -20,8 +23,26 @@ describe("resolveAppConfigResponse", () => {
       directRequest: {
         restricted: true,
         allowedHosts: ["dummyjson.com", "petstore3.swagger.io", "httpbin.org"]
+      },
+      mockServer: {
+        enabled: false
       }
     });
+  });
+
+  it("reports mock server availability only for self-hosted enabled mode", () => {
+    expect(
+      resolveAppConfigResponse({
+        PUBLIC_DEMO: "false",
+        MOCK_SERVER_ENABLED: "true"
+      }).mockServer.enabled
+    ).toBe(true);
+    expect(
+      resolveAppConfigResponse({
+        PUBLIC_DEMO: "true",
+        MOCK_SERVER_ENABLED: "true"
+      }).mockServer.enabled
+    ).toBe(false);
   });
 
   it("reads demo direct request hosts from env", () => {

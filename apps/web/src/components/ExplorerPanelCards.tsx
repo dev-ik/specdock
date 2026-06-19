@@ -2,7 +2,8 @@ import { ChevronRight, Search } from "lucide-react";
 import type React from "react";
 import type {
   ApiOperation,
-  OpenApiDiffFinding,
+  OpenApiDiffReport,
+  OpenApiProject,
   OpenApiQualityFinding,
   SchemaField
 } from "@specdock/core";
@@ -15,16 +16,19 @@ import { QualityPanel } from "./QualityPanel.js";
 
 export type ExplorerPanelCardsProps = {
   operationCount: number;
+  projects: OpenApiProject[];
+  activeProject?: OpenApiProject;
   operationGroups: OperationGroup[];
   qualityFindings: OpenApiQualityFinding[];
-  diffFindings: OpenApiDiffFinding[];
-  comparisonProjectName?: string;
+  contractDiffReport?: OpenApiDiffReport;
   requestBodyFields: SchemaField[];
   selectedOperation?: ApiOperation;
   searchQuery: string;
   hasProject: boolean;
   collapsedGroups: Record<string, boolean>;
   onSearchChange(value: string): void;
+  onCompareContractDiff(previousText: string, currentText: string): void;
+  onExportContractDiff(format: "markdown" | "json"): void;
   onSelectOperation(operationId: string): void;
   onCollapsedGroupsChange(updater: (current: Record<string, boolean>) => Record<string, boolean>): void;
   getPanelReorderProps(panelId: PanelId): PanelReorderProps;
@@ -49,10 +53,12 @@ export const renderExplorerPanelCard = (
     return (
       <ContractDiffPanel
         key={panelId}
-        findings={props.diffFindings}
-        hasComparison={Boolean(props.comparisonProjectName)}
-        comparisonName={props.comparisonProjectName}
+        projects={props.projects}
+        activeProject={props.activeProject}
+        report={props.contractDiffReport}
         reorder={props.getPanelReorderProps(panelId)}
+        onCompare={props.onCompareContractDiff}
+        onExport={props.onExportContractDiff}
       />
     );
   }

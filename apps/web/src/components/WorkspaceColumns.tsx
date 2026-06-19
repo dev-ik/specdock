@@ -51,16 +51,19 @@ export const WorkspaceColumns = ({
 
   const explorerProps: ExplorerPanelCardsProps = {
     operationCount: app.activeProject?.operations.length ?? 0,
+    projects: app.projects,
+    activeProject: app.activeProject,
     operationGroups: app.operationGroups,
     qualityFindings: app.qualityFindings,
-    diffFindings: app.diffFindings,
-    comparisonProjectName: app.comparisonProject?.name,
+    contractDiffReport: app.contractDiffReport,
     requestBodyFields: app.requestBodyFields,
     selectedOperation: app.selectedOperation,
     searchQuery: app.searchQuery,
     hasProject: Boolean(app.activeProject),
     collapsedGroups,
     onSearchChange: app.setSearchQuery,
+    onCompareContractDiff: app.compareContractDiff,
+    onExportContractDiff: app.exportContractDiff,
     onSelectOperation: app.setSelectedOperationId,
     onCollapsedGroupsChange: setCollapsedGroups,
     getPanelReorderProps

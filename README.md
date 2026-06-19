@@ -21,9 +21,11 @@ Try the hosted demo: [https://specdock.ru](https://specdock.ru)
 
 - Import OpenAPI 3.0/3.1 and Swagger 2.0 specs from raw text, file upload, or URL.
 - Explore endpoints grouped by tags with search and operation details.
+- Compare two OpenAPI contracts explicitly and export Markdown or JSON diff reports.
 - Build requests with OpenAPI parameter serialization, JSON, form, multipart, binary bodies, cURL preview, and saved Base URL/Mode.
 - Store per-project auth profiles locally in the browser for repeat testing.
 - Execute requests in Direct Browser Mode or restricted self-hosted Proxy Mode.
+- Generate, save, and serve self-hosted mock responses when `MOCK_SERVER_ENABLED=true`.
 - Inspect saved request/response exchanges per endpoint or latest request.
 - Generate TypeScript, Python, Go, Java, C#, and PHP SDK files with basic naming presets and ZIP downloads.
 - Store projects, settings, safe request preferences, and history metadata in local browser storage.
@@ -77,7 +79,7 @@ docker run -d --name specdock \
   -p 127.0.0.1:3000:3000 \
   -e PUBLIC_DEMO=true \
   -e PROXY_ENABLED=false \
-  docker.io/d8vik/specdock:v0.3.0
+  docker.io/d8vik/specdock:v0.5.0
 ```
 
 Or keep configuration in a local env file:
@@ -87,13 +89,14 @@ PUBLIC_DEMO=false
 PROXY_ENABLED=true
 PROXY_ALLOWED_HOSTS=api.example.com,staging-api.example.com
 PROXY_ALLOW_PRIVATE_TARGETS=false
+MOCK_SERVER_ENABLED=false
 ```
 
 ```bash
 docker run -d --name specdock \
   -p 127.0.0.1:3000:3000 \
   --env-file ./specdock.env \
-  docker.io/d8vik/specdock:v0.3.0
+  docker.io/d8vik/specdock:v0.5.0
 ```
 
 If you prefer Compose with the published image, create your own
@@ -102,7 +105,7 @@ If you prefer Compose with the published image, create your own
 ```yaml
 services:
   specdock:
-    image: docker.io/d8vik/specdock:v0.3.0
+    image: docker.io/d8vik/specdock:v0.5.0
     ports:
       - "127.0.0.1:3000:3000"
     environment:
@@ -122,7 +125,7 @@ Check health:
 curl -fsS http://127.0.0.1:3000/api/health
 ```
 
-Use immutable version tags such as `docker.io/d8vik/specdock:v0.3.0`.
+Use immutable version tags such as `docker.io/d8vik/specdock:v0.5.0`.
 The project does not rely on `latest` for releases.
 
 ## Configuration
@@ -146,9 +149,23 @@ PUBLIC_DEMO=false
 PROXY_ENABLED=true
 PROXY_ALLOWED_HOSTS=api.example.com,staging-api.example.com
 PROXY_ALLOW_PRIVATE_TARGETS=false
+MOCK_SERVER_ENABLED=false
 ```
 
 Do not enable unrestricted public proxying. Proxy requests are protected by explicit host allowlists, SSRF checks, header filtering, timeout limits, and request/response size limits. Self-hosted deployments should also use outbound firewall rules for internal networks.
+
+Self-hosted mock responses are disabled by default. Set `MOCK_SERVER_ENABLED=true`
+only on trusted self-hosted deployments. Public demo deployments ignore this
+flag and do not register mock routes. Saved mock routes are served under
+`/mock/...`, support OpenAPI path templates such as `/users/{id}`, and stay in
+memory only while the API process is running.
+
+Run a contract diff from the CLI:
+
+```bash
+npm run contract:diff -- old-openapi.yaml new-openapi.yaml
+npm run contract:diff -- --format json --fail-on-breaking old.yaml new.yaml
+```
 
 When running behind a trusted loopback reverse proxy, set `TRUST_PROXY=loopback`.
 Leave it disabled for direct public exposure.
@@ -205,21 +222,10 @@ docs            Architecture, security, deployment, smoke tests, and roadmap
 
 ## Documentation
 
-- [Master plan](docs/SPECDOCK_MASTER_PLAN.md)
-- [Changelog](CHANGELOG.md)
-- [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
-- [API contracts](docs/API_CONTRACTS.md)
-- [Data models](docs/DATA_MODELS.md)
-- [Storage model](docs/STORAGE_MODEL.md)
-- [SDK output spec](docs/SDK_SPEC.md)
-- [Multi-language SDK generation plan](docs/implementation-plan/multi-language-sdk.md)
-- [Deployment](docs/DEPLOYMENT.md)
-- [Security](SECURITY.md)
-- [Smoke tests](docs/SMOKE_TESTS.md)
-- [Release](docs/RELEASE.md)
-- [Roadmap](docs/ROADMAP.md)
-- [Contributing](CONTRIBUTING.md)
-- [Code of conduct](CODE_OF_CONDUCT.md)
+Start with the [master plan](docs/SPECDOCK_MASTER_PLAN.md),
+[implementation plan](docs/IMPLEMENTATION_PLAN.md), [API contracts](docs/API_CONTRACTS.md),
+[security guide](SECURITY.md), [release checklist](docs/RELEASE.md), and
+[roadmap](docs/ROADMAP.md).
 
 ## Open-Source Hygiene
 

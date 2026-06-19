@@ -3,6 +3,7 @@ import type { PanelId } from "../app/usePanelLayout.js";
 import type { useSpecDockController } from "../app/useSpecDockController.js";
 import { GeneratePanel } from "./GeneratePanel.js";
 import { GeneratedFilesPanel } from "./GeneratedFilesPanel.js";
+import { MockServerPanel } from "./MockServerPanel.js";
 import { RequestPanel } from "./RequestPanel.js";
 import { ResponsePanel } from "./ResponsePanel.js";
 import type { PanelReorderProps } from "./common.js";
@@ -58,6 +59,25 @@ export const renderWorkspacePanelCard = (
         context={app.displayedContext}
         responseScope={app.responseScope}
         onResponseScopeChange={app.setResponseScope}
+        onCopyText={(label, value) => void app.copyText(label, value)}
+        reorder={getPanelReorderProps(panelId)}
+      />
+    );
+  }
+
+  if (panelId === "mock-server") {
+    return (
+      <MockServerPanel
+        key={panelId}
+        project={app.activeProject}
+        enabled={app.appConfig.mockServer.enabled}
+        selectedOperationId={app.mockServerState.operationId}
+        selectedStatusCode={app.mockServerState.statusCode}
+        response={app.mockServerState.response}
+        route={app.mockServerState.route}
+        onStateChange={app.updateMockServerState}
+        onGenerate={() => void app.runMockResponse()}
+        onSaveRoute={() => void app.saveCurrentMockRoute()}
         onCopyText={(label, value) => void app.copyText(label, value)}
         reorder={getPanelReorderProps(panelId)}
       />

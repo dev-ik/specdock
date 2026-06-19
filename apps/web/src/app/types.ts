@@ -2,6 +2,8 @@ import type {
   ApiOperation,
   GeneratedFile,
   GenerateOptions,
+  MockRouteSummary,
+  MockResponseResult,
   OpenApiProject,
   RequestState
 } from "@specdock/core";
@@ -33,6 +35,17 @@ export type ResponseScope = "operation" | "latest";
 export type ThemeMode = "dark" | "light";
 export type ExchangeMap = Record<string, StoredExchange>;
 export type OperationGroup = [string, ApiOperation[]];
+
+export type MockServerState = {
+  operationId?: string;
+  statusCode?: string;
+  response?: MockResponseResult;
+  route?: MockRouteSummary;
+  entries?: Record<string, {
+    response?: MockResponseResult;
+    route?: MockRouteSummary;
+  }>;
+};
 
 export type StoredExchange = {
   projectId: string;
