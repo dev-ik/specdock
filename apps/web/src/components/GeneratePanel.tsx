@@ -65,12 +65,37 @@ export const GeneratePanel = ({
             onChange={(event) => onOptionsChange({ outputPath: event.target.value })}
           />
         </label>
+        <label className="block">
+          <span className="field-label">SDK package</span>
+          <input
+            className="field w-full"
+            value={options.packageName}
+            onChange={(event) => onOptionsChange({ packageName: event.target.value })}
+          />
+          <span className="field-hint">Package/module metadata for generated SDK files.</span>
+        </label>
+        <label className="block">
+          <span className="field-label">Client class</span>
+          <input
+            className="field w-full"
+            value={options.clientName}
+            onChange={(event) => onOptionsChange({ clientName: event.target.value })}
+          />
+          <span className="field-hint">Generated client type or class name.</span>
+        </label>
         <SegmentedOption
           label="Naming"
           value={options.namingStyle}
           options={["operationId", "camelCase"]}
           labels={{ operationId: "operationId", camelCase: "camel" }}
           onChange={(namingStyle) => onOptionsChange({ namingStyle })}
+        />
+        <SegmentedOption
+          label="Base URL strategy"
+          value={options.baseUrlStrategy}
+          options={["constructor", "perRequest"]}
+          labels={{ constructor: "constructor", perRequest: "per request" }}
+          onChange={(baseUrlStrategy) => onOptionsChange({ baseUrlStrategy })}
         />
       </div>
 

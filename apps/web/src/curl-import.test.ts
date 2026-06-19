@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { CurlImportError, importCurlCommand } from "./curl-import.js";
+import {
+  appendCurlCommandToSpec,
+  CurlImportError,
+  importCurlCommand
+} from "./curl-import.js";
 
 describe("importCurlCommand", () => {
   it("creates an OpenAPI spec and request state from a JSON POST cURL", () => {
@@ -94,6 +98,52 @@ describe("importCurlCommand", () => {
       )
     ).toHaveProperty("example", "1");
     expect(imported.specText).not.toContain("secret");
+  });
+
+  it("appends a cURL operation to an existing OpenAPI spec", () => {
+    const first = importCurlCommand("curl 'https://api.example.com/users?page=1'");
+    const appended = appendCurlCommandToSpec(
+      JSON.parse(first.specText),
+      "curl -X POST 'https://write.example.com/users' -H 'Content-Type: application/json' --data '{\"name\":\"Ada\"}'",
+      "proxy"
+    );
+    const spec = JSON.parse(appended.specText);
+
+    expect(spec.servers).toEqual([
+      { url: "https://api.example.com" },
+      { url: "https://write.example.com" }
+    ]);
+    expect(spec.paths["/users"].get.operationId).toBe("getUsers");
+    expect(spec.paths["/users"].post.operationId).toBe("postUsers");
+    expect(appended.operationId).toBe("postUsers");
+    expect(appended.requestState).toMatchObject({
+      operationId: "postUsers",
+      body: "{\"name\":\"Ada\"}",
+      requestMode: "proxy"
+    });
+  });
+
+  it("keeps appended operation ids unique across existing paths", () => {
+    const baseSpec = {
+      openapi: "3.0.3",
+      info: { title: "Custom cURL project", version: "1.0.0" },
+      paths: {
+        "/accounts": {
+          get: {
+            operationId: "getUsers",
+            responses: { "200": { description: "OK" } }
+          }
+        }
+      }
+    };
+    const appended = appendCurlCommandToSpec(
+      baseSpec,
+      "curl 'https://api.example.com/users'"
+    );
+    const spec = JSON.parse(appended.specText);
+
+    expect(appended.operationId).toBe("getUsers2");
+    expect(spec.paths["/users"].get.operationId).toBe("getUsers2");
   });
 
   it("rejects non-curl commands", () => {

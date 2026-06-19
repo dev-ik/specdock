@@ -2,6 +2,7 @@ import { Copy, Play, WandSparkles } from "lucide-react";
 import type { ApiOperation, AuthProfile, RequestState, SchemaField } from "@specdock/core";
 import {
   requestBodyFieldValues,
+  requestBodyContentType,
   requestBodyTitle,
   updateRequestBodyField
 } from "../request-body-fields.js";
@@ -21,6 +22,7 @@ export const RequestPanel = ({
   curlPreview,
   requestBodyExample,
   requestBodyFields,
+  requestBodyFiles,
   isExecuting,
   executionBlockReason,
   onBaseUrlChange,
@@ -30,6 +32,7 @@ export const RequestPanel = ({
   onRecordFieldRemove,
   onAddHeader,
   onFillRequestBodyExample,
+  onRequestBodyFileChange,
   onExecute,
   reorder
 }: {
@@ -43,6 +46,7 @@ export const RequestPanel = ({
   curlPreview: string;
   requestBodyExample?: string;
   requestBodyFields: SchemaField[];
+  requestBodyFiles: Record<string, File>;
   isExecuting: boolean;
   executionBlockReason?: string;
   onBaseUrlChange(projectId: string, value: string): void;
@@ -52,6 +56,7 @@ export const RequestPanel = ({
   onRecordFieldRemove(section: "pathParams" | "queryParams" | "headers", name: string): void;
   onAddHeader(): void;
   onFillRequestBodyExample(): void;
+  onRequestBodyFileChange(operationKey: string, name: string, file: File | undefined): void;
   onExecute(): void;
   reorder?: PanelReorderProps;
 }) => {
@@ -64,6 +69,8 @@ export const RequestPanel = ({
   const queryParamMeta = operation ? requestParameterMeta(operation, "query") : {};
   const headerParamMeta = operation ? requestParameterMeta(operation, "header") : {};
   const hasRequestBodyFields = requestBodyFields.length > 0;
+  const contentType = operation ? requestBodyContentType(operation) : undefined;
+  const isBinaryBody = contentType?.includes("application/octet-stream") ?? false;
 
   return (
   <Panel
@@ -150,13 +157,7 @@ export const RequestPanel = ({
             <div className="section-label-row">
               <span className="field-label">{bodyTitle}</span>
               {!hasRequestBodyFields ? (
-                <button
-                  className="button button-small button-secondary"
-                  type="button"
-                  disabled={!requestBodyExample}
-                  title={requestBodyExample ? "Fill request body example" : "No request body example available"}
-                  onClick={onFillRequestBodyExample}
-                >
+                <button className="button button-small button-secondary" type="button" disabled={!requestBodyExample} title={requestBodyExample ? "Fill request body example" : "No request body example available"} onClick={onFillRequestBodyExample}>
                   <WandSparkles size={14} aria-hidden="true" />
                   Fill body example
                 </button>
@@ -165,12 +166,28 @@ export const RequestPanel = ({
             <RequestBodyFields
               fields={requestBodyFields}
               values={bodyFieldValues}
+              fileValues={requestBodyFiles}
+              onFileChange={(field, file) => onRequestBodyFileChange(operationKey, field.name, file)}
               onChange={(field, value) =>
                 onRequestStateChange(operationKey, operation, {
                   body: updateRequestBodyField(operation, requestState.body, field, value)
                 })
               }
             />
+            {isBinaryBody ? (
+              <label className="schema-input-row">
+                <span>
+                  <span className="schema-input-heading">
+                    <span className="schema-input-name">Binary body</span>
+                    <span className="schema-type">application/octet-stream</span>
+                  </span>
+                </span>
+                <input className="field" type="file" onChange={(event) => onRequestBodyFileChange(operationKey, "__body", event.currentTarget.files?.[0])} />
+                {requestBodyFiles.__body ? (
+                  <span className="field-hint">{requestBodyFiles.__body.name}</span>
+                ) : null}
+              </label>
+            ) : null}
             <textarea
               aria-label={bodyTitle}
               className={`field code-field min-h-28 ${hasRequestBodyFields ? "body-editor-with-fields" : ""}`}
@@ -194,11 +211,7 @@ export const RequestPanel = ({
         <div>
           <div className="section-label-row">
             <span className="field-label">cURL</span>
-            <button
-              className="button button-small button-secondary"
-              type="button"
-              onClick={() => void navigator.clipboard.writeText(curlPreview)}
-            >
+            <button className="button button-small button-secondary" type="button" onClick={() => void navigator.clipboard.writeText(curlPreview)}>
               <Copy size={14} aria-hidden="true" />
               Copy
             </button>
@@ -212,13 +225,7 @@ export const RequestPanel = ({
           {executionBlockReason ? (
             <div className="empty-field">{executionBlockReason}</div>
           ) : null}
-          <button
-            className="button button-primary"
-            type="button"
-            disabled={isExecuting || Boolean(executionBlockReason)}
-            title={executionBlockReason}
-            onClick={onExecute}
-          >
+          <button className="button button-primary" type="button" disabled={isExecuting || Boolean(executionBlockReason)} title={executionBlockReason} onClick={onExecute}>
             <Play size={16} aria-hidden="true" />
             Send
           </button>

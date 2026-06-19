@@ -1,9 +1,11 @@
 import type { ApiOperation } from "@specdock/core";
+import { serializationHint } from "./request-serialization.js";
 
 export type RequestFieldMeta = {
   type?: string;
   required?: boolean;
   description?: string;
+  serialization?: string;
 };
 
 export const requestParameterMeta = (
@@ -18,7 +20,8 @@ export const requestParameterMeta = (
         {
           type: schemaType(parameter.schema),
           required: parameter.required,
-          description: parameter.description
+          description: parameter.description,
+          serialization: serializationHint(parameter)
         }
       ])
   );

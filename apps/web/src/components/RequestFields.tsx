@@ -43,11 +43,12 @@ export const RequestFields = ({
                     defaultValue={name}
                     onBlur={(event) => onRename(name, event.target.value)}
                   />
-                  {meta?.type || meta?.required || meta?.description ? (
+                  {meta?.type || meta?.required || meta?.description || meta?.serialization ? (
                     <span>
                       <span className="request-field-title">
                         {meta.type ? <span className="schema-type">{meta.type}</span> : null}
                         {meta.required ? <span className="required-label">required</span> : null}
+                        {meta.serialization ? <span className="schema-type">{meta.serialization}</span> : null}
                       </span>
                       {meta.description ? (
                         <span className="schema-input-description">{meta.description}</span>
@@ -61,6 +62,7 @@ export const RequestFields = ({
                     <span>{name}</span>
                     {meta?.type ? <span className="schema-type">{meta.type}</span> : null}
                     {meta?.required ? <span className="required-label">required</span> : null}
+                    {meta?.serialization ? <span className="schema-type">{meta.serialization}</span> : null}
                   </span>
                   {meta?.description ? (
                     <span className="schema-input-description">{meta.description}</span>

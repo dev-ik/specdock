@@ -83,11 +83,11 @@ const ExchangeRequest = ({
       value={exchange.request.headers}
       onCopy={() => onCopyText("Request headers", JSON.stringify(exchange.request.headers, null, 2))}
     />
-    {exchange.request.body ? (
+    {exchange.request.body !== undefined ? (
       <CodeBlock
         title="Request body"
-        value={exchange.request.body}
-        onCopy={() => onCopyText("Request body", exchange.request.body ?? "")}
+        value={requestBodyLabel(exchange.request.body)}
+        onCopy={() => onCopyText("Request body", requestBodyLabel(exchange.request.body!))}
       />
     ) : null}
   </>
@@ -165,3 +165,5 @@ const CopyButton = ({ label, onClick }: { label: string; onClick(): void }) => (
     {label}
   </button>
 );
+
+const requestBodyLabel = (body: BodyInit): string => typeof body === "string" ? body : "[session-only binary or multipart body]";

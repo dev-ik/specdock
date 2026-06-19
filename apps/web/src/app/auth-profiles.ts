@@ -66,7 +66,8 @@ export const applyAuthProfileToRequest = (
 export const redactRequestForPreview = (request: ApiRequest): ApiRequest => ({
   ...request,
   url: redactSensitiveUrl(request.url),
-  body: redactRequestBody(request.body),
+  body: typeof request.body === "string" ? redactRequestBody(request.body) : request.body,
+  bodyPreview: redactMultipartPreview(request.bodyPreview),
   headers: Object.fromEntries(
     Object.entries(request.headers).map(([name, value]) => [
       name,
@@ -104,6 +105,13 @@ const redactSensitiveBodyFields = (value: unknown): unknown => {
   }
 
   return value;
+};
+
+const redactMultipartPreview = (preview: string | undefined): string | undefined => {
+  if (!preview) return preview;
+  return preview.replace(/(-F\s+'?)([^='@\s]+)=([^'\s]+)/g, (_match, prefix: string, name: string, value: string) =>
+    `${prefix}${name}=${isSensitiveParameterName(name) ? REDACTED_VALUE : value}`
+  );
 };
 
 const withHeader = (
@@ -167,7 +175,7 @@ const withCsrfBodyField = (
   profile: AuthProfile
 ): ApiRequest => {
   const token = profile.values.csrfToken?.trim();
-  if (!token || !request.body?.trim()) {
+  if (!token || typeof request.body !== "string" || !request.body.trim()) {
     return request;
   }
 

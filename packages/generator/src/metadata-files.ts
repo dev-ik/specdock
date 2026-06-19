@@ -28,6 +28,12 @@ Language: ${languageLabel(options.language)}
 
 Runtime target: ${runtimeTarget(options.language).target}
 
+Package name: ${options.packageName}
+
+Client name: ${options.clientName}
+
+Base URL strategy: ${options.baseUrlStrategy}
+
 ${dependencyLine(options.language)}
 
 ## Files
@@ -57,6 +63,14 @@ const generateManifestFile = (
     language: options.language,
     runtimeTarget: runtimeTarget(options.language),
     namingStyle: options.namingStyle,
+    packageName: options.packageName,
+    clientName: options.clientName,
+    baseUrlStrategy: options.baseUrlStrategy,
+    preset: {
+      packageName: options.packageName,
+      clientName: options.clientName,
+      baseUrlStrategy: options.baseUrlStrategy
+    },
     files: files.map((file) => file.path.slice(outputPath.length + 1))
   },
   null,

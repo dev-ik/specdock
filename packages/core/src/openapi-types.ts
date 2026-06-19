@@ -17,6 +17,7 @@ export type OpenApiProject = {
   id: string;
   name: string;
   source: OpenApiSource;
+  specFormat?: "openapi3" | "swagger2";
   spec: unknown;
   servers: ApiServer[];
   tags: ApiTag[];
@@ -62,6 +63,8 @@ export type ApiParameter = {
   description?: string;
   schema?: unknown;
   example?: unknown;
+  style?: "simple" | "form" | "spaceDelimited" | "pipeDelimited" | "deepObject";
+  explode?: boolean;
 };
 
 export type ApiRequestBody = {
@@ -88,6 +91,7 @@ export type ApiSecurityRequirement = {
 
 export type NormalizedOpenApi = {
   spec: Record<string, unknown>;
+  specFormat: "openapi3" | "swagger2";
   servers: ApiServer[];
   tags: ApiTag[];
   operations: ApiOperation[];

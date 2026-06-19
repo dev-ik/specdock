@@ -23,7 +23,7 @@ import { buildSdkModel } from "./sdk-model.js";
 import { generateTypesFile } from "./types-file.js";
 import { generateZodFile } from "./zod-file.js";
 
-export const GENERATOR_VERSION = "0.2.3";
+export const GENERATOR_VERSION = "0.3.0";
 
 export const generateSdk = (
   spec: unknown,
@@ -40,7 +40,7 @@ export const generateSdk = (
 
   if (resolvedOptions.language === "go") {
     return appendMetadataFiles(
-      generateGoFiles(model, outputPath),
+      generateGoFiles(model, outputPath, resolvedOptions),
       outputPath,
       resolvedOptions,
       GENERATOR_VERSION
@@ -49,7 +49,7 @@ export const generateSdk = (
 
   if (resolvedOptions.language === "java") {
     return appendMetadataFiles(
-      generateJavaFiles(model, outputPath),
+      generateJavaFiles(model, outputPath, resolvedOptions),
       outputPath,
       resolvedOptions,
       GENERATOR_VERSION
@@ -58,7 +58,7 @@ export const generateSdk = (
 
   if (resolvedOptions.language === "csharp") {
     return appendMetadataFiles(
-      generateCsharpFiles(model, outputPath),
+      generateCsharpFiles(model, outputPath, resolvedOptions),
       outputPath,
       resolvedOptions,
       GENERATOR_VERSION
@@ -67,7 +67,7 @@ export const generateSdk = (
 
   if (resolvedOptions.language === "php") {
     return appendMetadataFiles(
-      generatePhpFiles(model, outputPath),
+      generatePhpFiles(model, outputPath, resolvedOptions),
       outputPath,
       resolvedOptions,
       GENERATOR_VERSION
@@ -76,7 +76,7 @@ export const generateSdk = (
 
   if (resolvedOptions.language === "python") {
     return appendMetadataFiles(
-      generatePythonFiles(model, outputPath),
+      generatePythonFiles(model, outputPath, resolvedOptions),
       outputPath,
       resolvedOptions,
       GENERATOR_VERSION

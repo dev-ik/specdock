@@ -5,9 +5,12 @@
 ```txt
 OpenAPI 3.0.x
 OpenAPI 3.1.x
+Swagger 2.0 import through normalization
 ```
 
-Swagger 2.0 is not supported in MVP.
+Swagger 2.0 import converts supported `host`, `basePath`, `schemes`, `paths`,
+`definitions`, `parameters`, `responses`, `consumes`, `produces`, and
+`securityDefinitions` fields into an internal OpenAPI 3 document.
 
 ## Import
 

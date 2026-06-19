@@ -16,7 +16,20 @@ const generateOptionsSchema = {
       pattern:
         "^/?(?!.*(?:^|/)\\.\\.?$)(?!.*(?:^|/)\\.\\.?/)(?!.*\\\\)[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*/?$"
     },
-    namingStyle: { type: "string", enum: ["operationId", "camelCase"] }
+    namingStyle: { type: "string", enum: ["operationId", "camelCase"] },
+    packageName: {
+      type: "string",
+      minLength: 1,
+      maxLength: 160,
+      pattern: "^(?!.*\\.\\.)[A-Za-z0-9][A-Za-z0-9._/-]*$"
+    },
+    clientName: {
+      type: "string",
+      minLength: 1,
+      maxLength: 80,
+      pattern: "^[A-Za-z][A-Za-z0-9_]*$"
+    },
+    baseUrlStrategy: { type: "string", enum: ["constructor", "perRequest"] }
   }
 } as const;
 

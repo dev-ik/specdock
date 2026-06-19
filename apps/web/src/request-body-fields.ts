@@ -9,6 +9,12 @@ export const requestBodyTitle = (operation: ApiOperation): string => {
   if (contentType?.includes("application/x-www-form-urlencoded")) {
     return "Form body";
   }
+  if (contentType?.includes("multipart/form-data")) {
+    return "Multipart body";
+  }
+  if (contentType?.includes("application/octet-stream")) {
+    return "Binary body";
+  }
 
   return "JSON body";
 };

@@ -32,6 +32,7 @@ export const renderWorkspacePanelCard = (
           curlPreview={app.curlPreview}
           requestBodyExample={app.requestBodyExample}
           requestBodyFields={app.requestBodyFields}
+          requestBodyFiles={app.requestBodyFiles}
           isExecuting={app.isExecuting}
           executionBlockReason={app.requestExecutionBlockReason}
           onBaseUrlChange={app.updateProjectBaseUrl}
@@ -41,6 +42,7 @@ export const renderWorkspacePanelCard = (
           onRecordFieldRemove={app.removeRecordField}
           onAddHeader={app.addHeader}
           onFillRequestBodyExample={app.fillRequestBodyExample}
+          onRequestBodyFileChange={app.updateRequestBodyFile}
           onExecute={() => void app.executeRequest()}
           reorder={getPanelReorderProps(panelId)}
         />
