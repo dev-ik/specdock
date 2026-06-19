@@ -30,6 +30,7 @@ import {
   sanitizeRequestStatesForStorage
 } from "./request-state-storage.js";
 import type { GeneratedFilesDiff, GeneratedFilesTarget } from "./sdk-diff.js";
+import { applyProjectBaseUrl } from "./base-url.js";
 import { hydrateGenerateOptions } from "./generate-options.js";
 import { useAppConfig } from "./useAppConfig.js";
 import { useSpecDockDerivedState } from "./useSpecDockDerivedState.js";
@@ -37,6 +38,7 @@ import type {
   ExchangeMap,
   GenerateMeta,
   ProjectBaseUrlMap,
+  RequestBodyFileMap,
   RequestStateMap,
   ResponseScope,
   ThemeMode
@@ -66,6 +68,7 @@ export const useSpecDockState = () => {
   const [requestStates, setRequestStates] = useState<RequestStateMap>(() =>
     hydrateStoredRequestStates(readLocalJson(requestStatesStorageKey, {}))
   );
+  const [requestBodyFilesByOperation, setRequestBodyFilesByOperation] = useState<RequestBodyFileMap>({});
   const [authProfiles, setAuthProfiles] = useState<AuthProfile[]>(() =>
     storageAdapter.getAuthProfiles()
   );
@@ -106,6 +109,7 @@ export const useSpecDockState = () => {
     activeProjectId,
     selectedOperationId,
     requestStates,
+    requestBodyFilesByOperation,
     authProfiles,
     defaultRequestMode,
     baseUrlsByProject,
@@ -130,13 +134,7 @@ export const useSpecDockState = () => {
 
     if (!activeProject) return;
 
-    setBaseUrlsByProject((current) => ({
-      ...current,
-      [activeProject.id]:
-        current[activeProject.id] ??
-        activeProject.servers[0]?.url ??
-        "https://api.example.com"
-    }));
+    setBaseUrlsByProject((current) => applyProjectBaseUrl(current, activeProject, "preserve"));
     setSelectedOperationId((current) =>
       current &&
       activeProject.operations.some((operation) => operation.id === current)
@@ -210,10 +208,13 @@ export const useSpecDockState = () => {
     setSelectedOperationId,
     requestStates,
     setRequestStates,
+    requestBodyFilesByOperation,
+    setRequestBodyFilesByOperation,
     authProfiles,
     setAuthProfiles,
     defaultRequestMode,
     setDefaultRequestMode,
+    baseUrlsByProject,
     setBaseUrlsByProject,
     files,
     setFiles,

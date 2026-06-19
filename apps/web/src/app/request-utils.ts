@@ -2,12 +2,21 @@ import type { ApiRequest, ResponseViewModel } from "../request.js";
 import type { ApiErrorResponse } from "./types.js";
 
 export const executeProxyRequest = async (request: ApiRequest): Promise<ResponseViewModel> => {
+  if (request.body !== undefined && typeof request.body !== "string") {
+    throw new Error("Proxy Mode supports text request bodies only. Use Direct Browser Mode for file uploads.");
+  }
+
   const response = await fetch("/api/proxy/request", {
     method: "POST",
     headers: {
       "content-type": "application/json"
     },
-    body: JSON.stringify(request)
+    body: JSON.stringify({
+      url: request.url,
+      method: request.method,
+      headers: request.headers,
+      body: request.body
+    })
   });
   const text = await response.text();
 

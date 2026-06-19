@@ -27,7 +27,7 @@
 .field:focus,
 .search-field:focus-within,
 .segmented-control button:focus-visible,
-.project-delete-button:focus-visible,
+.project-icon-button:focus-visible,
 .field-remove-button:focus-visible,
 .endpoint-item:focus-visible,
 .project-item:focus-visible,
@@ -100,6 +100,10 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
+}
+
+.button-row-tight {
+  gap: 0.4rem;
 }
 
 .section-label-row {

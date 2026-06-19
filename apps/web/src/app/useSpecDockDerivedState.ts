@@ -24,6 +24,7 @@ import { createOperationKey } from "./request-utils.js";
 import type {
   ExchangeMap,
   ProjectBaseUrlMap,
+  RequestBodyFileMap,
   RequestStateMap,
   ResponseScope
 } from "./types.js";
@@ -34,6 +35,7 @@ type DerivedStateInput = {
   activeProjectId?: string;
   selectedOperationId?: string;
   requestStates: RequestStateMap;
+  requestBodyFilesByOperation: RequestBodyFileMap;
   authProfiles: AuthProfile[];
   defaultRequestMode: RequestState["requestMode"];
   baseUrlsByProject: ProjectBaseUrlMap;
@@ -51,6 +53,7 @@ export const useSpecDockDerivedState = ({
   activeProjectId,
   selectedOperationId,
   requestStates,
+  requestBodyFilesByOperation,
   authProfiles,
   defaultRequestMode,
   baseUrlsByProject,
@@ -144,9 +147,10 @@ export const useSpecDockDerivedState = ({
     () =>
       selectedOperation
         ? getRequestBodySchemaFields(selectedOperation, activeProject?.spec)
-        : [],
+      : [],
     [activeProject?.spec, selectedOperation]
   );
+  const requestBodyFiles = operationKey ? (requestBodyFilesByOperation[operationKey] ?? {}) : {};
   const builtRequest = useMemo(() => {
     if (!selectedOperation || !requestState || !selectedBaseUrl.trim()) {
       return undefined;
@@ -154,14 +158,14 @@ export const useSpecDockDerivedState = ({
 
     try {
       return applyAuthProfileToRequest(
-        buildApiRequest(selectedOperation, requestState, selectedBaseUrl),
+        buildApiRequest(selectedOperation, requestState, selectedBaseUrl, requestBodyFiles),
         selectedAuthProfile,
         { requestMode: requestState.requestMode }
       );
     } catch {
       return undefined;
     }
-  }, [requestState, selectedAuthProfile, selectedBaseUrl, selectedOperation]);
+  }, [requestBodyFiles, requestState, selectedAuthProfile, selectedBaseUrl, selectedOperation]);
   const displayedExchange =
     responseScope === "latest"
       ? exchangesByOperation[latestExchangeKey ?? ""]
@@ -198,6 +202,7 @@ export const useSpecDockDerivedState = ({
     diffFindings,
     requestBodyExample,
     requestBodyFields,
+    requestBodyFiles,
     builtRequest,
     displayedExchange,
     displayedContext,

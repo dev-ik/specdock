@@ -24,6 +24,7 @@ export const buildProjectFromSpecText = (
     id: existingProject?.id ?? createProjectId(),
     name: title,
     source,
+    specFormat: normalized.specFormat,
     spec: normalized.spec,
     servers: normalized.servers,
     tags: normalized.tags,

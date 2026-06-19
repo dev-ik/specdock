@@ -76,4 +76,7 @@ export type GenerateOptions = {
   generateZod: boolean;
   outputPath: string;
   namingStyle: "operationId" | "camelCase";
+  packageName: string;
+  clientName: string;
+  baseUrlStrategy: "constructor" | "perRequest";
 };

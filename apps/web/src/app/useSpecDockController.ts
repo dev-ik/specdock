@@ -1,15 +1,16 @@
 import type React from "react";
 import { type GenerateOptions, type OpenApiProject } from "@specdock/core";
 import { importOpenApiFromUrl } from "../import-url.js";
-import { importCurlCommand } from "../curl-import.js";
 import { persistProjectFromSpecText } from "../workspace.js";
 import { createAuthActions } from "./auth-actions.js";
+import { applyProjectBaseUrl, type BaseUrlMode } from "./base-url.js";
 import { downloadSdkZip, downloadTextFile, generateSdkFiles } from "./controller-helpers.js";
+import { createCurlActions } from "./curl-actions.js";
 import { directRequestBlockReason } from "./deployment-policy.js";
 import { createHttpCollection } from "./http-collection.js";
 import { createProjectActions } from "./project-actions.js";
+import { createProjectTransferActions } from "./project-transfer-actions.js";
 import { createRequestActions } from "./request-actions.js";
-import { createOperationKey } from "./request-utils.js";
 import { canDiffGeneratedFiles, diffGeneratedFiles, generatedFilesTargetFromOptions } from "./sdk-diff.js";
 import { useSpecDockState } from "./useSpecDockState.js";
 
@@ -21,11 +22,7 @@ export const useSpecDockController = () => {
     state.setHistoryCount(state.storageAdapter.getHistory().length);
     state.setActiveProjectId(projectId ?? state.storageAdapter.getActiveProjectId());
   };
-  const activateProject = (
-    project: OpenApiProject,
-    message: string,
-    previousProjectForDiff?: OpenApiProject
-  ) => {
+  const activateProject = (project: OpenApiProject, message: string, options: { previousProjectForDiff?: OpenApiProject; baseUrlMode?: BaseUrlMode } = {}) => {
     state.setSpecText(JSON.stringify(project.spec, null, 2));
     state.setFiles([]);
     state.setGeneratedDiff(undefined);
@@ -33,12 +30,9 @@ export const useSpecDockController = () => {
     state.setSelectedPath(undefined);
     state.setGenerateMeta(undefined);
     state.setSearchQuery("");
-    state.setBaseUrlsByProject((current) => ({
-      ...current,
-      [project.id]: current[project.id] ?? project.servers[0]?.url ?? ""
-    }));
+    state.setBaseUrlsByProject((current) => applyProjectBaseUrl(current, project, options.baseUrlMode ?? "preserve", ""));
     state.setSelectedOperationId(project.operations[0]?.id);
-    state.setPreviousProjectForDiff(previousProjectForDiff);
+    state.setPreviousProjectForDiff(options.previousProjectForDiff);
     state.setActiveProjectId(project.id);
     state.storageAdapter.saveActiveProjectId(project.id);
     state.setStatus(message);
@@ -49,17 +43,9 @@ export const useSpecDockController = () => {
   };
   const importCurrentSpec = () => {
     const previousProject = state.activeProject;
-    const project = persistProjectFromSpecText(
-      state.storageAdapter,
-      state.specText,
-      state.currentSource,
-      state.activeProject
-    );
+    const project = persistProjectFromSpecText(state.storageAdapter, state.specText, state.currentSource, state.activeProject);
     refreshStoredProjects(project.id);
-    state.setBaseUrlsByProject((current) => ({
-      ...current,
-      [project.id]: current[project.id] ?? project.servers[0]?.url ?? state.selectedBaseUrl
-    }));
+    state.setBaseUrlsByProject((current) => ({ ...current, [project.id]: current[project.id] ?? project.servers[0]?.url ?? state.selectedBaseUrl }));
     state.setSelectedOperationId(project.operations[0]?.id);
     state.setPreviousProjectForDiff(previousProject);
     return project;
@@ -69,13 +55,10 @@ export const useSpecDockController = () => {
     state.setStatus("Importing OpenAPI URL");
     try {
       const imported = await importOpenApiFromUrl(state.urlInput);
-      const project = persistProjectFromSpecText(state.storageAdapter, imported.text, {
-        type: "url",
-        url: imported.url
-      });
+      const project = persistProjectFromSpecText(state.storageAdapter, imported.text, { type: "url", url: imported.url });
       state.setSpecText(imported.text);
       refreshStoredProjects(project.id);
-      activateProject(project, `Imported ${project.name} from URL`);
+      activateProject(project, `Imported ${project.name} from URL`, { baseUrlMode: "reset" });
       state.setCurrentSource({ type: "url", url: imported.url });
     } catch (error) {
       state.setStatus(error instanceof Error ? error.message : "Unable to import OpenAPI URL.");
@@ -89,42 +72,23 @@ export const useSpecDockController = () => {
       state.setCurrentSource({ type: "raw" });
       const project = persistProjectFromSpecText(state.storageAdapter, state.specText, { type: "raw" }, state.activeProject);
       refreshStoredProjects(project.id);
-      activateProject(project, `Imported ${project.name}`, previousProject);
+      activateProject(project, `Imported ${project.name}`, { previousProjectForDiff: previousProject, baseUrlMode: "reset" });
     } catch (error) {
       state.setStatus(error instanceof Error ? error.message : "Unable to import raw OpenAPI.");
-    }
-  };
-  const importCurl = () => {
-    try {
-      const imported = importCurlCommand(state.curlInput, state.defaultRequestMode);
-      const project = persistProjectFromSpecText(state.storageAdapter, imported.specText, { type: "curl" });
-      const operation = project.operations.find((candidate) => candidate.id === imported.operationId);
-      if (!operation) {
-        throw new Error("Imported cURL did not produce an operation.");
-      }
-
-      refreshStoredProjects(project.id);
-      activateProject(project, `Imported cURL as ${operation.method} ${operation.path}`);
-      state.setSpecText(imported.specText);
-      state.setCurrentSource({ type: "curl" });
-      state.setBaseUrlsByProject((current) => ({ ...current, [project.id]: imported.baseUrl }));
-      state.setSelectedOperationId(operation.id);
-      state.setRequestStates((current) => ({
-        ...current,
-        [createOperationKey(project.id, operation.id)]: {
-          ...imported.requestState,
-          operationId: operation.id
-        }
-      }));
-    } catch (error) {
-      state.setStatus(error instanceof Error ? error.message : "Unable to import cURL.");
     }
   };
   const uploadSpec = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.currentTarget.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => importUploadedText(file.name, String(reader.result ?? ""));
+    reader.onload = () => {
+      const text = String(reader.result ?? "");
+      if (file.name.endsWith(".specdock.json")) {
+        projectTransferActions.importProjectExport(text);
+      } else {
+        importUploadedText(file.name, text);
+      }
+    };
     reader.readAsText(file);
   };
   const importUploadedText = (fileName: string, text: string) => {
@@ -137,7 +101,7 @@ export const useSpecDockController = () => {
     try {
       const project = persistProjectFromSpecText(state.storageAdapter, text, { type: "file", fileName });
       refreshStoredProjects(project.id);
-      activateProject(project, `Imported ${project.name} from ${fileName}`);
+      activateProject(project, `Imported ${project.name} from ${fileName}`, { baseUrlMode: "reset" });
       state.setCurrentSource({ type: "file", fileName });
     } catch (error) {
       state.setActiveProjectId(undefined);
@@ -194,6 +158,8 @@ export const useSpecDockController = () => {
   };
   const requestActions = createRequestActions(state);
   const projectActions = createProjectActions(state, activateProject);
+  const projectTransferActions = createProjectTransferActions(state, activateProject, refreshStoredProjects);
+  const curlActions = createCurlActions(state, activateProject, refreshStoredProjects);
   const authActions = createAuthActions(state);
   const requestExecutionBlockReason = directRequestBlockReason(
     state.appConfig,
@@ -234,8 +200,9 @@ export const useSpecDockController = () => {
     },
     openProject,
     ...projectActions,
+    ...projectTransferActions,
+    ...curlActions,
     importFromUrl,
-    importCurl,
     importRawSpec,
     uploadSpec,
     ...requestActions,

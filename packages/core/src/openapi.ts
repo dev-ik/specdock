@@ -14,6 +14,7 @@ import {
   extractSecurity
 } from "./openapi-operation.js";
 import { assertRecord, isRecord, type OpenApiRecord } from "./openapi-utils.js";
+import { convertSwagger2ToOpenApi3, isSwagger2Spec } from "./swagger2.js";
 
 export const parseSpec = (input: string | unknown): OpenApiRecord => {
   if (typeof input !== "string") {
@@ -37,8 +38,8 @@ export const validateSpec = (spec: unknown): OpenApiRecord => {
   const document = assertRecord(spec, "Specification must be an object.");
   const openapi = document.openapi;
 
-  if (typeof document.swagger === "string" && document.swagger.startsWith("2.")) {
-    throw new Error("Swagger 2.0 is not supported yet. Please use OpenAPI 3.x.");
+  if (isSwagger2Spec(document)) {
+    return convertSwagger2ToOpenApi3(document);
   }
 
   if (typeof openapi !== "string" || !/^3\.(0|1)\.\d+/.test(openapi)) {
@@ -53,10 +54,13 @@ export const validateSpec = (spec: unknown): OpenApiRecord => {
 };
 
 export const normalizeSpec = (input: string | unknown): NormalizedOpenApi => {
-  const spec = validateSpec(parseSpec(input));
+  const parsed = parseSpec(input);
+  const specFormat = isSwagger2Spec(parsed) ? "swagger2" : "openapi3";
+  const spec = validateSpec(parsed);
 
   return {
     spec,
+    specFormat,
     servers: extractServers(spec),
     tags: extractTags(spec),
     operations: extractOperations(spec),
