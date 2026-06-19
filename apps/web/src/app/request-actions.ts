@@ -104,6 +104,27 @@ export const createRequestActions = (state: State) => {
       }
     });
   };
+  const updateRequestBodyFile = (
+    operationKey: string,
+    name: string,
+    file: File | undefined
+  ) => {
+    state.setRequestBodyFilesByOperation((current) => {
+      const currentFiles = current[operationKey] ?? {};
+      const nextFiles = { ...currentFiles };
+
+      if (file) {
+        nextFiles[name] = file;
+      } else {
+        delete nextFiles[name];
+      }
+
+      return {
+        ...current,
+        [operationKey]: nextFiles
+      };
+    });
+  };
   const fillRequestBodyExample = () => {
     if (!state.selectedOperation || !state.operationKey || !state.requestBodyExample)
       return;
@@ -174,6 +195,7 @@ export const createRequestActions = (state: State) => {
     renameRecordField,
     removeRecordField,
     addHeader,
+    updateRequestBodyFile,
     fillRequestBodyExample,
     executeRequest
   };

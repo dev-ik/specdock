@@ -130,8 +130,65 @@ describe("generateSdk", () => {
         name: "TypeScript",
         target: "TypeScript 5.x, Node.js 20+ or modern browsers"
       },
+      packageName: "specdock-generated-client",
+      clientName: "SpecDockClient",
+      baseUrlStrategy: "constructor",
       files: expect.arrayContaining(["client.ts", "README.md"])
     });
+  });
+
+  it("includes SDK preset metadata and applies Python package names", () => {
+    const files = generateSdk(spec, {
+      language: "python",
+      packageName: "acme-api-client",
+      clientName: "AcmeClient",
+      baseUrlStrategy: "perRequest"
+    });
+    const manifest = JSON.parse(
+      files.find((file) => file.path === "generated/specdock.manifest.json")?.content ?? "{}"
+    );
+
+    expect(files.map((file) => file.path)).toContain("generated/acme_api_client/client.py");
+    expect(files.find((file) => file.path === "generated/acme_api_client/client.py")?.content).toContain(
+      "class AcmeClient"
+    );
+    expect(manifest.preset).toEqual({
+      packageName: "acme-api-client",
+      clientName: "AcmeClient",
+      baseUrlStrategy: "perRequest"
+    });
+  });
+
+  it("generates per-request base URL operation helpers", () => {
+    const tsFiles = generateSdk(spec, { baseUrlStrategy: "perRequest" });
+    const goFiles = generateSdk(spec, { language: "go", baseUrlStrategy: "perRequest" });
+    const javaFiles = generateSdk(spec, { language: "java", baseUrlStrategy: "perRequest" });
+    const csharpFiles = generateSdk(spec, { language: "csharp", baseUrlStrategy: "perRequest" });
+    const phpFiles = generateSdk(spec, { language: "php", baseUrlStrategy: "perRequest" });
+    const pythonFiles = generateSdk(spec, {
+      language: "python",
+      baseUrlStrategy: "perRequest",
+      clientName: "AcmeClient"
+    });
+
+    expect(tsFiles.find((file) => file.path === "generated/client.ts")?.content).toContain(
+      "baseUrl: string"
+    );
+    expect(goFiles.find((file) => file.path === "generated/client.go")?.content).toContain(
+      "RequestWithBaseURL(ctx, baseURL"
+    );
+    expect(javaFiles.find((file) => file.path.endsWith("SpecDockClient.java"))?.content).toContain(
+      "requestWithBaseUrl(baseUrl"
+    );
+    expect(csharpFiles.find((file) => file.path === "generated/SpecDockClient.cs")?.content).toContain(
+      "RequestWithBaseUrlAsync(baseUrl"
+    );
+    expect(phpFiles.find((file) => file.path === "generated/src/SpecDockClient.php")?.content).toContain(
+      "requestWithBaseUrl($baseUrl"
+    );
+    expect(pythonFiles.find((file) => file.path === "generated/specdock_client/client.py")?.content).toContain(
+      "base_url: str"
+    );
   });
 
   it("rejects specs above generation complexity limits", () => {

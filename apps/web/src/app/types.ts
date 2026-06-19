@@ -27,6 +27,7 @@ export type ApiErrorResponse = {
 };
 
 export type RequestStateMap = Record<string, RequestState>;
+export type RequestBodyFileMap = Record<string, Record<string, File>>;
 export type ProjectBaseUrlMap = Record<string, string>;
 export type ResponseScope = "operation" | "latest";
 export type ThemeMode = "dark" | "light";

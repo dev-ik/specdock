@@ -29,6 +29,7 @@ export type SdkOperation = {
   cookieParameters: SdkParameter[];
   hasQuery: boolean;
   hasBody: boolean;
+  baseUrlStrategy: GenerateOptions["baseUrlStrategy"];
 };
 
 export type SdkModel = {
@@ -68,7 +69,8 @@ const toSdkOperation = (
     headerParameters,
     cookieParameters,
     hasQuery: queryParameters.length > 0,
-    hasBody: operation.requestBody !== undefined
+    hasBody: operation.requestBody !== undefined,
+    baseUrlStrategy: options.baseUrlStrategy
   };
 };
 

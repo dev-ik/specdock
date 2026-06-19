@@ -68,23 +68,22 @@ describe("sdk diff", () => {
   });
 
   it("does not diff generated files across SDK languages", () => {
-    const typescriptTarget = generatedFilesTargetFromOptions({
+    const baseOptions = {
       language: "typescript",
       client: "fetch",
       generateTypes: true,
       generateReactQuery: false,
       generateZod: false,
       outputPath: "generated",
-      namingStyle: "operationId"
-    });
+      namingStyle: "operationId",
+      packageName: "specdock-generated-client",
+      clientName: "SpecDockClient",
+      baseUrlStrategy: "constructor"
+    } as const;
+    const typescriptTarget = generatedFilesTargetFromOptions(baseOptions);
     const javaTarget = generatedFilesTargetFromOptions({
-      language: "java",
-      client: "fetch",
-      generateTypes: true,
-      generateReactQuery: false,
-      generateZod: false,
-      outputPath: "generated",
-      namingStyle: "operationId"
+      ...baseOptions,
+      language: "java"
     });
 
     expect(canDiffGeneratedFiles(typescriptTarget, typescriptTarget)).toBe(true);

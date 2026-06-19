@@ -1,4 +1,4 @@
-import type { ApiSchema } from "@specdock/core";
+import type { ApiSchema, GenerateOptions } from "@specdock/core";
 import type { SdkModel, SdkOperation } from "./sdk-model.js";
 import {
   parameterPlaceholder,
@@ -10,14 +10,14 @@ import {
 } from "./php-naming.js";
 import { isRecord } from "./schema-utils.js";
 
-export const generatePhpFiles = (model: SdkModel, outputPath: string) => [
-  { path: `${outputPath}/composer.json`, content: generateComposerFile() },
-  { path: `${outputPath}/src/SpecDockClient.php`, content: generateClientFile(model.operations) },
+export const generatePhpFiles = (model: SdkModel, outputPath: string, options: GenerateOptions) => [
+  { path: `${outputPath}/composer.json`, content: generateComposerFile(options.packageName) },
+  { path: `${outputPath}/src/SpecDockClient.php`, content: generateClientFile(model.operations, options.clientName) },
   { path: `${outputPath}/src/Models.php`, content: generateModelsFile(model.schemas) }
 ];
 
-const generateComposerFile = () => `{
-  "name": "specdock/generated-client",
+const generateComposerFile = (packageName: string) => `{
+  "name": "${phpComposerName(packageName)}",
   "description": "Generated SpecDock API client.",
   "type": "library",
   "license": "MIT",
@@ -33,7 +33,7 @@ const generateComposerFile = () => `{
 }
 `;
 
-const generateClientFile = (operations: SdkOperation[]) => `<?php
+const generateClientFile = (operations: SdkOperation[], clientName: string) => `<?php
 
 declare(strict_types=1);
 
@@ -42,7 +42,7 @@ namespace SpecDock\\Client;
 use GuzzleHttp\\Client;
 use GuzzleHttp\\ClientInterface;
 
-final class SpecDockClient
+final class ${phpClassName(clientName)}
 {
     private string $baseUrl;
     private ClientInterface $httpClient;
@@ -55,12 +55,17 @@ final class SpecDockClient
 
     public function request(string $method, string $path, array $query = [], mixed $body = null, array $headers = []): mixed
     {
+        return $this->requestWithBaseUrl($this->baseUrl, $method, $path, $query, $body, $headers);
+    }
+
+    public function requestWithBaseUrl(string $baseUrl, string $method, string $path, array $query = [], mixed $body = null, array $headers = []): mixed
+    {
         $options = ['headers' => $headers, 'query' => array_filter($query, static fn ($value): bool => $value !== null && $value !== '')];
         if ($body !== null) {
             $options['json'] = $body;
         }
 
-        $response = $this->httpClient->request($method, $this->baseUrl . $path, $options);
+        $response = $this->httpClient->request($method, rtrim($baseUrl, '/') . $path, $options);
         $contents = (string) $response->getBody();
         return $contents === '' ? null : json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
     }
@@ -75,6 +80,7 @@ const generateOperation = (operation: SdkOperation): string => {
   );
   const args = [
     ...pathParams,
+    operation.baseUrlStrategy === "perRequest" ? "string $baseUrl" : undefined,
     operation.hasQuery ? "array $query = []" : undefined,
     operation.hasBody ? "mixed $body = null" : undefined,
     "array $headers = []"
@@ -89,13 +95,19 @@ const generateOperation = (operation: SdkOperation): string => {
   );
   const queryArg = operation.hasQuery ? "$query" : "[]";
   const bodyArg = operation.hasBody ? "$body" : "null";
+  const requestCall = operation.baseUrlStrategy === "perRequest"
+    ? `$this->requestWithBaseUrl($baseUrl, ${phpStringLiteral(operation.method)}, $path, ${queryArg}, ${bodyArg}, $headers)`
+    : `$this->request(${phpStringLiteral(operation.method)}, $path, ${queryArg}, ${bodyArg}, $headers)`;
 
   return `    public function ${phpMethodName(operation.name)}(${args.join(", ")}): mixed
     {
         $path = ${pathToPhpExpression(path)};
-        return $this->request(${phpStringLiteral(operation.method)}, $path, ${queryArg}, ${bodyArg}, $headers);
+        return ${requestCall};
     }`;
 };
+
+const phpComposerName = (packageName: string): string =>
+  packageName.includes("/") ? packageName.toLowerCase() : `specdock/${packageName.toLowerCase()}`;
 
 const generateModelsFile = (schemas: ApiSchema[]) => `<?php
 

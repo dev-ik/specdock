@@ -67,13 +67,63 @@ describe("openapi", () => {
     expect(normalized.schemas[0]?.name).toBe("User");
   });
 
-  it("rejects Swagger 2.0", () => {
-    expect(() =>
-      validateSpec({
-        swagger: "2.0",
-        info: { title: "Old", version: "1.0.0" },
-        paths: {}
-      })
-    ).toThrow("Swagger 2.0 is not supported");
+  it("normalizes Swagger 2.0 specs through an OpenAPI 3 document", () => {
+    const normalized = normalizeSpec({
+      swagger: "2.0",
+      info: { title: "Old", version: "1.0.0" },
+      host: "api.example.com",
+      basePath: "/v1",
+      schemes: ["https"],
+      consumes: ["application/json"],
+      produces: ["application/json"],
+      paths: {
+        "/users/{id}": {
+          get: {
+            operationId: "getUser",
+            tags: ["users"],
+            parameters: [
+              { name: "id", in: "path", required: true, type: "string" },
+              { name: "include", in: "query", type: "array", items: { type: "string" }, collectionFormat: "multi" }
+            ],
+            responses: {
+              "200": { description: "OK", schema: { $ref: "#/definitions/User" } }
+            },
+            security: [{ api_key: [] }]
+          },
+          post: {
+            operationId: "uploadAvatar",
+            consumes: ["multipart/form-data"],
+            parameters: [
+              { name: "avatar", in: "formData", required: true, type: "file" },
+              { name: "label", in: "formData", type: "string" }
+            ],
+            responses: { "201": { description: "Created" } }
+          }
+        }
+      },
+      definitions: {
+        User: { type: "object", properties: { id: { type: "string" } } }
+      },
+      securityDefinitions: {
+        api_key: { type: "apiKey", name: "x-api-key", in: "header" }
+      }
+    });
+
+    expect(normalized.specFormat).toBe("swagger2");
+    expect(validateSpec(normalized.spec).openapi).toBe("3.0.3");
+    expect(normalized.servers).toEqual([{ url: "https://api.example.com/v1", description: undefined }]);
+    expect(normalized.operations[0]).toMatchObject({
+      operationId: "getUser",
+      parameters: [
+        { name: "id", in: "path", required: true },
+        { name: "include", in: "query", explode: true }
+      ],
+      responses: [{ statusCode: "200" }],
+      security: [{ name: "api_key", scopes: [] }]
+    });
+    expect(normalized.operations[1]?.requestBody?.content[0]).toMatchObject({
+      contentType: "multipart/form-data"
+    });
+    expect(normalized.schemas[0]?.name).toBe("User");
   });
 });

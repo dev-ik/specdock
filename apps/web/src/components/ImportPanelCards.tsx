@@ -1,4 +1,4 @@
-import { Link, Terminal, Trash2, Upload, Wand2 } from "lucide-react";
+import { Download, Link, Plus, Terminal, Trash2, Upload, Wand2 } from "lucide-react";
 import type React from "react";
 import type { OpenApiProject } from "@specdock/core";
 import type { PanelId } from "../app/usePanelLayout.js";
@@ -12,12 +12,14 @@ export type ImportPanelCardsProps = {
   curlInput: string;
   isImportingUrl: boolean;
   onOpenProject(project: OpenApiProject): void;
+  onExportProject(project: OpenApiProject): void;
   onDeleteProject(project: OpenApiProject): void;
   onSpecTextChange(value: string): void;
   onUrlInputChange(value: string): void;
   onCurlInputChange(value: string): void;
   onUrlImport(): void;
   onCurlImport(): void;
+  onCurlAppend(): void;
   onRawImport(): void;
   onUpload(event: React.ChangeEvent<HTMLInputElement>): void;
   getPanelReorderProps(panelId: PanelId): PanelReorderProps;
@@ -37,6 +39,7 @@ const LocalProjectsPanel = ({
   projects,
   activeProjectId,
   onOpenProject,
+  onExportProject,
   onDeleteProject,
   getPanelReorderProps
 }: ImportPanelCardsProps) => (
@@ -61,16 +64,27 @@ const LocalProjectsPanel = ({
                 {project.operations.length} operations - {project.schemas.length} schemas
               </span>
             </button>
-            {activeProjectId === project.id ? <span className="project-active-badge">Active</span> : null}
-            <button
-              className="project-delete-button"
-              type="button"
-              aria-label={`Delete ${project.name}`}
-              title={`Delete ${project.name}`}
-              onClick={() => onDeleteProject(project)}
-            >
-              <Trash2 size={15} aria-hidden="true" />
-            </button>
+            <div className="project-actions">
+              {activeProjectId === project.id ? <span className="project-active-badge">Active</span> : null}
+              <button
+                className="project-icon-button"
+                type="button"
+                aria-label={`Export ${project.name}`}
+                title={`Export ${project.name}`}
+                onClick={() => onExportProject(project)}
+              >
+                <Download size={15} aria-hidden="true" />
+              </button>
+              <button
+                className="project-icon-button project-danger-button"
+                type="button"
+                aria-label={`Delete ${project.name}`}
+                title={`Delete ${project.name}`}
+                onClick={() => onDeleteProject(project)}
+              >
+                <Trash2 size={15} aria-hidden="true" />
+              </button>
+            </div>
           </div>
         ))
       )}
@@ -79,6 +93,7 @@ const LocalProjectsPanel = ({
 );
 
 const ImportSpecPanel = ({
+  activeProjectId,
   specText,
   urlInput,
   curlInput,
@@ -88,6 +103,7 @@ const ImportSpecPanel = ({
   onCurlInputChange,
   onUrlImport,
   onCurlImport,
+  onCurlAppend,
   onRawImport,
   onUpload,
   getPanelReorderProps
@@ -100,7 +116,7 @@ const ImportSpecPanel = ({
       <label className="button button-secondary cursor-pointer">
         <Upload size={16} aria-hidden="true" />
         Upload
-        <input className="sr-only" type="file" accept=".yaml,.yml,.json" onChange={onUpload} />
+        <input className="sr-only" type="file" accept=".yaml,.yml,.json,.specdock.json" onChange={onUpload} />
       </label>
     }
   >
@@ -119,15 +135,26 @@ const ImportSpecPanel = ({
       </div>
       <div className="section-label-row">
         <span className="field-label">cURL request</span>
-        <button
-          className="button button-secondary button-small"
-          type="button"
-          disabled={!curlInput.trim()}
-          onClick={onCurlImport}
-        >
-          <Terminal size={15} aria-hidden="true" />
-          Import cURL
-        </button>
+        <div className="button-row button-row-tight">
+          <button
+            className="button button-secondary button-small"
+            type="button"
+            disabled={!curlInput.trim()}
+            onClick={onCurlImport}
+          >
+            <Terminal size={15} aria-hidden="true" />
+            New project
+          </button>
+          <button
+            className="button button-secondary button-small"
+            type="button"
+            disabled={!activeProjectId || !curlInput.trim()}
+            onClick={onCurlAppend}
+          >
+            <Plus size={15} aria-hidden="true" />
+            Add to active
+          </button>
+        </div>
       </div>
       <textarea
         className="field code-field curl-editor"

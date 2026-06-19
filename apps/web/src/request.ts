@@ -5,12 +5,17 @@ import {
   type HttpMethod,
   type RequestState
 } from "@specdock/core";
+import {
+  appendSerializedQueryParams,
+  serializePathTemplate
+} from "./request-serialization.js";
 
 export type ApiRequest = {
   url: string;
   method: HttpMethod;
   headers: Record<string, string>;
-  body?: string;
+  body?: BodyInit;
+  bodyPreview?: string;
 };
 
 export type ResponseViewModel = {
@@ -26,30 +31,27 @@ export type ResponseViewModel = {
 export const buildApiRequest = (
   operation: ApiOperation,
   requestState: RequestState,
-  baseUrl: string
+  baseUrl: string,
+  bodyFiles: Record<string, File> = {}
 ): ApiRequest => {
   const normalizedBaseUrl = baseUrl.trim().replace(/\/+$/, "");
-  const path = replacePathParams(operation.path, requestState.pathParams);
+  const path = serializePathTemplate(operation.path, requestState.pathParams, operation.parameters);
   const url = new URL(`${normalizedBaseUrl}${path.startsWith("/") ? path : `/${path}`}`);
 
-  for (const [name, value] of Object.entries(requestState.queryParams)) {
-    if (value !== "") {
-      url.searchParams.set(name, value);
-    }
-  }
+  appendSerializedQueryParams(url, requestState.queryParams, operation.parameters);
 
   const headers = Object.fromEntries(
     Object.entries(requestState.headers).filter(([name, value]) => name.trim() && value.trim())
   );
-  const hasBody = !["GET", "HEAD"].includes(operation.method) && requestState.body?.trim();
-  const requestBody = hasBody ? requestState.body : undefined;
-  const requestHeaders = addDefaultContentType(headers, requestBody, operation);
+  const requestBody = createBody(operation, requestState, bodyFiles);
+  const requestHeaders = addDefaultContentType(headers, requestBody.body, operation);
 
   return {
     url: url.toString(),
     method: operation.method,
     headers: requestHeaders,
-    body: requestBody
+    body: requestBody.body,
+    bodyPreview: requestBody.preview
   };
 };
 
@@ -60,7 +62,9 @@ export const generateCurl = (request: ApiRequest): string => {
     parts.push("-H", shellQuote(`${name}: ${value}`));
   }
 
-  if (request.body !== undefined) {
+  if (request.bodyPreview !== undefined) {
+    parts.push(request.bodyPreview);
+  } else if (typeof request.body === "string") {
     parts.push("--data", shellQuote(request.body));
   }
 
@@ -121,10 +125,6 @@ export const responseViewerMessageForError = (error: unknown): string => {
   return error instanceof Error ? error.message : "Request failed.";
 };
 
-const replacePathParams = (path: string, pathParams: Record<string, string>): string => {
-  return path.replace(/\{([^}]+)\}/g, (_match, name: string) => encodeURIComponent(pathParams[name] ?? ""));
-};
-
 const formatBody = (
   body: string,
   contentType: string | undefined
@@ -172,9 +172,67 @@ const defaultBodyForOperation = (operation: ApiOperation): string | undefined =>
   return contentType?.includes("json") ? "{\n  \n}" : "";
 };
 
+const createBody = (
+  operation: ApiOperation,
+  requestState: RequestState,
+  bodyFiles: Record<string, File>
+): { body?: BodyInit; preview?: string } => {
+  if (["GET", "HEAD"].includes(operation.method)) return {};
+  const contentType = selectRequestMediaType(operation.requestBody?.content)?.contentType;
+
+  if (contentType?.includes("multipart/form-data")) {
+    return createMultipartBody(requestState.body, bodyFiles);
+  }
+
+  if (contentType?.includes("application/octet-stream") && bodyFiles.__body) {
+    return {
+      body: bodyFiles.__body,
+      preview: `--data-binary ${shellQuote(`@${bodyFiles.__body.name}`)}`
+    };
+  }
+
+  const body = requestState.body?.trim() ? requestState.body : undefined;
+  return { body };
+};
+
+const createMultipartBody = (
+  body: string | undefined,
+  bodyFiles: Record<string, File>
+): { body?: FormData; preview?: string } => {
+  const fields = parseBodyObject(body);
+  const formData = new FormData();
+  const previewParts: string[] = [];
+
+  for (const [name, value] of Object.entries(fields)) {
+    formData.append(name, stringifyBodyValue(value));
+    previewParts.push("-F", shellQuote(`${name}=${stringifyBodyValue(value)}`));
+  }
+
+  for (const [name, file] of Object.entries(bodyFiles)) {
+    if (!file || name === "__body") continue;
+    formData.append(name, file);
+    previewParts.push("-F", shellQuote(`${name}=@${file.name}`));
+  }
+
+  return previewParts.length ? { body: formData, preview: previewParts.join(" ") } : {};
+};
+
+const parseBodyObject = (body: string | undefined): Record<string, unknown> => {
+  if (!body?.trim()) return {};
+  try {
+    const parsed = JSON.parse(body);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return Object.fromEntries(new URLSearchParams(body).entries());
+  }
+};
+
+const stringifyBodyValue = (value: unknown): string =>
+  value && typeof value === "object" ? JSON.stringify(value) : String(value ?? "");
+
 const addDefaultContentType = (
   headers: Record<string, string>,
-  body: string | undefined,
+  body: BodyInit | undefined,
   operation: ApiOperation
 ): Record<string, string> => {
   if (!body || hasHeader(headers, "content-type")) {
@@ -182,11 +240,16 @@ const addDefaultContentType = (
   }
 
   const contentType = selectRequestMediaType(operation.requestBody?.content)?.contentType;
+  if (body instanceof FormData) {
+    return headers;
+  }
   if (contentType) {
     return { ...headers, "content-type": contentType };
   }
 
-  return looksLikeJson(body) ? { ...headers, "content-type": "application/json" } : headers;
+  return typeof body === "string" && looksLikeJson(body)
+    ? { ...headers, "content-type": "application/json" }
+    : headers;
 };
 
 const hasHeader = (headers: Record<string, string>, name: string): boolean => {

@@ -27,6 +27,8 @@ export const resolveGenerateOptions = (
 export const assertSupportedGenerateOptions = (options: GenerateOptions): void => {
   const language = String(options.language);
   const client = String(options.client);
+  const packageName = String(options.packageName);
+  const clientName = String(options.clientName);
 
   if (!isSupportedGenerateLanguage(language)) {
     throw new Error(`Unsupported SDK language: ${language}`);
@@ -34,6 +36,18 @@ export const assertSupportedGenerateOptions = (options: GenerateOptions): void =
 
   if (!isSupportedGenerateClient(client)) {
     throw new Error(`Unsupported TypeScript client: ${client}`);
+  }
+
+  if (!/^[a-z0-9][a-z0-9._/-]{0,159}$/i.test(packageName) || packageName.includes("..")) {
+    throw new Error("Unsupported SDK package name.");
+  }
+
+  if (!/^[A-Za-z][A-Za-z0-9_]{0,79}$/.test(clientName)) {
+    throw new Error("Unsupported SDK client name.");
+  }
+
+  if (options.baseUrlStrategy !== "constructor" && options.baseUrlStrategy !== "perRequest") {
+    throw new Error(`Unsupported SDK base URL strategy: ${String(options.baseUrlStrategy)}`);
   }
 };
 

@@ -1,6 +1,6 @@
 # Release
 
-This document describes the manual release path for `v0.2.3`.
+This document describes the manual release path for `v0.3.0`.
 
 ## Preflight
 
@@ -21,7 +21,7 @@ Build a local image for smoke testing:
 
 ```bash
 docker build \
-  -t docker.io/d8vik/specdock:v0.2.3 \
+  -t docker.io/d8vik/specdock:v0.3.0 \
   .
 ```
 
@@ -31,7 +31,7 @@ Smoke the image locally:
 docker run --rm -p 127.0.0.1:3000:3000 \
   -e PUBLIC_DEMO=true \
   -e PROXY_ENABLED=false \
-  docker.io/d8vik/specdock:v0.2.3
+  docker.io/d8vik/specdock:v0.3.0
 ```
 
 Check:
@@ -46,7 +46,7 @@ Publish the Docker Hub multi-arch version tag:
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t docker.io/d8vik/specdock:v0.2.3 \
+  -t docker.io/d8vik/specdock:v0.3.0 \
   --push \
   .
 ```
@@ -59,11 +59,11 @@ Do not move old release tags. Create a new immutable tag for every patch
 release.
 
 ```bash
-git tag v0.2.3
+git tag v0.3.0
 git push origin main
-git push origin v0.2.3
+git push origin v0.3.0
 git push gitlab main
-git push gitlab v0.2.3
+git push gitlab v0.3.0
 ```
 
 The GitHub Actions Docker workflow publishes the Docker Hub image when `v*` tags are pushed, assuming these repository secrets exist:

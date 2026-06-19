@@ -1,6 +1,6 @@
 import type { GenerateOptions, UserSettings } from "./types.js";
 
-export const APP_VERSION = "0.2.3";
+export const APP_VERSION = "0.3.0";
 export const CURRENT_STORAGE_VERSION = "1";
 
 export const STORAGE_KEYS = {
@@ -36,7 +36,10 @@ export const defaultGenerateOptions: GenerateOptions = {
   generateReactQuery: false,
   generateZod: false,
   outputPath: "generated",
-  namingStyle: "operationId"
+  namingStyle: "operationId",
+  packageName: "specdock-generated-client",
+  clientName: "SpecDockClient",
+  baseUrlStrategy: "constructor"
 };
 
 export const defaultSettings: UserSettings = {

@@ -119,4 +119,151 @@ describe("request helpers", () => {
     expect(curl).toContain("-H 'authorization: Bearer token'");
     expect(curl).toContain("--data '{\"name\":\"Ada\"}'");
   });
+
+  it("serializes supported OpenAPI query parameter styles", () => {
+    const styledOperation: ApiOperation = {
+      ...operation,
+      path: "/users",
+      parameters: [
+        {
+          name: "tags",
+          in: "query",
+          required: false,
+          schema: { type: "array", items: { type: "string" } },
+          style: "pipeDelimited",
+          explode: false
+        },
+        {
+          name: "filter",
+          in: "query",
+          required: false,
+          schema: { type: "object" },
+          style: "deepObject",
+          explode: true
+        }
+      ]
+    };
+
+    const request = buildApiRequest(
+      styledOperation,
+      {
+        operationId: "getUser",
+        pathParams: {},
+        queryParams: { tags: "red,blue", filter: '{"status":"open","owner":"me"}' },
+        headers: {},
+        requestMode: "direct"
+      },
+      "https://api.example.com"
+    );
+
+    expect(request.url).toBe(
+      "https://api.example.com/users?tags=red%7Cblue&filter%5Bstatus%5D=open&filter%5Bowner%5D=me"
+    );
+  });
+
+  it("serializes path object parameters with simple explode", () => {
+    const styledOperation: ApiOperation = {
+      ...operation,
+      path: "/users/{filter}",
+      parameters: [
+        {
+          name: "filter",
+          in: "path",
+          required: true,
+          schema: { type: "object" },
+          style: "simple",
+          explode: true
+        }
+      ]
+    };
+
+    const request = buildApiRequest(
+      styledOperation,
+      {
+        operationId: "getUser",
+        pathParams: { filter: '{"role":"admin","active":"true"}' },
+        queryParams: {},
+        headers: {},
+        requestMode: "direct"
+      },
+      "https://api.example.com"
+    );
+
+    expect(request.url).toBe("https://api.example.com/users/role%3Dadmin%2Cactive%3Dtrue");
+  });
+
+  it("builds multipart browser bodies with cURL file placeholders", () => {
+    const uploadOperation: ApiOperation = {
+      ...operation,
+      id: "uploadAvatar",
+      method: "POST",
+      path: "/avatar",
+      parameters: [],
+      requestBody: {
+        required: true,
+        content: [
+          {
+            contentType: "multipart/form-data",
+            schema: {
+              type: "object",
+              properties: {
+                label: { type: "string" },
+                avatar: { type: "string", format: "binary" }
+              }
+            }
+          }
+        ]
+      }
+    };
+    const file = new File(["image"], "avatar.png", { type: "image/png" });
+    const request = buildApiRequest(
+      uploadOperation,
+      {
+        operationId: "uploadAvatar",
+        pathParams: {},
+        queryParams: {},
+        headers: {},
+        body: '{"label":"Profile"}',
+        requestMode: "direct"
+      },
+      "https://api.example.com",
+      { avatar: file }
+    );
+
+    expect(request.body).toBeInstanceOf(FormData);
+    expect(request.headers).toEqual({});
+    expect(generateCurl(request)).toContain("-F 'avatar=@avatar.png'");
+  });
+
+  it("builds binary browser bodies from session files", () => {
+    const binaryOperation: ApiOperation = {
+      ...operation,
+      id: "uploadBinary",
+      method: "PUT",
+      path: "/binary",
+      parameters: [],
+      requestBody: {
+        required: true,
+        content: [{ contentType: "application/octet-stream" }]
+      }
+    };
+    const file = new File(["raw"], "payload.bin");
+    const request = buildApiRequest(
+      binaryOperation,
+      {
+        operationId: "uploadBinary",
+        pathParams: {},
+        queryParams: {},
+        headers: {},
+        body: "",
+        requestMode: "direct"
+      },
+      "https://api.example.com",
+      { __body: file }
+    );
+
+    expect(request.body).toBe(file);
+    expect(request.headers).toEqual({ "content-type": "application/octet-stream" });
+    expect(generateCurl(request)).toContain("--data-binary '@payload.bin'");
+  });
 });

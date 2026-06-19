@@ -1,4 +1,4 @@
-import type { ApiSchema } from "@specdock/core";
+import type { ApiSchema, GenerateOptions } from "@specdock/core";
 import type { SdkModel, SdkOperation } from "./sdk-model.js";
 import {
   javaClassName,
@@ -11,10 +11,10 @@ import { isRecord } from "./schema-utils.js";
 
 const PACKAGE_PATH = "src/main/java/com/specdock/client";
 
-export const generateJavaFiles = (model: SdkModel, outputPath: string) => [
+export const generateJavaFiles = (model: SdkModel, outputPath: string, options: GenerateOptions) => [
   {
     path: `${outputPath}/pom.xml`,
-    content: generatePomFile()
+    content: generatePomFile(options.packageName)
   },
   {
     path: `${outputPath}/${PACKAGE_PATH}/SpecDockClient.java`,
@@ -26,12 +26,12 @@ export const generateJavaFiles = (model: SdkModel, outputPath: string) => [
   }
 ];
 
-const generatePomFile = () => `<project xmlns="http://maven.apache.org/POM/4.0.0"
+const generatePomFile = (packageName: string) => `<project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.specdock</groupId>
-  <artifactId>specdock-generated-client</artifactId>
+  <artifactId>${packageName}</artifactId>
   <version>0.1.0</version>
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
@@ -76,7 +76,12 @@ public final class SpecDockClient {
 
   public JsonNode request(String method, String path, Map<String, String> query, Object body, Map<String, String> headers)
       throws IOException, InterruptedException {
-    HttpRequest.Builder builder = HttpRequest.newBuilder(buildUri(path, query)).method(method, bodyPublisher(body));
+    return requestWithBaseUrl(baseUrl, method, path, query, body, headers);
+  }
+
+  public JsonNode requestWithBaseUrl(String requestBaseUrl, String method, String path, Map<String, String> query, Object body, Map<String, String> headers)
+      throws IOException, InterruptedException {
+    HttpRequest.Builder builder = HttpRequest.newBuilder(buildUri(requestBaseUrl, path, query)).method(method, bodyPublisher(body));
     if (body != null) {
       builder.header("content-type", "application/json");
     }
@@ -92,8 +97,8 @@ public final class SpecDockClient {
 
 ${operations.map(generateJavaOperation).join("\n\n")}
 
-  private URI buildUri(String path, Map<String, String> query) {
-    StringBuilder uri = new StringBuilder(baseUrl).append(path);
+  private URI buildUri(String requestBaseUrl, String path, Map<String, String> query) {
+    StringBuilder uri = new StringBuilder(trimTrailingSlash(requestBaseUrl)).append(path);
     if (query != null && !query.isEmpty()) {
       StringBuilder search = new StringBuilder();
       query.forEach((key, value) -> {
@@ -133,6 +138,7 @@ const generateJavaOperation = (operation: SdkOperation): string => {
   );
   const args = [
     ...pathParams,
+    operation.baseUrlStrategy === "perRequest" ? "String baseUrl" : undefined,
     operation.hasQuery ? "Map<String, String> query" : undefined,
     operation.hasBody ? "Object body" : undefined,
     "Map<String, String> headers"
@@ -147,10 +153,13 @@ const generateJavaOperation = (operation: SdkOperation): string => {
   );
   const queryArg = operation.hasQuery ? "query" : "null";
   const bodyArg = operation.hasBody ? "body" : "null";
+  const requestCall = operation.baseUrlStrategy === "perRequest"
+    ? `requestWithBaseUrl(baseUrl, "${operation.method}", path, ${queryArg}, ${bodyArg}, headers)`
+    : `request("${operation.method}", path, ${queryArg}, ${bodyArg}, headers)`;
 
   return `  public JsonNode ${name}(${args.join(", ")}) throws IOException, InterruptedException {
     String path = ${pathToJavaExpression(path)};
-    return request("${operation.method}", path, ${queryArg}, ${bodyArg}, headers);
+    return ${requestCall};
   }`;
 };
 
