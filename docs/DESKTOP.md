@@ -43,6 +43,16 @@ Electron Builder signing environment variables to produce signed artifacts:
   `APPLE_API_ISSUER`
 - Windows: `WIN_CSC_LINK`, `WIN_CSC_KEY_PASSWORD`
 
+Unsigned macOS downloads can show a Gatekeeper dialog saying `"SpecDock" is
+damaged and can't be opened`. If you trust the downloaded release and have
+verified `SHA256SUMS.txt`, cancel the dialog, copy the app to `/Applications`,
+then remove the quarantine flag:
+
+```bash
+sudo xattr -dr com.apple.quarantine /Applications/SpecDock.app
+open /Applications/SpecDock.app
+```
+
 The GitHub `Desktop Release` workflow maps repository secrets to those
 environment variables and verifies signatures when credentials are present. In
 GitHub, store the Apple `.p8` notarization key as `APPLE_API_KEY_BASE64`; the

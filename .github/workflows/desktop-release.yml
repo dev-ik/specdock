@@ -182,7 +182,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if gh release view "$VERSION" >/dev/null 2>&1; then
-            echo "::error title=Release already exists::GitHub immutable releases do not allow replacing assets. Create a new patch tag, for example v1.0.1, and run Desktop Release for that tag."
+            asset_count="$(gh release view "$VERSION" --json assets --jq '.assets | length')"
+
+            if [ "$asset_count" -gt 0 ]; then
+              echo "::notice title=Release already published::Release $VERSION already has $asset_count assets. Immutable release assets cannot be replaced, so this rerun is treated as already complete."
+              exit 0
+            fi
+
+            echo "::error title=Release already exists::Release $VERSION exists without assets. GitHub immutable releases do not allow replacing published assets. Create a new patch tag and run Desktop Release for that tag."
             exit 1
           fi
 
