@@ -1,6 +1,6 @@
 # Release
 
-This document describes the manual release path for `v1.0.1`.
+This document describes the manual release path for `v1.0.2`.
 
 ## Preflight
 
@@ -33,8 +33,8 @@ GitHub-hosted desktop artifacts are published by the `Desktop Release` workflow
 for a new immutable `v*` tag:
 
 ```bash
-git tag v1.0.1
-git push origin v1.0.1
+git tag v1.0.2
+git push origin v1.0.2
 ```
 
 The workflow builds macOS, Windows, and Linux artifacts, generates
@@ -77,7 +77,7 @@ Build a local image for smoke testing:
 
 ```bash
 docker build \
-  -t docker.io/d8vik/specdock:v1.0.1 \
+  -t docker.io/d8vik/specdock:v1.0.2 \
   .
 ```
 
@@ -87,7 +87,7 @@ Smoke the image locally:
 docker run --rm -p 127.0.0.1:3000:3000 \
   -e PUBLIC_DEMO=true \
   -e PROXY_ENABLED=false \
-  docker.io/d8vik/specdock:v1.0.1
+  docker.io/d8vik/specdock:v1.0.2
 ```
 
 Check:
@@ -102,7 +102,7 @@ Publish the Docker Hub multi-arch version tag:
 ```bash
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t docker.io/d8vik/specdock:v1.0.1 \
+  -t docker.io/d8vik/specdock:v1.0.2 \
   --push \
   .
 ```
@@ -114,7 +114,7 @@ Always publish an immutable version tag. Do not publish `latest` unless you inte
 Before creating or pushing a release tag, create the release note:
 
 ```txt
-docs/release-notes/v1.0.1.md
+docs/release-notes/v1.0.2.md
 ```
 
 The release note is required for every release and must be named after the
@@ -124,11 +124,11 @@ Do not move old release tags. Create a new immutable tag for every patch
 release.
 
 ```bash
-git tag v1.0.1
+git tag v1.0.2
 git push origin main
-git push origin v1.0.1
+git push origin v1.0.2
 git push gitlab main
-git push gitlab v1.0.1
+git push gitlab v1.0.2
 ```
 
 The GitHub Actions Docker workflow publishes the Docker Hub image when `v*` tags are pushed, assuming these repository secrets exist:
