@@ -131,6 +131,13 @@ Use immutable version tags such as `docker.io/d8vik/specdock:v1.0.2`; the projec
 
 Download desktop installers from [GitHub Releases](https://github.com/dev-ik/specdock/releases). The desktop app runs the SpecDock API on `127.0.0.1` with proxy and mock features disabled by default; `Settings -> Desktop runtime` controls local mock/proxy settings. See [Desktop](docs/DESKTOP.md) for packaging and release workflow details.
 
+Desktop builds are unsigned. Verify `SHA256SUMS.txt` before bypassing platform
+warnings. On macOS, clear quarantine with
+`sudo xattr -dr com.apple.quarantine /Applications/SpecDock.app` and run
+`open /Applications/SpecDock.app`. On Windows, SmartScreen can warn; use
+`More info -> Run anyway` only after checksum verification. On Linux, make the
+AppImage executable with `chmod +x SpecDock*.AppImage` or use the `.tar.gz`.
+
 ## Configuration
 
 Public/demo deployments should keep backend proxy mode disabled:
@@ -226,24 +233,14 @@ docs            Architecture, security, deployment, smoke tests, and roadmap
 ## Documentation
 
 Start with the [master plan](docs/SPECDOCK_MASTER_PLAN.md),
-[implementation plan](docs/IMPLEMENTATION_PLAN.md), [API contracts](docs/API_CONTRACTS.md),
+[implementation plan](docs/IMPLEMENTATION_PLAN.md),
 [security guide](SECURITY.md), [release checklist](docs/RELEASE.md), and
 [roadmap](docs/ROADMAP.md).
 
 ## Open-Source Hygiene
 
-The repository intentionally ignores local-only files:
-
-```txt
-.env
-.history
-.playwright-mcp
-docs_deprecated
-docs/BOOTSTRAP_REPOSITORY.md
-docs/TASKS.md
-```
-
-Do not commit local credentials, private proxy targets, provider-specific hosting entrypoints, or generated build output.
+Do not commit local credentials, private proxy targets, provider-specific
+hosting entrypoints, or generated build output.
 
 ## License
 

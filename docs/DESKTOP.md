@@ -53,6 +53,20 @@ sudo xattr -dr com.apple.quarantine /Applications/SpecDock.app
 open /Applications/SpecDock.app
 ```
 
+Unsigned Windows downloads can show Microsoft Defender SmartScreen warnings.
+Verify `SHA256SUMS.txt`, then choose `More info -> Run anyway` only if the
+checksum matches the GitHub Release asset.
+
+Linux AppImage downloads may need executable permissions:
+
+```bash
+chmod +x SpecDock*.AppImage
+./SpecDock*.AppImage
+```
+
+If AppImage does not start because FUSE is unavailable on your distribution,
+use the `.tar.gz` archive from the same release.
+
 The GitHub `Desktop Release` workflow maps repository secrets to those
 environment variables and verifies signatures when credentials are present. In
 GitHub, store the Apple `.p8` notarization key as `APPLE_API_KEY_BASE64`; the
