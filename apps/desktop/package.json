@@ -1,0 +1,79 @@
+{
+  "name": "@specdock/desktop",
+  "version": "1.0.0",
+  "description": "SpecDock Electron desktop workspace beta.",
+  "private": true,
+  "author": "SpecDock contributors",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "build": "tsc --noEmit -p tsconfig.json && node scripts/build.mjs",
+    "dev": "npm run build && node scripts/run.mjs",
+    "lint": "eslint .",
+    "package:dir": "node scripts/package.mjs --dir",
+    "package:linux": "node scripts/package.mjs --linux",
+    "package:mac": "node scripts/package.mjs --mac",
+    "package:win": "node scripts/package.mjs --win",
+    "test": "vitest run --passWithNoTests --exclude='dist/**'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@specdock/api": "1.0.0",
+    "@specdock/core": "1.0.0",
+    "@specdock/generator": "1.0.0"
+  },
+  "devDependencies": {
+    "electron": "41.7.1",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.27.2",
+    "typescript": "5.9.3",
+    "vitest": "4.1.9"
+  },
+  "build": {
+    "appId": "dev.specdock.app",
+    "productName": "SpecDock",
+    "icon": "build/icon.png",
+    "directories": {
+      "output": "release/desktop"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icon.icns",
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.inherit.plist",
+      "notarize": true,
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "signtoolOptions": {
+        "signingHashAlgorithms": [
+          "sha256"
+        ],
+        "rfc3161TimeStampServer": "http://timestamp.digicert.com"
+      },
+      "target": [
+        "nsis",
+        "zip"
+      ]
+    },
+    "linux": {
+      "category": "Development",
+      "icon": "build/icons",
+      "target": [
+        "AppImage",
+        "tar.gz"
+      ]
+    }
+  }
+}

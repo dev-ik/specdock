@@ -41,8 +41,7 @@ Published image tags:
 ```txt
 docker.io/d8vik/specdock:v0.1.0
 docker.io/d8vik/specdock:v0.2.2
-docker.io/d8vik/specdock:v0.3.0
-docker.io/d8vik/specdock:v0.5.0
+docker.io/d8vik/specdock:v1.0.0
 ```
 
 Use version tags for repeatable deployments. Do not rely on `latest`.
@@ -58,7 +57,7 @@ docker run -d --name specdock \
   -p 127.0.0.1:3000:3000 \
   -e PUBLIC_DEMO=true \
   -e PROXY_ENABLED=false \
-  docker.io/d8vik/specdock:v0.5.0
+  docker.io/d8vik/specdock:v1.0.0
 ```
 
 To pass more configuration, either add more `-e` flags or use an env file:
@@ -79,7 +78,7 @@ TRUST_PROXY=false
 docker run -d --name specdock \
   -p 127.0.0.1:3000:3000 \
   --env-file ./specdock.env \
-  docker.io/d8vik/specdock:v0.5.0
+  docker.io/d8vik/specdock:v1.0.0
 ```
 
 Keep `PROXY_ENABLED=false` for public demo use. If you enable proxy mode,

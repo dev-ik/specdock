@@ -9,7 +9,7 @@ on:
       version:
         description: "Docker image version tag"
         required: true
-        default: "v0.2.3"
+        default: "v1.0.0"
 
 env:
   DOCKERHUB_IMAGE: docker.io/d8vik/specdock

@@ -36,6 +36,19 @@ export default [
     }
   },
   {
+    files: ["apps/desktop/**/*.{ts,mjs}", "scripts/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        AbortSignal: "readonly",
+        Buffer: "readonly",
+        clearTimeout: "readonly",
+        fetch: "readonly",
+        process: "readonly",
+        setTimeout: "readonly"
+      }
+    }
+  },
+  {
     files: ["apps/web/**/*.{ts,tsx}", "packages/ui/**/*.{ts,tsx}"],
     languageOptions: {
       globals: {

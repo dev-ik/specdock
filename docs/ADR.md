@@ -119,3 +119,28 @@ Avoid drift between `API.md`, implementation and tests.
 Status:
 
 Accepted.
+
+## ADR-008 — Plan Electron for desktop
+
+Decision:
+
+Use Electron for the planned stable desktop app.
+
+Reason:
+
+- reuses the existing Node.js, Fastify, and generator runtime
+- supports native filesystem workflows for local-first projects
+- avoids introducing a Rust runtime before the desktop model is proven
+- can keep renderer code isolated with strict preload IPC
+
+Constraints:
+
+- renderer must run with Node.js integration disabled
+- renderer must use context isolation and sandboxing
+- filesystem and backend access must go through allowlisted IPC
+- backend must bind to loopback only by default
+- desktop must preserve public-demo proxy restrictions
+
+Status:
+
+Planned.

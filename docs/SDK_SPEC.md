@@ -88,6 +88,28 @@ generated/
   specdock.manifest.json
 ```
 
+## Output Plan
+
+`POST /api/generate` returns an output plan alongside generated files:
+
+```ts
+export type GeneratedOutputPlan = {
+  outputRoot: string;
+  fileCount: number;
+  totalBytes: number;
+  pathPolicy: "relative-no-traversal";
+  files: {
+    path: string;
+    relativePath: string;
+    bytes: number;
+  }[];
+};
+```
+
+The plan is derived from generated files before ZIP download. It is the future
+desktop write contract: paths are relative, under `outputRoot`, and cannot use
+absolute paths, backslashes, drive letters, or `.` / `..` segments.
+
 ## Naming Rules
 
 Prefer `operationId`.
@@ -122,11 +144,17 @@ DELETE /users/{id} -> deleteUserById
 | C# | .NET 8.0 | HttpClient | System.Text.Json DTOs | Yes |
 | PHP | PHP >=8.1 | Guzzle ^7.0 | DTO classes | Yes |
 
-Future CLI shape:
+## CLI Generation
+
+Internal command:
 
 ```bash
-specdock generate --language python --input openapi.yaml --out sdk/
+npm run sdk:generate -- --input openapi.yaml --out sdk --language python
+npm run sdk:generate -- --input openapi.yaml --out sdk --plan
 ```
+
+The command reuses the pure generator and writes only under the normalized
+relative `--out` root. `--plan` prints the output plan without writing files.
 
 ## Release Smoke Checks
 

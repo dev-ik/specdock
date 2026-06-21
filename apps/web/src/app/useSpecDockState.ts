@@ -2,13 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { AuthProfile, GeneratedFile, GenerateOptions, OpenApiDiffReport, OpenApiProject, OpenApiSource, RequestState } from "@specdock/core";
 import { createRequestState } from "../request.js";
 import { createWorkspaceStorage } from "../workspace.js";
-import {
-  readLocalJson,
-  readLocalString,
-  removeLocalValue,
-  writeLocalJson,
-  writeLocalString
-} from "./local-storage.js";
+import { readLocalJson, readLocalString, removeLocalValue, writeLocalJson, writeLocalString } from "./local-storage.js";
 import { sampleSpec } from "./sample-spec.js";
 import {
   baseUrlsStorageKey,
@@ -83,7 +77,11 @@ export const useSpecDockState = () => {
   );
   const [mockServerState, setMockServerState] = useState<MockServerState>({});
   const appConfig = useAppConfig();
-  const [status, setStatus] = useState("Ready");
+  const [status, setStatus] = useState(() =>
+    storageAdapter.getDiagnostics().some((diagnostic) => diagnostic.code !== "missing-key")
+      ? "Recovered local workspace storage. Some invalid saved data was reset."
+      : "Ready"
+  );
   const [isImportingUrl, setIsImportingUrl] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDownloadingZip, setIsDownloadingZip] = useState(false);

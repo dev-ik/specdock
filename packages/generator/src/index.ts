@@ -19,11 +19,12 @@ import { appendMetadataFiles } from "./metadata-files.js";
 import { normalizeOutputPath } from "./naming.js";
 import { generatePhpFiles } from "./php-file.js";
 import { generatePythonFiles } from "./python-file.js";
+export { createGeneratedOutputPlan } from "./output-plan.js";
 import { buildSdkModel } from "./sdk-model.js";
 import { generateTypesFile } from "./types-file.js";
 import { generateZodFile } from "./zod-file.js";
 
-export const GENERATOR_VERSION = "0.5.0";
+export const GENERATOR_VERSION = "1.0.0";
 
 export const generateSdk = (
   spec: unknown,

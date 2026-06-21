@@ -57,7 +57,21 @@ export type StorageSchema = {
   activeProjectId?: string;
 };
 
+export type StorageMigrationCode =
+  | "missing-key"
+  | "malformed-json"
+  | "invalid-shape"
+  | "future-version"
+  | "write-failed"
+  | "active-project-reset";
+
+export type StorageMigrationDiagnostic = {
+  key: string;
+  code: StorageMigrationCode;
+};
+
 export type StorageAdapter = {
+  getDiagnostics(): StorageMigrationDiagnostic[];
   getProjects(): OpenApiProject[];
   saveProjects(projects: OpenApiProject[]): void;
   getEnvironments(): Environment[];
