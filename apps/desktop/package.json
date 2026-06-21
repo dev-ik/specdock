@@ -33,6 +33,7 @@
   "build": {
     "appId": "dev.specdock.app",
     "productName": "SpecDock",
+    "executableName": "specdock",
     "icon": "build/icon.png",
     "directories": {
       "output": "release/desktop"
