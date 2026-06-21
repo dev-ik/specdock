@@ -29,8 +29,8 @@ npm run release:checksums
 Publish `apps/desktop/release/desktop/SHA256SUMS.txt` alongside the desktop
 downloads so users can verify artifacts.
 
-GitHub-hosted desktop artifacts are published by the `Desktop Release` workflow.
-Push an immutable `v*` tag, or run the workflow manually with an existing tag:
+GitHub-hosted desktop artifacts are published by the `Desktop Release` workflow
+for a new immutable `v*` tag:
 
 ```bash
 git tag v1.0.0
@@ -39,6 +39,8 @@ git push origin v1.0.0
 
 The workflow builds macOS, Windows, and Linux artifacts, generates
 `SHA256SUMS.txt`, and attaches everything to the matching GitHub Release.
+If that release already exists, create a new patch tag instead of replacing
+assets on the published release.
 Desktop artifacts are unsigned by default for open-source releases. If signing
 secrets are configured, macOS and Windows artifacts are signed automatically.
 

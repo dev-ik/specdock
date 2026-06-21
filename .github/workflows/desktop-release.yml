@@ -177,16 +177,17 @@ jobs:
       - name: Generate checksums
         run: npm run release:checksums -- release-assets
 
-      - name: Create or update release
+      - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           if gh release view "$VERSION" >/dev/null 2>&1; then
-            gh release upload "$VERSION" release-assets/* --clobber
-          else
-            gh release create "$VERSION" \
-              --verify-tag \
-              --title "SpecDock $VERSION" \
-              --notes-file "docs/release-notes/${VERSION}.md" \
-              release-assets/*
+            echo "::error title=Release already exists::GitHub immutable releases do not allow replacing assets. Create a new patch tag, for example v1.0.1, and run Desktop Release for that tag."
+            exit 1
           fi
+
+          gh release create "$VERSION" \
+            --verify-tag \
+            --title "SpecDock $VERSION" \
+            --notes-file "docs/release-notes/${VERSION}.md" \
+            release-assets/*
