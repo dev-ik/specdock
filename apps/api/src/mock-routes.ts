@@ -1,4 +1,4 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply } from "fastify";
 import {
   createMockResponse,
   normalizeSpec,
@@ -8,7 +8,7 @@ import {
   type OpenApiProject
 } from "@specdock/core";
 import { sendError } from "./errors.js";
-import { resolveMockServerConfig } from "./mock-config.js";
+import { resolveMockServerConfig, type MockServerConfig } from "./mock-config.js";
 import { createMockRouteRegistry, liveMockPath } from "./mock-registry.js";
 import { createRateLimit } from "./rate-limit.js";
 import {
@@ -27,7 +27,10 @@ export const registerMockRoutes = (app: FastifyInstance): void => {
     "/api/mock/response",
     { schema: mockResponseRequestSchema, preHandler: mockRateLimit },
     async (request, reply) => {
-      const config = resolveMockServerConfig();
+      const config = ensureMockServerEnabled(reply);
+
+      if (!config) return;
+
       const project = buildMockProject(request.body.spec);
       const response = createMockResponse(project, request.body);
 
@@ -57,7 +60,9 @@ export const registerMockRoutes = (app: FastifyInstance): void => {
     "/api/mock/routes",
     { schema: mockRouteUpsertSchema, preHandler: mockRateLimit },
     async (request, reply) => {
-      const config = resolveMockServerConfig();
+      const config = ensureMockServerEnabled(reply);
+
+      if (!config) return;
 
       if (Buffer.byteLength(request.body.body, "utf8") > config.maxResponseBodyBytes) {
         return sendError(
@@ -74,11 +79,19 @@ export const registerMockRoutes = (app: FastifyInstance): void => {
     }
   );
 
-  app.get("/api/mock/routes", async () => ({
-    routes: registry.list()
-  }));
+  app.get("/api/mock/routes", async (_request, reply) => {
+    const config = ensureMockServerEnabled(reply);
+
+    if (!config) return;
+
+    return { routes: registry.list() };
+  });
 
   app.all("/mock/*", async (request, reply) => {
+    const config = ensureMockServerEnabled(reply);
+
+    if (!config) return;
+
     const route = registry.find(
       request.method.toUpperCase() as HttpMethod,
       liveMockPath(request.url)
@@ -94,6 +107,17 @@ export const registerMockRoutes = (app: FastifyInstance): void => {
     reply.code(route.status);
     return reply.send(route.body);
   });
+};
+
+const ensureMockServerEnabled = (reply: FastifyReply): MockServerConfig | undefined => {
+  const config = resolveMockServerConfig();
+
+  if (!config.enabled) {
+    sendError(reply, 404, "NOT_FOUND", "Route not found.");
+    return undefined;
+  }
+
+  return config;
 };
 
 const buildMockProject = (spec: unknown): OpenApiProject => {

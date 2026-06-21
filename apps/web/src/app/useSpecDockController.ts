@@ -12,6 +12,7 @@ import {
 } from "./controller-helpers.js";
 import { createCurlActions } from "./curl-actions.js";
 import { directRequestBlockReason } from "./deployment-policy.js";
+import { createDesktopSettingsActions } from "./desktop-settings-actions.js";
 import { createHttpCollection } from "./http-collection.js";
 import { createMockActions } from "./mock-actions.js";
 import { createProjectActions } from "./project-actions.js";
@@ -166,6 +167,7 @@ export const useSpecDockController = () => {
   const authActions = createAuthActions(state);
   const contractDiffActions = createContractDiffActions(state);
   const mockActions = createMockActions(state);
+  const desktopSettingsActions = createDesktopSettingsActions(state);
   const requestExecutionBlockReason = directRequestBlockReason(
     state.appConfig,
     state.requestState?.requestMode,
@@ -211,6 +213,7 @@ export const useSpecDockController = () => {
     importRawSpec,
     uploadSpec,
     ...requestActions,
+    ...desktopSettingsActions,
     ...authActions,
     generate,
     downloadZip,

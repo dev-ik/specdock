@@ -63,6 +63,42 @@ GitHub downloads are produced by the `Desktop Release` workflow when a `v*` tag
 is pushed. The workflow uploads installers and `SHA256SUMS.txt` to the matching
 GitHub Release.
 
+If GitHub immutable releases are enabled and a release is already published,
+do not rerun `Desktop Release` against the same version expecting assets to be
+replaced. Publish a new patch tag, for example `v1.0.1`, and let the workflow
+create artifacts for that immutable release instead.
+
+## Runtime Settings
+
+Desktop starts the embedded API on `127.0.0.1` with network-adjacent features
+disabled:
+
+```env
+PROXY_ENABLED=false
+PROXY_ALLOWED_HOSTS=
+PROXY_ALLOW_PRIVATE_TARGETS=false
+MOCK_SERVER_ENABLED=false
+TRUST_PROXY=false
+```
+
+Users can change safe runtime settings from `Settings -> Desktop runtime`:
+
+- `Mock server`: enables saved local mock routes under `/mock/...`.
+- `Proxy mode`: enables restricted proxy execution for explicitly allowed
+  hosts.
+- `Proxy allowed hosts`: comma-separated host allowlist for proxy requests.
+- `Allow private targets`: allows proxy targets that resolve to private
+  addresses; keep it off unless testing local/internal APIs intentionally.
+- `Default request mode`: chooses Direct Browser Mode or Desktop Proxy for new
+  and current requests.
+- `Proxy timeout, ms`: desktop proxy request timeout, capped by the application
+  limit.
+- `Proxy max response, bytes`: desktop proxy response body cap.
+- `Mock max response, bytes`: saved mock route response body cap.
+
+Runtime settings are local to the desktop app and are not stored in exported
+`.specdock.json` project files.
+
 ## Native Filesystem Workflows
 
 Desktop IPC exposes allowlisted operations only:

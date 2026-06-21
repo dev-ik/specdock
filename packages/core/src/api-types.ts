@@ -100,6 +100,26 @@ export type MockRoutesResponse = {
   routes: MockRouteSummary[];
 };
 
+export type DesktopRuntimeSettings = {
+  mockServerEnabled: boolean;
+  mockMaxResponseBytes: number;
+  proxyAllowPrivateTargets: boolean;
+  proxyAllowedHosts: string;
+  proxyEnabled: boolean;
+  proxyMaxResponseBytes: number;
+  proxyTimeoutMs: number;
+};
+
+export type DesktopRuntimeSettingsPatch = {
+  mockServerEnabled?: boolean;
+  mockMaxResponseBytes?: number;
+  proxyAllowPrivateTargets?: boolean;
+  proxyAllowedHosts?: string;
+  proxyEnabled?: boolean;
+  proxyMaxResponseBytes?: number;
+  proxyTimeoutMs?: number;
+};
+
 export type GeneratedFile = {
   path: string;
   content: string;

@@ -86,6 +86,9 @@ export const App = () => {
         historyCount={app.historyCount}
         authProfiles={app.projectAuthProfiles}
         hiddenPanelIds={panelLayout.hiddenPanelIds}
+        desktopSettingsAvailable={app.desktopSettingsAvailable}
+        desktopSettings={app.desktopSettings}
+        defaultRequestMode={app.defaultRequestMode}
         onClose={() => setIsSettingsOpen(false)}
         onClearHistory={app.clearRequestHistory}
         onPanelVisibilityChange={panelLayout.setPanelVisibility}
@@ -93,6 +96,8 @@ export const App = () => {
         onAddAuthProfile={app.addAuthProfile}
         onUpdateAuthProfile={app.updateAuthProfile}
         onDeleteAuthProfile={app.deleteAuthProfile}
+        onDesktopSettingsChange={(patch) => void app.updateDesktopSettings(patch)}
+        onDefaultRequestModeChange={app.updateDefaultRequestMode}
       />
     </main>
   );

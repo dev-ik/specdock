@@ -14,6 +14,13 @@ import type {
   GenerationResult,
   GenerationRunner
 } from "../../../api/src/generation-runner.js";
+import {
+  applyDesktopRuntimeEnv,
+  createDesktopRuntimeEnv,
+  registerDesktopSettingsRoutes
+} from "./runtime-settings.js";
+
+export { registerDesktopSettingsRoutes } from "./runtime-settings.js";
 
 export const DESKTOP_API_HOST = "127.0.0.1";
 
@@ -39,12 +46,11 @@ export function createDesktopApiEnv(
 ): NodeJS.ProcessEnv {
   return {
     ...baseEnv,
+    ...createDesktopRuntimeEnv(),
     APP_IP: DESKTOP_API_HOST,
     HOST: DESKTOP_API_HOST,
     APP_PORT: String(port),
     PORT: String(port),
-    PROXY_ENABLED: "false",
-    MOCK_SERVER_ENABLED: "false",
     TRUST_PROXY: "false",
     WEB_DIST_DIR: webDistDir
   };
@@ -85,8 +91,10 @@ export async function startDesktopApi(
   const server = buildApp({
     generationRunner: runDesktopGenerationJob,
     logger: false,
+    mockRoutesMode: "runtime",
     webDistDir: options.webDistDir
   });
+  registerDesktopSettingsRoutes(server);
 
   await server.listen({ port, host: DESKTOP_API_HOST });
 
@@ -101,8 +109,7 @@ function applyDesktopApiEnv(env: NodeJS.ProcessEnv): void {
   process.env.HOST = env.HOST;
   process.env.APP_PORT = env.APP_PORT;
   process.env.PORT = env.PORT;
-  process.env.PROXY_ENABLED = env.PROXY_ENABLED;
-  process.env.MOCK_SERVER_ENABLED = env.MOCK_SERVER_ENABLED;
+  applyDesktopRuntimeEnv(env);
   process.env.TRUST_PROXY = env.TRUST_PROXY;
   process.env.WEB_DIST_DIR = env.WEB_DIST_DIR;
 }

@@ -22,6 +22,10 @@
   border-color: var(--selected-border);
 }
 
+.settings-section-static:hover {
+  border-color: var(--border);
+}
+
 .settings-section-toggle svg {
   color: var(--muted);
   transition: transform 0.16s ease;
@@ -117,6 +121,29 @@
 .settings-block-toggle.is-hidden > span:last-child {
   background: var(--border);
   color: var(--muted);
+}
+
+.settings-block-toggle input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--selected-text);
+}
+
+.settings-section .code-field {
+  min-height: 4.8rem;
+  resize: vertical;
+}
+
+.settings-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+@media (max-width: 720px) {
+  .settings-field-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .settings-block-name {

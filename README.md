@@ -125,8 +125,11 @@ Check health:
 curl -fsS http://127.0.0.1:3000/api/health
 ```
 
-Use immutable version tags such as `docker.io/d8vik/specdock:v1.0.0`.
-The project does not rely on `latest` for releases.
+Use immutable version tags such as `docker.io/d8vik/specdock:v1.0.0`; the project does not rely on `latest` for releases.
+
+## Desktop
+
+Download desktop installers from [GitHub Releases](https://github.com/dev-ik/specdock/releases). The desktop app runs the SpecDock API on `127.0.0.1` with proxy and mock features disabled by default; `Settings -> Desktop runtime` controls local mock/proxy settings. See [Desktop](docs/DESKTOP.md) for packaging and release workflow details.
 
 ## Configuration
 
