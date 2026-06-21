@@ -47,7 +47,7 @@ function run(command, args, extraEnv = {}) {
 
     const child = spawn(command, args, {
       env,
-      shell: false,
+      shell: process.platform === "win32",
       stdio: "inherit"
     });
 
