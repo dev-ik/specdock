@@ -39,6 +39,11 @@ function run(command, args, extraEnv = {}) {
         delete env[name];
       }
     }
+    for (const name of Object.keys(env)) {
+      if (name.includes("=")) {
+        delete env[name];
+      }
+    }
 
     const child = spawn(command, args, {
       env,
