@@ -76,6 +76,29 @@ Saved live mock routes are stored in memory in the current API process and are
 lost on restart. They can be called through `/mock/*` only in trusted
 self-hosted mode.
 
+## Desktop App
+
+The Electron app runs the existing Fastify API inside the main process bound to
+`127.0.0.1` on a random local port. Desktop startup forces:
+
+```env
+APP_IP=127.0.0.1
+PROXY_ENABLED=false
+MOCK_SERVER_ENABLED=false
+TRUST_PROXY=false
+```
+
+The renderer loads the web app over that loopback URL. `nodeIntegration` is
+disabled, `contextIsolation` and sandboxing are enabled, new windows are denied,
+and navigation is limited to the local API origin.
+
+Preload IPC exposes only app metadata and native file workflows. Desktop project
+file reads and writes validate `.specdock.json` content with the shared
+workspace manifest parser before handing it to the renderer or saving it to
+disk. Project folders and SDK output directories are explicit user-selected
+paths. Generated SDK output reuses the relative no-traversal output plan and
+does not overwrite files unless the caller explicitly requests it.
+
 ## Sensitive Data
 
 Do not put production credentials into shared browsers. Auth profiles are stored

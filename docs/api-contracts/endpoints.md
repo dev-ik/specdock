@@ -14,7 +14,7 @@ Example:
 ```json
 {
   "status": "ok",
-  "version": "0.1.0"
+  "version": "1.0.0"
 }
 ```
 
@@ -51,10 +51,7 @@ Generate SDK files from an OpenAPI document.
 For MVP prefer JSON response first because it is easier to test. ZIP generation can be added through `/api/generate/zip`.
 
 ```ts
-export type GenerateRequest = {
-  spec: unknown;
-  options?: Partial<GenerateOptions>;
-};
+export type GenerateRequest = { spec: unknown; options?: Partial<GenerateOptions> };
 
 export type GenerateOptions = {
   language: "typescript" | "python" | "go" | "java" | "csharp" | "php";
@@ -72,6 +69,13 @@ export type GenerateResponse = {
     fileCount: number;
     generatedAt: string;
     generatorVersion: string;
+    outputPlan: {
+      outputRoot: string;
+      fileCount: number;
+      totalBytes: number;
+      pathPolicy: "relative-no-traversal";
+      files: { path: string; relativePath: string; bytes: number }[];
+    };
   };
 };
 ```

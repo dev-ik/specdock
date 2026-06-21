@@ -40,6 +40,10 @@ export const generationErrorCode = (error: unknown): string => {
     return "GENERATION_TOO_COMPLEX";
   }
 
+  if (error.message.includes("Generated file path")) {
+    return "VALIDATION_ERROR";
+  }
+
   if (error.message.includes("Specification")) {
     return "INVALID_SPEC";
   }

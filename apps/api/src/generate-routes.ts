@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { LIMITS, type GenerateRequest } from "@specdock/core";
-import { GENERATOR_VERSION } from "@specdock/generator";
+import { createGeneratedOutputPlan, GENERATOR_VERSION } from "@specdock/generator";
 import { generationErrorCode, sendError } from "./errors.js";
 import { resolveGenerateOptions } from "./generation.js";
 import {
@@ -59,7 +59,8 @@ export const registerGenerateRoutes = (
           meta: {
             fileCount: result.files.length,
             generatedAt: new Date().toISOString(),
-            generatorVersion: GENERATOR_VERSION
+            generatorVersion: GENERATOR_VERSION,
+            outputPlan: createGeneratedOutputPlan(result.files, resolvedOptions)
           }
         };
       } catch (error) {

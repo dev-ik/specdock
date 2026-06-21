@@ -36,6 +36,7 @@ export type GenerateResponse = {
     fileCount: number;
     generatedAt: string;
     generatorVersion: string;
+    outputPlan: GeneratedOutputPlan;
   };
 };
 
@@ -102,6 +103,20 @@ export type MockRoutesResponse = {
 export type GeneratedFile = {
   path: string;
   content: string;
+};
+
+export type GeneratedOutputPlanEntry = {
+  path: string;
+  relativePath: string;
+  bytes: number;
+};
+
+export type GeneratedOutputPlan = {
+  outputRoot: string;
+  fileCount: number;
+  totalBytes: number;
+  pathPolicy: "relative-no-traversal";
+  files: GeneratedOutputPlanEntry[];
 };
 
 export type GenerateLanguage =

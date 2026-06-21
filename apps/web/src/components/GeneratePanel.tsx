@@ -124,7 +124,11 @@ export const GeneratePanel = ({
 
       <div className="request-actions">
         <div className="generate-summary">
-          {fileCount > 0 ? `${fileCount} generated files ready` : "Generate SDK files from the active OpenAPI spec"}
+          {meta
+            ? `${meta.outputPlan.fileCount} files in ${meta.outputPlan.outputRoot} - ${formatBytes(meta.outputPlan.totalBytes)}`
+            : fileCount > 0
+              ? `${fileCount} generated files ready`
+              : "Generate SDK files from the active OpenAPI spec"}
         </div>
         <div className="button-row">
           <button className="button button-primary" type="button" disabled={isGenerating} onClick={onGenerate}>
@@ -163,6 +167,11 @@ const languageOptions = [
   { value: "csharp", label: "C#", target: ".NET 8.0, System.Text.Json" },
   { value: "php", label: "PHP", target: "PHP >=8.1, Guzzle ^7.0" }
 ] satisfies { value: GenerateOptions["language"]; label: string; target: string }[];
+
+const formatBytes = (value: number): string => {
+  if (value < 1024) return `${value} B`;
+  return `${(value / 1024).toFixed(1)} KB`;
+};
 
 const SelectOption = <T extends string>({
   label,

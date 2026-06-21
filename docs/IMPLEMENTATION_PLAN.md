@@ -31,3 +31,5 @@ Before implementation read:
 - Auth Profiles are deferred to post-v0.1.0; MVP uses manual headers and an explicit placeholder.
 - Public demo must keep `PROXY_ENABLED=false`.
 - Versioned container images should use immutable version tags; do not rely on `latest` for v0.1.0.
+- `v0.3.0` through `v0.9.0` are internal milestones unless explicitly published;
+  `v1.0.0` is the planned first public stable release.

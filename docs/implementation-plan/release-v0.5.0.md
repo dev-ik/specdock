@@ -1,4 +1,4 @@
-# v0.5.0 Release Plan
+# v0.5.0 Internal Milestone Plan
 
 Headline:
 

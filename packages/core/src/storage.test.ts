@@ -9,7 +9,7 @@ import {
 import type { OpenApiProject, RequestHistoryItem } from "./types.js";
 
 class MemoryStorage implements Storage {
-  private readonly data = new Map<string, string>();
+  protected readonly data = new Map<string, string>();
 
   get length(): number {
     return this.data.size;
@@ -33,6 +33,12 @@ class MemoryStorage implements Storage {
 
   setItem(key: string, value: string): void {
     this.data.set(key, value);
+  }
+}
+
+class WriteFailingStorage extends MemoryStorage {
+  override setItem(): void {
+    throw new Error("storage unavailable");
   }
 }
 
@@ -71,6 +77,66 @@ describe("local storage adapter", () => {
     expect(storage.getItem(STORAGE_KEYS.storageVersion)).toBe(CURRENT_STORAGE_VERSION);
     expect(adapter.getProjects()).toEqual([]);
     expect(adapter.getSettings()).toEqual(defaultSettings);
+    expect(adapter.getDiagnostics()).toContainEqual({
+      key: STORAGE_KEYS.settings,
+      code: "malformed-json"
+    });
+  });
+
+  it("resets malformed-but-valid JSON values during migration", () => {
+    const storage = new MemoryStorage();
+    storage.setItem(STORAGE_KEYS.projects, JSON.stringify([{ id: "project-1" }]));
+    storage.setItem(STORAGE_KEYS.settings, JSON.stringify({ theme: "blue" }));
+
+    const adapter = createLocalStorageAdapter(storage);
+
+    expect(adapter.getProjects()).toEqual([]);
+    expect(adapter.getSettings()).toEqual(defaultSettings);
+    expect(adapter.getDiagnostics()).toEqual(
+      expect.arrayContaining([
+        { key: STORAGE_KEYS.projects, code: "invalid-shape" },
+        { key: STORAGE_KEYS.settings, code: "invalid-shape" }
+      ])
+    );
+  });
+
+  it("reports future storage versions and validates known keys", () => {
+    const storage = new MemoryStorage();
+    storage.setItem(STORAGE_KEYS.storageVersion, "99");
+    storage.setItem(STORAGE_KEYS.projects, JSON.stringify([createProject("project-1")]));
+
+    const adapter = createLocalStorageAdapter(storage);
+
+    expect(adapter.getProjects()).toHaveLength(1);
+    expect(adapter.getDiagnostics()).toContainEqual({
+      key: STORAGE_KEYS.storageVersion,
+      code: "future-version"
+    });
+  });
+
+  it("clears an active project id that no longer points at a stored project", () => {
+    const storage = new MemoryStorage();
+    storage.setItem(STORAGE_KEYS.projects, JSON.stringify([createProject("project-1")]));
+    storage.setItem(STORAGE_KEYS.activeProjectId, "missing-project");
+
+    const adapter = createLocalStorageAdapter(storage);
+
+    expect(adapter.getActiveProjectId()).toBeUndefined();
+    expect(adapter.getDiagnostics()).toContainEqual({
+      key: STORAGE_KEYS.activeProjectId,
+      code: "active-project-reset"
+    });
+  });
+
+  it("keeps in-memory fallbacks when storage writes fail during migration", () => {
+    const adapter = createLocalStorageAdapter(new WriteFailingStorage());
+
+    expect(adapter.getProjects()).toEqual([]);
+    expect(adapter.getSettings()).toEqual(defaultSettings);
+    expect(adapter.getDiagnostics()).toContainEqual({
+      key: STORAGE_KEYS.storageVersion,
+      code: "write-failed"
+    });
   });
 
   it("saves imported projects as active and keeps the newest project first", () => {

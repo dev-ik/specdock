@@ -11,3 +11,4 @@ export * from "./openapi-schema-fields.js";
 export * from "./security.js";
 export * from "./storage.js";
 export * from "./types.js";
+export * from "./workspace-manifest.js";

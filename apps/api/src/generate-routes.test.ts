@@ -44,7 +44,14 @@ describe("generate routes", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toMatchObject({
       files: [{ path: "generated/client.ts" }],
-      meta: { fileCount: 1 }
+      meta: {
+        fileCount: 1,
+        outputPlan: {
+          outputRoot: "generated",
+          fileCount: 1,
+          files: [{ path: "generated/client.ts", relativePath: "client.ts" }]
+        }
+      }
     });
   });
 
@@ -136,6 +143,16 @@ describe("generate routes", () => {
 
     expect(response.statusCode).toBe(413);
     expect(errorCode(response)).toBe("GENERATED_OUTPUT_TOO_LARGE");
+  });
+
+  it("rejects generated files that escape the output root", async () => {
+    const response = await injectGenerate(async () => ({
+      kind: "files",
+      files: [{ path: "generated/../secret.ts", content: "" }]
+    }));
+
+    expect(response.statusCode).toBe(400);
+    expect(errorCode(response)).toBe("VALIDATION_ERROR");
   });
 
   it("maps child stdout size errors", async () => {

@@ -1,6 +1,8 @@
 node_modules
 dist
 build
+!apps/desktop/build/
+!apps/desktop/build/**
 coverage
 .history
 .env
@@ -15,3 +17,6 @@ coverage
 docs_deprecated
 docs/BOOTSTRAP_REPOSITORY.md
 docs/TASKS.md
+apps/desktop/release
+apps/api/src/**/*.js
+apps/api/src/**/*.js.map

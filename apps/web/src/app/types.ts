@@ -1,6 +1,7 @@
 import type {
   ApiOperation,
   GeneratedFile,
+  GeneratedOutputPlan,
   GenerateOptions,
   MockRouteSummary,
   MockResponseResult,
@@ -16,6 +17,7 @@ export type GenerateApiResponse = {
     fileCount: number;
     generatedAt: string;
     generatorVersion: string;
+    outputPlan: GeneratedOutputPlan;
   };
 };
 
