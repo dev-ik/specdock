@@ -13,7 +13,11 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY . .
-RUN npm run build
+RUN npm run build --workspace @specdock/core \
+  && npm run build --workspace @specdock/generator \
+  && npm run build --workspace @specdock/ui \
+  && npm run build --workspace @specdock/api \
+  && npm run build --workspace @specdock/web
 
 FROM node:20.19-alpine AS runner
 WORKDIR /app
