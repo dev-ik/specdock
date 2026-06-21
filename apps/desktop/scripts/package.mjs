@@ -2,7 +2,20 @@ import { spawn } from "node:child_process";
 
 const target = process.argv[2] ?? "--dir";
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-const builderArgs = target === "--dir" ? ["electron-builder", "--dir"] : ["electron-builder", target];
+const builderArgs =
+  target === "--dir"
+    ? ["electron-builder", "--dir", "--publish", "never"]
+    : ["electron-builder", target, "--publish", "never"];
+const emptySigningEnvNames = [
+  "CSC_LINK",
+  "CSC_NAME",
+  "CSC_KEY_PASSWORD",
+  "WIN_CSC_LINK",
+  "WIN_CSC_KEY_PASSWORD",
+  "APPLE_API_KEY",
+  "APPLE_API_KEY_ID",
+  "APPLE_API_ISSUER"
+];
 const hasSigningConfig =
   process.env.CSC_LINK ||
   process.env.CSC_NAME ||
@@ -21,6 +34,11 @@ function run(command, args, extraEnv = {}) {
     };
 
     delete env.ELECTRON_RUN_AS_NODE;
+    for (const name of emptySigningEnvNames) {
+      if (env[name] === "") {
+        delete env[name];
+      }
+    }
 
     const child = spawn(command, args, {
       env,
