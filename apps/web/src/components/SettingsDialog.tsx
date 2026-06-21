@@ -1,6 +1,10 @@
 import { ChevronRight, Eye, EyeOff, LayoutGrid, Trash2, X } from "lucide-react";
 import { useState } from "react";
-import type { AuthProfile } from "@specdock/core";
+import type {
+  AuthProfile,
+  DesktopRuntimeSettings,
+  RequestState
+} from "@specdock/core";
 import {
   defaultPanelLayout,
   panelLabels,
@@ -8,6 +12,7 @@ import {
   type PanelId
 } from "../app/usePanelLayout.js";
 import { AuthProfilesSection } from "./AuthProfilesSection.js";
+import { DesktopRuntimeSettingsSection } from "./DesktopRuntimeSettingsSection.js";
 
 type SettingsDialogProps = {
   open: boolean;
@@ -16,6 +21,9 @@ type SettingsDialogProps = {
   historyCount: number;
   authProfiles: AuthProfile[];
   hiddenPanelIds: PanelId[];
+  desktopSettingsAvailable: boolean;
+  desktopSettings: DesktopRuntimeSettings;
+  defaultRequestMode: RequestState["requestMode"];
   onClose(): void;
   onClearHistory(): void;
   onPanelVisibilityChange(panelId: PanelId, visible: boolean): void;
@@ -26,6 +34,8 @@ type SettingsDialogProps = {
     patch: Partial<Pick<AuthProfile, "name" | "values">>
   ): void;
   onDeleteAuthProfile(profileId: string): void;
+  onDesktopSettingsChange(patch: Partial<DesktopRuntimeSettings>): void;
+  onDefaultRequestModeChange(mode: RequestState["requestMode"]): void;
 };
 
 export const SettingsDialog = ({
@@ -35,13 +45,18 @@ export const SettingsDialog = ({
   historyCount,
   authProfiles,
   hiddenPanelIds,
+  desktopSettingsAvailable,
+  desktopSettings,
+  defaultRequestMode,
   onClose,
   onClearHistory,
   onPanelVisibilityChange,
   onHiddenPanelsChange,
   onAddAuthProfile,
   onUpdateAuthProfile,
-  onDeleteAuthProfile
+  onDeleteAuthProfile,
+  onDesktopSettingsChange,
+  onDefaultRequestModeChange
 }: SettingsDialogProps) => {
   const [workspaceBlocksOpen, setWorkspaceBlocksOpen] = useState(false);
 
@@ -71,6 +86,14 @@ export const SettingsDialog = ({
             <Trash2 size={16} aria-hidden="true" />
             Clear history
           </button>
+          {desktopSettingsAvailable ? (
+            <DesktopRuntimeSettingsSection
+              settings={desktopSettings}
+              defaultRequestMode={defaultRequestMode}
+              onChange={onDesktopSettingsChange}
+              onDefaultRequestModeChange={onDefaultRequestModeChange}
+            />
+          ) : null}
           <div className="settings-section">
             <button
               className="settings-section-toggle"

@@ -4,34 +4,16 @@ import { createRequestState } from "../request.js";
 import { createWorkspaceStorage } from "../workspace.js";
 import { readLocalJson, readLocalString, removeLocalValue, writeLocalJson, writeLocalString } from "./local-storage.js";
 import { sampleSpec } from "./sample-spec.js";
-import {
-  baseUrlsStorageKey,
-  exchangesStorageKey,
-  generateOptionsStorageKey,
-  latestExchangeKeyStorageKey,
-  requestStatesStorageKey,
-  responseScopeStorageKey
-} from "./storage-keys.js";
-import {
-  hydrateStoredRequestStates,
-  sanitizeRequestStatesForStorage
-} from "./request-state-storage.js";
+import { baseUrlsStorageKey, exchangesStorageKey, generateOptionsStorageKey, latestExchangeKeyStorageKey, requestStatesStorageKey, responseScopeStorageKey } from "./storage-keys.js";
+import { hydrateStoredRequestStates, sanitizeRequestStatesForStorage } from "./request-state-storage.js";
 import type { GeneratedFilesDiff, GeneratedFilesTarget } from "./sdk-diff.js";
 import { applyProjectBaseUrl } from "./base-url.js";
 import { hydrateGenerateOptions } from "./generate-options.js";
+import { useDesktopSettings } from "./useDesktopSettings.js";
 import { useMockRouteHydration } from "./mock-route-hydration.js";
 import { useAppConfig } from "./useAppConfig.js";
 import { useSpecDockDerivedState } from "./useSpecDockDerivedState.js";
-import type {
-  ExchangeMap,
-  GenerateMeta,
-  MockServerState,
-  ProjectBaseUrlMap,
-  RequestBodyFileMap,
-  RequestStateMap,
-  ResponseScope,
-  ThemeMode
-} from "./types.js";
+import type { ExchangeMap, GenerateMeta, MockServerState, ProjectBaseUrlMap, RequestBodyFileMap, RequestStateMap, ResponseScope, ThemeMode } from "./types.js";
 
 export const useSpecDockState = () => {
   const storageAdapter = useMemo(() => createWorkspaceStorage(), []);
@@ -76,7 +58,12 @@ export const useSpecDockState = () => {
     readLocalString(responseScopeStorageKey) === "latest" ? "latest" : "operation"
   );
   const [mockServerState, setMockServerState] = useState<MockServerState>({});
-  const appConfig = useAppConfig();
+  const { appConfig, reloadAppConfig } = useAppConfig();
+  const {
+    desktopSettings,
+    setDesktopSettings,
+    desktopSettingsAvailable
+  } = useDesktopSettings(reloadAppConfig);
   const [status, setStatus] = useState(() =>
     storageAdapter.getDiagnostics().some((diagnostic) => diagnostic.code !== "missing-key")
       ? "Recovered local workspace storage. Some invalid saved data was reset."
@@ -229,6 +216,10 @@ export const useSpecDockState = () => {
     mockServerState,
     setMockServerState,
     appConfig,
+    reloadAppConfig,
+    desktopSettings,
+    setDesktopSettings,
+    desktopSettingsAvailable,
     status,
     setStatus,
     isImportingUrl,

@@ -50,6 +50,27 @@ describe("mock routes", () => {
     }
   });
 
+  it("supports runtime mock route enablement", async () => {
+    vi.stubEnv("MOCK_SERVER_ENABLED", "false");
+    const app = buildApp({
+      logger: false,
+      mockRoutesMode: "runtime",
+      webDistDir: null
+    });
+
+    try {
+      const disabled = await app.inject(mockRequest());
+
+      vi.stubEnv("MOCK_SERVER_ENABLED", "true");
+      const enabled = await app.inject(mockRequest());
+
+      expect(disabled.statusCode).toBe(404);
+      expect(enabled.statusCode).toBe(200);
+    } finally {
+      await app.close();
+    }
+  });
+
   it("serves saved live mock routes when enabled", async () => {
     vi.stubEnv("MOCK_SERVER_ENABLED", "true");
     const app = buildApp({ logger: false, webDistDir: null });

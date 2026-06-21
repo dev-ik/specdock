@@ -1,15 +1,27 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { AppConfigResponse } from "@specdock/core";
 import { defaultAppConfig, fetchAppConfig } from "./deployment-policy.js";
 
-export const useAppConfig = (): AppConfigResponse => {
+export const useAppConfig = (): {
+  appConfig: AppConfigResponse;
+  reloadAppConfig: () => Promise<AppConfigResponse>;
+} => {
   const [appConfig, setAppConfig] = useState<AppConfigResponse>(defaultAppConfig);
+  const reloadAppConfig = useCallback(async (): Promise<AppConfigResponse> => {
+    try {
+      const nextConfig = await fetchAppConfig();
 
-  useEffect(() => {
-    void fetchAppConfig()
-      .then(setAppConfig)
-      .catch(() => setAppConfig(defaultAppConfig));
+      setAppConfig(nextConfig);
+      return nextConfig;
+    } catch {
+      setAppConfig(defaultAppConfig);
+      return defaultAppConfig;
+    }
   }, []);
 
-  return appConfig;
+  useEffect(() => {
+    void reloadAppConfig();
+  }, [reloadAppConfig]);
+
+  return { appConfig, reloadAppConfig };
 };

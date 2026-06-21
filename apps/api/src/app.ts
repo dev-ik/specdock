@@ -25,6 +25,7 @@ export type AppOptions = {
   fetchImplementation?: typeof fetch;
   generationRunner?: GenerationRunner;
   logger?: boolean;
+  mockRoutesMode?: "auto" | "runtime";
   webDistDir?: string | null;
 };
 
@@ -77,7 +78,7 @@ export const buildApp = (options: AppOptions = {}) => {
 
   registerGenerateRoutes(app, options.generationRunner);
   registerProxyRoute(app, fetchImplementation);
-  if (resolveMockServerConfig().enabled) {
+  if (options.mockRoutesMode === "runtime" || resolveMockServerConfig().enabled) {
     registerMockRoutes(app);
   }
 
