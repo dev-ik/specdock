@@ -1,6 +1,6 @@
 {
   "name": "@specdock/desktop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SpecDock Electron desktop workspace beta.",
   "private": true,
   "author": "SpecDock contributors",
@@ -19,9 +19,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@specdock/api": "1.0.0",
-    "@specdock/core": "1.0.0",
-    "@specdock/generator": "1.0.0"
+    "@specdock/api": "1.0.1",
+    "@specdock/core": "1.0.1",
+    "@specdock/generator": "1.0.1"
   },
   "devDependencies": {
     "electron": "41.7.1",

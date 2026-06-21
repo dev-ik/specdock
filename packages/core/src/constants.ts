@@ -1,6 +1,6 @@
 import type { GenerateOptions, UserSettings } from "./types.js";
 
-export const APP_VERSION = "1.0.0";
+export const APP_VERSION = "1.0.1";
 export const CURRENT_STORAGE_VERSION = "1";
 
 export const STORAGE_KEYS = {
