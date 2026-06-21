@@ -136,14 +136,18 @@
 
 .settings-field-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.55rem;
 }
 
-@media (max-width: 720px) {
-  .settings-field-grid {
-    grid-template-columns: 1fr;
-  }
+.settings-field-grid > .block,
+.settings-field-grid .field {
+  min-width: 0;
+}
+
+.settings-field-grid .field {
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .settings-block-name {
